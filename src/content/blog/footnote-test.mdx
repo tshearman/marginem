@@ -1,0 +1,71 @@
+---
+title: "A Long Walk Through Footnotes"
+description: "Stress-test the new floating footnote panel with plenty of references."
+pubDate: 2024-07-01
+tags:
+  - ux
+  - typography
+  - experiments
+heroImage: "/images/library.jpg"
+---
+import MarginNote from '../../components/MarginNote.astro';
+import ImageFigure from '../../components/ImageFigure.astro';
+
+The humble footnote carries nuance, history, and detours. In this extended field report we mix dense narrative with plentiful references so the new floating panel can stretch its legs.[^origin] This is not merely a test—it is a tour of marginalia done right.[^tour]
+
+## Layered context
+
+Scholars often describe Tufte-esque layouts as a flow of parallel narratives. Margin notes whisper in the periphery while references anchor the main story.[^tufte] To simulate real reading, this section introduces background context, interjects math, and sprinkles callouts.
+
+<MarginNote title="Sidebar">
+  Marginalia acts like a low-frequency commentary track.
+</MarginNote>
+
+The function of a footnote expands in technical writing: code samples get annotations, theorems gain provenance, and charts pick up precise wording. Even the classic equation for continuous compounding[^lens] can benefit from a quick aside.[^compound] Sometimes we hide entire derivations or visual references so the main flow stays uncluttered.[^derivation]
+
+$$
+A = Pe^{rt}
+$$
+
+<ImageFigure src="https://images.unsplash.com/photo-1469474968028-56623f02e42e" alt="Notebook and glasses" caption="The quintessential researcher's desk." />
+
+## Dense narrative
+
+To really stretch the interaction, we need a continuous wall of text peppered with references. Consider the classic story of an engineer debugging a timing glitch. They keep a log of measurements, annotate every anomaly, and mark each aha moment with a discreet footnote.[^log]
+
+> "When you can capture a detour without derailing the main paragraph, readers stay immersed." — anonymous editor[^editor]
+
+We can also drop in code. Here is a mock parser that walks through a document, generating structured footnotes to feed a renderer.
+
+```js
+const collectFootnotes = (doc) => {
+  const nodes = doc.querySelectorAll('sup a[href^="#fn"]');
+  return Array.from(nodes).map((link) => {
+    const id = link.getAttribute('href').slice(1);
+    const note = document.getElementById(id);
+    return {
+      id,
+      text: note?.textContent?.trim() ?? ''
+    };
+  });
+};
+```
+
+## Interaction checklist
+
+1. Click the first footnote to see the panel rise with its copy.
+2. Click another reference to verify the text swaps without jank.
+3. Scroll the page; the panel should disappear immediately.
+4. Click outside the panel to close it.
+5. Tap the × button because sometimes users just want to dismiss popups.
+
+If all five points behave, the sliding panel is ready for editorial review.
+
+[^origin]: Footnotes have been around since the 15th century and remain the best way to keep tangents nearby.
+[^tour]: We intentionally write at length so the floating panel sees varied content, including long strings that wrap onto multiple lines.
+[^tufte]: Edward Tufte popularized margin notes as a gentle way to interleave commentary.
+[^compound]: In finance, a short footnote can carry the caveat that continuous compounding is an idealized case.
+[^derivation]: The variance of a sum expands to $\mathrm{Var}(X+Y) = \mathrm{Var}(X) + \mathrm{Var}(Y) + 2\,\mathrm{Cov}(X,Y)$, which is a handy reminder when debugging stochastic simulations.
+[^lens]: ![Desk lamp and magnifying glass](https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=60)
+[^log]: Every log entry gets cross-referenced to a measurement dataset; these references pile up quickly.
+[^editor]: Editors love footnotes because they can sneak in personality without injuring the argument.

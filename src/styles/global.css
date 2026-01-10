@@ -127,6 +127,78 @@ footer {
   padding-top: 1rem;
 }
 
+.footnote-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--fg);
+  border-radius: 0;
+  box-shadow: 0 -6px 30px rgba(15, 23, 42, 0.18);
+  padding: 1.35rem 3.25rem 1.35rem 1.5rem;
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  z-index: 50;
+  font-size: 0.85rem;
+}
+
+.footnote-panel--visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.footnote-panel__inner {
+  margin: 0 auto;
+  width: min(72ch, 100%);
+}
+
+.footnote-panel__content {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.footnote-panel__number {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.footnote-panel__text {
+  margin: 0;
+  flex: 1;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.footnote-panel__text img {
+  max-height: 50vh;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.footnote-panel__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  border: none;
+  background: transparent;
+  font-size: 1.35rem;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.25rem;
+}
+
+.footnote-panel__close:hover {
+  color: var(--fg);
+}
+
 blockquote {
   margin: 2rem 0;
   padding: 1rem 1.5rem;

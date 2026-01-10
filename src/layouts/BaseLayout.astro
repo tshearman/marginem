@@ -28,5 +28,9 @@ const {
         <p>© {new Date().getFullYear()} — Built with Astro &amp; MDX.</p>
       </footer>
     </main>
+    <script type="module" is:inline>
+      import initFootnotes from '/src/scripts/footnotes.js';
+      initFootnotes();
+    </script>
   </body>
 </html>
