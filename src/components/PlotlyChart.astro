@@ -1,0 +1,18 @@
+---
+import plotlyClient from '../scripts/plotly-client.ts?url';
+
+const { data = [], layout = {}, config = {} } = Astro.props;
+const chartId = `plotly-${Astro.generateId?.() ?? Math.random().toString(36).slice(2)}`;
+const combinedConfig = {
+  displayModeBar: false,
+  responsive: true,
+  ...config
+};
+const payloadAttr = JSON.stringify({ data, layout, config: combinedConfig }).replace(/</g, '\\u003c');
+---
+<div
+  id={chartId}
+  style="width: 100%; min-height: 320px;"
+  data-plotly={payloadAttr}
+></div>
+<script type="module" src={plotlyClient}></script>

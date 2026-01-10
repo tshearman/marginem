@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TagList from '../components/TagList.astro';
+import Pagination from '../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+
+const POSTS_PER_PAGE = 5;
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+const pagePosts = posts.slice(0, POSTS_PER_PAGE);
+const pageCount = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE));
+const formatDate = (date) =>
+  new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+---
+<BaseLayout
+  title="Notebook"
+  description="Ideas on math, visualization, and systems"
+  hero="Notebook"
+>
+  {pagePosts.map((post) => (
+    <article style="margin-bottom: 3rem;">
+      <p style="margin: 0; color: #64748b;">{formatDate(post.data.pubDate)}</p>
+      <h2 style="margin: 0.35rem 0 0.5rem;">
+        <a href={`/posts/${post.slug}/`}>{post.data.title}</a>
+      </h2>
+      <p>{post.data.description}</p>
+      <TagList tags={post.data.tags} />
+    </article>
+  ))}
+  <Pagination currentPage={1} totalPages={pageCount} />
+</BaseLayout>

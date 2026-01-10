@@ -1,0 +1,25 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import TagList from '../components/TagList.astro';
+
+const { frontmatter } = Astro.props;
+const formattedDate = frontmatter?.pubDate
+  ? new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric', year: 'numeric' }).format(
+      frontmatter.pubDate
+    )
+  : '';
+---
+<BaseLayout
+  title={`${frontmatter.title} | Notebook`}
+  description={frontmatter.description}
+  hero={frontmatter.title}
+>
+  <p style="color: #64748b; margin: 0 0 1rem;">
+    {formattedDate}
+    {frontmatter.readingTime ? ` · ${frontmatter.readingTime}` : ''}
+  </p>
+  <TagList tags={frontmatter.tags} />
+  <article>
+    <slot />
+  </article>
+</BaseLayout>

@@ -1,0 +1,32 @@
+---
+import '../styles/global.css';
+import 'katex/dist/katex.min.css';
+
+const {
+  title = 'Notebook',
+  description = 'Explorations in math, code, and visualization',
+  hero = 'Notebook'
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.ico" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <p style="letter-spacing: 0.15em; text-transform: uppercase; font-size: 0.75rem; color: #64748b;">{description}</p>
+        <h1 style="margin: 0.3rem 0 1rem; font-size: clamp(2.4rem, 4vw, 3.2rem);">{hero}</h1>
+      </header>
+      <slot />
+      <footer>
+        <p>© {new Date().getFullYear()} — Built with Astro &amp; MDX.</p>
+      </footer>
+    </main>
+  </body>
+</html>

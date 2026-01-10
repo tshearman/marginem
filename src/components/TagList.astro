@@ -1,0 +1,13 @@
+---
+const { tags = [] } = Astro.props;
+const normalized = tags.filter(Boolean);
+---
+{normalized.length ? (
+  <p style="margin: 0.5rem 0 1.5rem;">
+    {normalized.map((tag) => (
+      <a class="tag" href={`/tags/${tag.toLowerCase()}/`}>
+        #{tag}
+      </a>
+    ))}
+  </p>
+) : null}

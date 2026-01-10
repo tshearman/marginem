@@ -1,0 +1,156 @@
+@import "@fontsource-variable/inter/index.css";
+@import "./prism-vs.css";
+
+:root {
+  color-scheme: light;
+  --bg: #fafafa;
+  --fg: #111826;
+  --accent: #2563eb;
+  --muted: #475569;
+  --border: rgba(15, 23, 42, 0.12);
+  --code-bg: #fdfcf7;
+  --code-fg: #1f2937;
+}
+
+html {
+  font-size: 18px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter Variable", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  text-rendering: optimizeLegibility;
+  line-height: 1.7;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+main {
+  width: min(72ch, 100%);
+  margin: 0 auto;
+  padding: 2.5rem 1rem 3rem;
+}
+
+article img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+pre {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  background: var(--code-bg);
+  color: var(--code-fg);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+}
+
+code {
+  font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+}
+
+code:not(pre code) {
+  background: rgba(15, 23, 42, 0.08);
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.35rem;
+}
+
+footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  margin-right: 0.5rem;
+  font-size: 0.8rem;
+  text-transform: lowercase;
+}
+
+.paginator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.margin-note {
+  position: relative;
+  padding-left: 1.5rem;
+  margin: 1.5rem 0;
+  color: var(--muted);
+  border-left: 3px solid var(--border);
+}
+
+@media (min-width: 960px) {
+  .margin-note {
+    float: right;
+    clear: right;
+    margin: 0 0 1rem 1.5rem;
+    max-width: 18rem;
+    border-left: none;
+    border-right: 3px solid var(--border);
+    padding: 0 0 0 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+.footnotes {
+  font-size: 0.85rem;
+  border-top: 1px solid var(--border);
+  margin-top: 3rem;
+  padding-top: 1rem;
+}
+
+blockquote {
+  margin: 2rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid var(--accent);
+  background: rgba(37, 99, 235, 0.08);
+  border-radius: 0 1rem 1rem 0;
+}
+
+figure {
+  margin: 2rem 0;
+}
+
+figcaption {
+  text-align: center;
+  color: var(--muted);
+  margin-top: 0.5rem;
+}
+
+.run-output {
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--border);
+  font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+  font-size: 0.9rem;
+}

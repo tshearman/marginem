@@ -1,0 +1,7 @@
+---
+const { title = 'Note' } = Astro.props;
+---
+<aside class="margin-note">
+  <strong>{title}</strong>
+  <slot />
+</aside>
