@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import HomeLayouts from '../components/HomeLayouts.astro';
+import HomeLayout from '../layouts/HomeLayout.astro';
 import Pagination from '../components/Pagination.astro';
 import { getCollection } from 'astro:content';
 import { POSTS_PER_PAGE } from '../lib/blog';
@@ -17,6 +17,6 @@ const formatDate = (date) =>
   description="Ideas on math, visualization, and systems"
   hero="Notebook"
 >
-  <HomeLayouts posts={pagePosts} formatDate={formatDate} />
+  <HomeLayout posts={pagePosts} formatDate={formatDate} />
   <Pagination currentPage={1} totalPages={pageCount} />
 </BaseLayout>

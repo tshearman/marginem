@@ -12,3 +12,14 @@ const nextHref = currentPage < totalPages ? `/page/${currentPage + 1}/` : null;
     {nextHref ? <a href={nextHref}>Older posts →</a> : <span />}
   </nav>
 ) : null}
+
+<style>
+  .paginator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+</style>

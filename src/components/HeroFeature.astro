@@ -1,0 +1,90 @@
+---
+import TagList from "./TagList.astro";
+
+interface Props {
+  title: string;
+  url: string;
+  dateLabel?: string;
+  description?: string;
+  tags?: string[];
+  backgroundImage?: string | null;
+}
+
+const {
+  title,
+  url,
+  dateLabel = "",
+  description = "",
+  tags = [],
+  backgroundImage = null,
+} = Astro.props as Props;
+---
+
+<article
+  class="hero-feature"
+  style={backgroundImage ? `background-image: ${backgroundImage};` : undefined}
+>
+  <div class="hero-feature__body">
+    {dateLabel ? <p class="hero-feature__date">{dateLabel}</p> : null}
+    <h2 class="hero-feature__title">
+      <a href={url}>{title}</a>
+    </h2>
+    {description ? <p class="hero-feature__summary">{description}</p> : null}
+    <TagList tags={tags} />
+  </div>
+</article>
+
+<style>
+  .hero-feature {
+    border-radius: 1.75rem;
+    padding: 3rem;
+    color: #fff;
+    background-size: cover;
+    background-position: center;
+    margin-top: 2.5rem;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.25);
+  }
+
+  .hero-feature__body {
+    text-shadow:
+      0 0 3px rgba(0, 0, 0, 0.85),
+      0 0 6px rgba(0, 0, 0, 0.7),
+      0 0 12px rgba(0, 0, 0, 0.6);
+  }
+
+  .hero-feature__date {
+    margin: 0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  .hero-feature__title {
+    margin: 0.35rem 0 0.75rem;
+    font-size: clamp(2.2rem, 4vw, 3rem);
+  }
+
+  .hero-feature__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .hero-feature__title a:hover {
+    text-decoration: underline;
+  }
+
+  .hero-feature__summary {
+    margin: 0 0 1rem;
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  .hero-feature :global(.tag) {
+    background: rgba(0, 0, 0, 0.45);
+    border-color: rgba(255, 255, 255, 0.6);
+    color: #fff;
+    text-shadow:
+      0 0 3px rgba(0, 0, 0, 0.85),
+      0 0 6px rgba(0, 0, 0, 0.7);
+  }
+</style>

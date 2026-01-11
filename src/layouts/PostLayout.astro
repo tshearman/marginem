@@ -14,12 +14,43 @@ const formattedDate = frontmatter?.pubDate
   description={frontmatter.description}
   hero={frontmatter.title}
 >
-  <p style="color: #64748b; margin: 0 0 1rem;">
-    {formattedDate}
-    {frontmatter.readingTime ? ` · ${frontmatter.readingTime}` : ''}
-  </p>
-  <TagList tags={frontmatter.tags} />
-  <article>
+  <header class="paper-header">
+    <div class="paper-meta">
+      <span>{formattedDate}</span>
+      {frontmatter.readingTime ? <span>{frontmatter.readingTime}</span> : null}
+    </div>
+    <TagList tags={frontmatter.tags} />
+  </header>
+  <article class="paper-body">
     <slot />
   </article>
 </BaseLayout>
+
+<style>
+  .paper-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .paper-meta {
+    font-size: 0.95rem;
+    color: var(--muted);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-style: italic;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .paper-body {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--fg);
+  }
+
+  .paper-body > *:first-child {
+    margin-top: 0;
+  }
+</style>

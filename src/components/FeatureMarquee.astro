@@ -1,0 +1,182 @@
+---
+import TagList from './TagList.astro';
+
+interface Entry {
+  title: string;
+  url: string;
+  dateLabel: string;
+  excerpt: string;
+  tags?: string[];
+  background: string;
+}
+
+interface Props {
+  entries?: Entry[];
+  repeat?: number;
+  gap?: string;
+  duration?: string;
+}
+
+const {
+  entries = [],
+  repeat = 2,
+  gap = '1rem',
+  duration = '120s'
+} = Astro.props as Props;
+
+const trackCopies = Array.from({ length: repeat }, (_, index) => index);
+const hasEntries = entries.length > 0;
+---
+
+{hasEntries ? (
+  <div
+    class="feature-marquee"
+    style={`--marquee-gap: ${gap}; --marquee-duration: ${duration};`}
+  >
+    {trackCopies.map((copy) => (
+      <div class="feature-marquee__track" aria-hidden={copy > 0}>
+        {entries.map((entry, index) => (
+          <article
+            class={`feature-marquee__panel feature-marquee__panel--${index % 3}`}
+            style={`background-image: ${entry.background};`}
+          >
+            <div class="feature-marquee__panel-body">
+              <span class="feature-marquee__panel-index">{index + 1}</span>
+              <p class="feature-marquee__panel-date">{entry.dateLabel}</p>
+              <h3 class="feature-marquee__panel-title">
+                <a href={entry.url}>{entry.title}</a>
+              </h3>
+              <p class="feature-marquee__panel-excerpt">{entry.excerpt}</p>
+              <TagList tags={entry.tags} />
+            </div>
+          </article>
+        ))}
+      </div>
+    ))}
+  </div>
+) : null}
+
+<style>
+  .feature-marquee {
+    --marquee-gap: 1rem;
+    --marquee-duration: 120s;
+    margin-top: 2rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding: 1rem 0;
+    display: flex;
+    gap: var(--marquee-gap);
+    mask-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0),
+      rgba(0, 0, 0, 1) 15%,
+      rgba(0, 0, 0, 1) 85%,
+      rgba(0, 0, 0, 0)
+    );
+  }
+
+  .feature-marquee__track {
+    flex-shrink: 0;
+    display: flex;
+    gap: var(--marquee-gap);
+    min-width: 100%;
+    animation: feature-marquee-scroll var(--marquee-duration) linear infinite;
+  }
+
+  .feature-marquee:hover .feature-marquee__track,
+  @media (prefers-reduced-motion: reduce) {
+    .feature-marquee__track {
+      animation-play-state: paused;
+    }
+  }
+
+  .feature-marquee__panel {
+    min-width: 10rem;
+    max-width: 15rem;
+    border-radius: 1rem;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .feature-marquee__panel-body {
+    padding: 1rem;
+    color: #fff;
+    position: relative;
+  }
+
+  .feature-marquee__panel-index {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    text-shadow:
+      0 0 4px rgba(0, 0, 0, 0.8),
+      0 0 6px rgba(0, 0, 0, 0.7);
+  }
+
+  .feature-marquee__panel-date,
+  .feature-marquee__panel-title,
+  .feature-marquee__panel-excerpt,
+  .feature-marquee__panel-body a {
+    color: #fff;
+    text-shadow:
+      0 0 3px rgba(0, 0, 0, 0.85),
+      0 0 6px rgba(0, 0, 0, 0.7),
+      0 0 12px rgba(0, 0, 0, 0.6);
+  }
+
+  .feature-marquee__panel-date {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .feature-marquee__panel-title {
+    margin: 0.35rem 0 0.4rem;
+    font-size: 1.15rem;
+  }
+
+  .feature-marquee__panel-excerpt {
+    margin-bottom: 0.6rem;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .feature-marquee__panel :global(.tag) {
+    background: rgba(0, 0, 0, 0.45);
+    border-color: rgba(255, 255, 255, 0.6);
+    color: #fff;
+    text-shadow:
+      0 0 3px rgba(0, 0, 0, 0.85),
+      0 0 6px rgba(0, 0, 0, 0.7);
+  }
+
+  .feature-marquee__panel--0 {
+    background-image: linear-gradient(135deg, #0f0f0f, #4b4b4b);
+  }
+
+  .feature-marquee__panel--1 {
+    background-image: linear-gradient(135deg, #1c1c1c, #6a6a6a);
+  }
+
+  .feature-marquee__panel--2 {
+    background-image: linear-gradient(135deg, #2a2a2a, #8c8c8c);
+  }
+
+  @keyframes feature-marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(calc(-100% - var(--marquee-gap)));
+    }
+  }
+</style>

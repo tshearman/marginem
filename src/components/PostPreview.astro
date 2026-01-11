@@ -1,5 +1,5 @@
 ---
-import Tag from './Tag.astro';
+import Tag from "./Tag.astro";
 
 interface Props {
   id?: string;
@@ -15,37 +15,136 @@ const {
   id,
   title,
   url,
-  pubDate = '',
-  displayDate = '',
-  description = '',
-  tags = []
+  pubDate = "",
+  displayDate = "",
+  description = "",
+  tags = [],
 } = Astro.props as Props;
 ---
 
 <article class="post-preview" data-search-id={id || undefined}>
-  <h3 class="post-preview__title">
-    <a class="post-preview__link" href={url}>{title}</a>
-  </h3>
-  <time
-    class="post-preview__meta"
-    datetime={pubDate}
-    data-default-display={displayDate}
-    hidden={displayDate ? undefined : true}
-  >
-    {displayDate}
-  </time>
-  <p
-    class="post-preview__excerpt"
-    data-default-excerpt={description}
-    hidden={description ? undefined : true}
-  >
-    {description}
-  </p>
-  {tags.length ? (
-    <div class="post-preview__tags">
-      {tags.map((tag) => (
-        <Tag tag={tag} />
-      ))}
+  <div class="post-preview__body">
+    <h3 class="post-preview__title">
+      <a class="post-preview__link" href={url}>{title}</a>
+    </h3>
+    <div class="post-preview__authors">
+      {displayDate ? <time datetime={pubDate}>{displayDate}</time> : null}
     </div>
-  ) : null}
+    <div class="post-preview__meta">
+      {
+        tags.length ? (
+          tags.map((tag) => <Tag tag={tag} />)
+        ) : (
+          <span class="post-preview__meta-empty">Research Notes</span>
+        )
+      }
+    </div>
+    <div class="post-preview__section">
+      <p
+        class="post-preview__excerpt"
+        data-default-excerpt={description}
+        hidden={description ? undefined : true}
+      >
+        {description}
+      </p>
+    </div>
+  </div>
 </article>
+
+<style>
+  .post-preview {
+    background: var(--bg);
+    border: 0;
+    padding: 0;
+  }
+
+  .post-preview__rule {
+    display: block;
+    width: 100%;
+    height: 10px;
+    background: var(--fg);
+  }
+
+  .post-preview__rule--title {
+    height: 2px;
+    margin: 0.85rem 0 1rem;
+  }
+
+  .post-preview__rule--bottom {
+    height: 3px;
+    margin-top: 1.25rem;
+  }
+
+  .post-preview__body {
+    padding: 1.2rem 1.5rem 1.4rem;
+    text-align: center;
+  }
+
+  .post-preview__title {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+
+  .post-preview__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .post-preview__link:hover {
+    text-decoration: underline;
+  }
+
+  .post-preview__authors {
+    margin: 0.5rem 0 0;
+    font-size: 0.95rem;
+    color: var(--fg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .post-preview__authors time {
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .post-preview__meta {
+    margin: 0.8rem 0 1.3rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+
+  .post-preview__meta-empty {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .post-preview__section {
+    text-align: left;
+    border-bottom: 0px;
+    padding-bottom: 1rem;
+  }
+
+  .post-preview__section strong {
+    display: block;
+    text-align: center;
+    font-size: 1.05rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .post-preview__excerpt {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--fg);
+  }
+
+  .post-preview__tags {
+    display: none;
+  }
+</style>

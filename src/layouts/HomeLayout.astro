@@ -1,0 +1,144 @@
+---
+import PostPreview from "../components/PostPreview.astro";
+import HeroFeature from "../components/HeroFeature.astro";
+
+const { posts = [], formatDate } = Astro.props;
+const format = formatDate
+  ? (date) => formatDate(date)
+  : (date) =>
+      new Intl.DateTimeFormat("en", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(date);
+
+const heroImage = (post) => post?.data?.heroImage ?? null;
+const heroStyle = (post, overlay = "rgba(0,0,0,0.45)") => {
+  const src = heroImage(post);
+  if (!src) return null;
+  return `linear-gradient(135deg, ${overlay}, rgba(0,0,0,0.2)), url(${src})`;
+};
+const getUrl = (post) => `/posts/${post.slug}/`;
+const getExcerpt = (post) => post.data.description ?? "";
+const hasPosts = posts.length > 0;
+const hybridHero = posts[0];
+const hybridListPosts = posts.slice(1, posts.length);
+const featuredPosts = posts.filter((post) => post?.data?.featured);
+const marqueeSource = featuredPosts.length ? featuredPosts : posts;
+const marqueeCopies = 6;
+const hybridMarqueePosts = Array.from({ length: marqueeCopies }, () =>
+  marqueeSource.slice(0, 6),
+).flat();
+const marqueeEntries = hybridMarqueePosts.map((post) => ({
+  title: post.data.title,
+  url: getUrl(post),
+  dateLabel: format(post.data.pubDate),
+  excerpt: getExcerpt(post),
+  tags: post.data.tags,
+  background:
+    heroStyle(post, "rgba(20,20,20,0.65)") ??
+    "linear-gradient(135deg, rgba(20,20,20,0.75), rgba(95,95,95,0.45))",
+}));
+---
+
+{
+  !hasPosts ? (
+    <p>No posts yet. Check back soon.</p>
+  ) : (
+    hybridHero && (
+      <section class="home-layout home-layout--stack">
+        <HeroFeature
+          title={hybridHero.data.title}
+          url={getUrl(hybridHero)}
+          dateLabel={format(hybridHero.data.pubDate)}
+          description={getExcerpt(hybridHero)}
+          tags={hybridHero.data.tags}
+          backgroundImage={
+            heroStyle(hybridHero, "rgba(18,18,18,0.75)") ??
+            "linear-gradient(135deg, rgba(12,12,12,0.85), rgba(90,90,90,0.55))"
+          }
+        />
+        <div class="stack-post-previews">
+          {hybridListPosts.map((post) => (
+            <PostPreview
+              id={post.slug}
+              title={post.data.title}
+              url={getUrl(post)}
+              pubDate={post.data.pubDate?.toISOString?.() ?? ""}
+              displayDate={format(post.data.pubDate)}
+              description={getExcerpt(post)}
+              tags={post.data.tags}
+            />
+          ))}
+        </div>
+      </section>
+    )
+  )
+}
+
+<style>
+  .home-layout {
+    display: block;
+    margin-top: 3rem;
+  }
+
+  .home-layout--stack {
+    margin-top: 2rem;
+  }
+
+  .stack-notes {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .stack-note {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    position: relative;
+  }
+
+  .stack-note__meta {
+    text-align: right;
+    min-width: 11rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .stack-note__rule {
+    position: absolute;
+    left: 30%;
+    right: 30%;
+    height: 1px;
+    background: var(--border);
+    top: 0;
+  }
+
+  .stack-note__rule--bottom {
+    bottom: 0;
+    top: auto;
+  }
+
+  .stack-post-previews {
+    margin-top: 2.5rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (max-width: 720px) {
+    .stack-note {
+      flex-direction: column;
+    }
+
+    .stack-note__meta {
+      text-align: left;
+      min-width: auto;
+    }
+  }
+</style>
