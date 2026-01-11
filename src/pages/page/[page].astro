@@ -1,10 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import TagList from '../../components/TagList.astro';
+import PostPreview from '../../components/PostPreview.astro';
 import Pagination from '../../components/Pagination.astro';
 import { getCollection } from 'astro:content';
-
-const POSTS_PER_PAGE = 5;
+import { POSTS_PER_PAGE } from '../../lib/blog';
 
 export async function getStaticPaths() {
   const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
@@ -28,14 +27,15 @@ const formatDate = (date) =>
 ---
 <BaseLayout title={`Page ${currentPage} | Notebook`} description="Older posts" hero="Notebook">
   {pagePosts.map((post) => (
-    <article style="margin-bottom: 3rem;">
-      <p style="margin: 0; color: #64748b;">{formatDate(post.data.pubDate)}</p>
-      <h2 style="margin: 0.35rem 0 0.5rem;">
-        <a href={`/posts/${post.slug}/`}>{post.data.title}</a>
-      </h2>
-      <p>{post.data.description}</p>
-      <TagList tags={post.data.tags} />
-    </article>
+    <PostPreview
+      id={post.slug}
+      title={post.data.title}
+      url={`/posts/${post.slug}/`}
+      pubDate={post.data.pubDate?.toISOString?.() ?? ''}
+      displayDate={formatDate(post.data.pubDate)}
+      description={post.data.description ?? ''}
+      tags={post.data.tags}
+    />
   ))}
   <Pagination currentPage={currentPage} totalPages={pageCount} />
 </BaseLayout>

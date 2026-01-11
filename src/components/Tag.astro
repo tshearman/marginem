@@ -1,0 +1,18 @@
+---
+interface Props {
+  tag?: string;
+  href?: string;
+}
+
+const { tag = '', href } = Astro.props as Props;
+const label = tag?.trim() ?? '';
+const url =
+  href ??
+  (label ? `/tags/${encodeURIComponent(label.toLowerCase())}/` : undefined);
+---
+
+{label && url ? (
+  <a class="tag" href={url}>
+    #{label}
+  </a>
+) : null}

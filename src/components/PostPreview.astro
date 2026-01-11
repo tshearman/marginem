@@ -1,0 +1,51 @@
+---
+import Tag from './Tag.astro';
+
+interface Props {
+  id?: string;
+  title: string;
+  url: string;
+  pubDate?: string;
+  displayDate?: string;
+  description?: string;
+  tags?: string[];
+}
+
+const {
+  id,
+  title,
+  url,
+  pubDate = '',
+  displayDate = '',
+  description = '',
+  tags = []
+} = Astro.props as Props;
+---
+
+<article class="post-preview" data-search-id={id || undefined}>
+  <h3 class="post-preview__title">
+    <a class="post-preview__link" href={url}>{title}</a>
+  </h3>
+  <time
+    class="post-preview__meta"
+    datetime={pubDate}
+    data-default-display={displayDate}
+    hidden={displayDate ? undefined : true}
+  >
+    {displayDate}
+  </time>
+  <p
+    class="post-preview__excerpt"
+    data-default-excerpt={description}
+    hidden={description ? undefined : true}
+  >
+    {description}
+  </p>
+  {tags.length ? (
+    <div class="post-preview__tags">
+      {tags.map((tag) => (
+        <Tag tag={tag} />
+      ))}
+    </div>
+  ) : null}
+</article>

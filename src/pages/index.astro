@@ -1,10 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import TagList from '../components/TagList.astro';
+import HomeLayouts from '../components/HomeLayouts.astro';
 import Pagination from '../components/Pagination.astro';
 import { getCollection } from 'astro:content';
-
-const POSTS_PER_PAGE = 5;
+import { POSTS_PER_PAGE } from '../lib/blog';
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
@@ -18,15 +17,6 @@ const formatDate = (date) =>
   description="Ideas on math, visualization, and systems"
   hero="Notebook"
 >
-  {pagePosts.map((post) => (
-    <article style="margin-bottom: 3rem;">
-      <p style="margin: 0; color: #64748b;">{formatDate(post.data.pubDate)}</p>
-      <h2 style="margin: 0.35rem 0 0.5rem;">
-        <a href={`/posts/${post.slug}/`}>{post.data.title}</a>
-      </h2>
-      <p>{post.data.description}</p>
-      <TagList tags={post.data.tags} />
-    </article>
-  ))}
+  <HomeLayouts posts={pagePosts} formatDate={formatDate} />
   <Pagination currentPage={1} totalPages={pageCount} />
 </BaseLayout>

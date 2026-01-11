@@ -1,12 +1,37 @@
 ---
 import '../styles/global.css';
 import 'katex/dist/katex.min.css';
+import SiteNav from '../components/SiteNav.astro';
+import PostPreview from '../components/PostPreview.astro';
+import { getCollection } from 'astro:content';
 
 const {
   title = 'Notebook',
   description = 'Explorations in math, code, and visualization',
   hero = 'Notebook'
 } = Astro.props;
+
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const searchDateFormatter = new Intl.DateTimeFormat('en', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric'
+});
+const searchEntries = posts.map((post) => {
+  const pubDate = post.data.pubDate ?? null;
+  const isoDate = pubDate ? pubDate.toISOString() : '';
+  return {
+    id: post.slug,
+    title: post.data.title,
+    description: post.data.description ?? '',
+    pubDate: isoDate,
+    displayDate: pubDate ? searchDateFormatter.format(pubDate) : '',
+    tags: post.data.tags ?? [],
+    url: `/posts/${post.slug}/`,
+    content: post.body ?? ''
+  };
+});
+const searchDataJson = JSON.stringify(searchEntries);
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -18,6 +43,21 @@ const {
     <link rel="icon" href="/favicon.ico" />
   </head>
   <body>
+    <div id="search-data" data-search-data={searchDataJson} hidden aria-hidden="true"></div>
+    <div id="search-result-store" hidden aria-hidden="true">
+      {searchEntries.map((entry) => (
+        <PostPreview
+          id={entry.id}
+          title={entry.title}
+          url={entry.url}
+          pubDate={entry.pubDate}
+          displayDate={entry.displayDate}
+          description={entry.description}
+          tags={entry.tags}
+        />
+      ))}
+    </div>
+    <SiteNav />
     <main>
       <header>
         <p style="letter-spacing: 0.15em; text-transform: uppercase; font-size: 0.75rem; color: #64748b;">{description}</p>

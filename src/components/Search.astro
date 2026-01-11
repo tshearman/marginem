@@ -1,0 +1,596 @@
+---
+---
+
+<div class="nav-search">
+  <button
+    id="search-trigger"
+    class="nav-search__trigger"
+    type="button"
+    aria-label="Search articles and notes"
+  >
+    <svg
+      class="nav-search__icon"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.35-4.35"></path>
+    </svg>
+    <span class="nav-search__text">Search</span>
+    <span class="nav-search__shortcut">/</span>
+  </button>
+</div>
+
+<div id="search-modal" class="search-modal" hidden aria-hidden="true">
+  <div id="search-overlay" class="search-modal__overlay" tabindex="-1"></div>
+  <div
+    class="search-modal__panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="search-heading"
+  >
+    <div class="search-modal__header">
+      <div class="search-modal__field">
+        <svg
+          class="search-modal__field-icon"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input
+          id="search-input"
+          class="search-modal__input"
+          type="text"
+          placeholder="Search posts, tags, and text…"
+          autocomplete="off"
+          aria-label="Search site content"
+        />
+      </div>
+      <button id="search-close" class="search-modal__close" type="button" aria-label="Close search">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div id="search-results" class="search-modal__results" aria-live="polite">
+      <div class="search-modal__placeholder">
+        Type to search the entire archive.
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .nav-search__trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg, #fff);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 999px;
+    padding: 0.4rem 0.75rem;
+    font: inherit;
+    color: var(--fg, #0f172a);
+    cursor: pointer;
+    min-width: 9rem;
+    justify-content: flex-start;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .nav-search__trigger:hover,
+  .nav-search__trigger:focus-visible {
+    border-color: rgba(15, 23, 42, 0.4);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.07);
+  }
+
+  .nav-search__icon {
+    color: rgba(15, 23, 42, 0.55);
+  }
+
+  .nav-search__text {
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .nav-search__shortcut {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: rgba(15, 23, 42, 0.65);
+    background: rgba(15, 23, 42, 0.05);
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.4rem;
+  }
+
+  @media (max-width: 640px) {
+    .nav-search__trigger {
+      width: 100%;
+      min-width: 0;
+    }
+    .nav-search__text {
+      font-size: 0.8rem;
+    }
+  }
+
+  .search-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 1000;
+    align-items: flex-start;
+    justify-content: center;
+    padding: clamp(1rem, 4vh, 2.5rem) clamp(1rem, 4vw, 2.5rem);
+    overflow-y: auto;
+  }
+
+  .search-modal.is-visible {
+    display: flex;
+  }
+
+  .search-modal__overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(6px);
+  }
+
+  .search-modal__panel {
+    position: relative;
+    width: min(720px, 100%);
+    max-height: calc(100vh - clamp(2rem, 8vh, 4rem));
+    background: var(--bg, #fff);
+    color: var(--fg, #0f172a);
+    border-radius: 1.35rem;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow:
+      0 20px 60px rgba(15, 23, 42, 0.28),
+      0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    backdrop-filter: blur(6px);
+  }
+
+  @media (max-width: 640px) {
+    .search-modal__panel {
+      width: 100%;
+      border-radius: 1rem;
+      padding: 1rem;
+      max-height: calc(100vh - 2rem);
+    }
+  }
+
+  .search-modal__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    padding-bottom: 0.85rem;
+    flex-shrink: 0;
+    background: var(--bg, #fff);
+  }
+
+  .search-modal__field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 0.75rem;
+    background: rgba(15, 23, 42, 0.04);
+  }
+
+  .search-modal__field-icon {
+    color: rgba(15, 23, 42, 0.5);
+  }
+
+  .search-modal__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    font-family: inherit;
+    color: inherit;
+    outline: none;
+  }
+
+  .search-modal__close {
+    border: none;
+    background: transparent;
+    padding: 0.4rem;
+    border-radius: 999px;
+    cursor: pointer;
+    color: rgba(15, 23, 42, 0.5);
+  }
+
+  .search-modal__close:hover,
+  .search-modal__close:focus-visible {
+    background: rgba(15, 23, 42, 0.08);
+    color: rgba(15, 23, 42, 0.85);
+  }
+
+  .search-modal__results {
+    margin-top: 1rem;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-right: 0.4rem;
+    padding-bottom: 0.75rem;
+    scrollbar-width: thin;
+    min-height: 0;
+  }
+
+  .search-modal__results::-webkit-scrollbar {
+    width: 0.4rem;
+  }
+
+  .search-modal__results::-webkit-scrollbar-thumb {
+    background: rgba(15, 23, 42, 0.35);
+    border-radius: 999px;
+  }
+
+  .search-modal__results::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .search-modal__placeholder,
+  .search-modal__empty {
+    padding: 1.5rem;
+    text-align: center;
+    color: rgba(15, 23, 42, 0.6);
+    font-size: 0.95rem;
+  }
+
+  :global(.post-preview) {
+    padding: 1rem 1.1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    color: var(--fg, #0f172a);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  :global(.post-preview h3) {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  :global(.post-preview h3 a) {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  :global(.post-preview h3 a:hover) {
+    text-decoration: underline;
+  }
+
+  :global(.post-preview__meta) {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(15, 23, 42, 0.6);
+    font-style: italic !important;
+    font-family: inherit;
+    font-weight: 500;
+  }
+
+  :global(.post-preview__excerpt) {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(15, 23, 42, 0.8);
+  }
+
+  :global(.post-preview__tags) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  :global(body.search-locked) {
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  (function () {
+    const SEARCH_STATE = (window.__siteSearchState = window.__siteSearchState || {});
+
+    function loadSearchData() {
+      if (SEARCH_STATE.data) {
+        return SEARCH_STATE.data;
+      }
+      const el = document.getElementById('search-data');
+      if (!el) return [];
+      const raw = el.getAttribute('data-search-data');
+      if (!raw) return [];
+      try {
+        const parsed = JSON.parse(raw);
+        SEARCH_STATE.data = Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.error('[search] Failed to parse search data', error);
+        SEARCH_STATE.data = [];
+      }
+      return SEARCH_STATE.data;
+    }
+
+    function formatDate(value) {
+      if (!value) return '';
+      try {
+        return new Intl.DateTimeFormat('en', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }).format(new Date(value));
+      } catch {
+        return value;
+      }
+    }
+
+    function getSnippet(item) {
+      if (item.description) return item.description;
+      if (item.content) {
+        return item.content.replace(/[#>*_`[\]\\]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 180);
+      }
+      return '';
+    }
+
+    function renderPlaceholder(container, message, className = 'search-modal__placeholder') {
+      container.innerHTML = '';
+      const wrapper = document.createElement('div');
+      wrapper.className = className;
+      wrapper.textContent = message;
+      container.appendChild(wrapper);
+    }
+
+    function ensureCardStore() {
+      if (SEARCH_STATE.cardMap) return;
+      const store = document.getElementById('search-result-store');
+      const map = new Map();
+      if (store) {
+        store.querySelectorAll('[data-search-id]').forEach((node) => {
+          const id = node.getAttribute('data-search-id');
+          if (id) map.set(id, node);
+        });
+      }
+      SEARCH_STATE.cardMap = map;
+    }
+
+    function cloneCard(id) {
+      ensureCardStore();
+      const source = SEARCH_STATE.cardMap?.get(id);
+      if (!source) return null;
+      return source.cloneNode(true);
+    }
+
+    function hydrateCard(node, item) {
+      if (!node) return null;
+      const meta = node.querySelector('.post-preview__meta');
+      if (meta) {
+        if (item.pubDate) {
+          meta.setAttribute('datetime', item.pubDate);
+        } else {
+          meta.removeAttribute('datetime');
+        }
+        const defaultDisplay = meta.getAttribute('data-default-display') || '';
+        const displayText = defaultDisplay || formatDate(item.pubDate);
+        meta.textContent = displayText;
+        meta.style.fontStyle = 'italic';
+      }
+      const excerpt = node.querySelector('.post-preview__excerpt');
+      if (excerpt) {
+        const defaultSnippet = excerpt.getAttribute('data-default-excerpt') || '';
+        const snippet = getSnippet(item) || defaultSnippet;
+        if (snippet) {
+          excerpt.textContent = snippet;
+          excerpt.hidden = false;
+        } else {
+          excerpt.textContent = '';
+          excerpt.hidden = true;
+        }
+      }
+      return node;
+    }
+
+    function renderResults(container, results) {
+      container.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+      results.forEach((item) => {
+        const card = hydrateCard(cloneCard(item.id), item);
+        if (card) {
+          fragment.appendChild(card);
+        }
+      });
+      container.appendChild(fragment);
+    }
+
+    function performSearch(query) {
+      const container = document.getElementById('search-results');
+      if (!container) return;
+      if (!query.trim()) {
+        renderPlaceholder(container, 'Type to search the entire archive.');
+        return;
+      }
+
+      const data = loadSearchData();
+      if (!data.length) {
+        renderPlaceholder(container, 'Search data is still loading…');
+        return;
+      }
+
+      const term = query.toLowerCase();
+      const matches = data
+        .filter((item) => {
+          const haystacks = [
+            item.title,
+            item.description,
+            item.content,
+            ...(item.tags || [])
+          ]
+            .filter(Boolean)
+            .map((value) => String(value).toLowerCase());
+          return haystacks.some((haystack) => haystack.includes(term));
+        })
+        .sort((a, b) => {
+          const aDate = a.pubDate ? new Date(a.pubDate).getTime() : 0;
+          const bDate = b.pubDate ? new Date(b.pubDate).getTime() : 0;
+          return bDate - aDate;
+        });
+
+      if (!matches.length) {
+        renderPlaceholder(container, 'No matches found.', 'search-modal__empty');
+        return;
+      }
+
+      renderResults(container, matches.slice(0, 20));
+    }
+
+    function openSearch() {
+      const modal = document.getElementById('search-modal');
+      const input = document.getElementById('search-input');
+      if (!modal || !input) return;
+      modal.classList.add('is-visible');
+      modal.removeAttribute('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('search-locked');
+      loadSearchData();
+      requestAnimationFrame(() => {
+        input.focus();
+        input.select();
+      });
+    }
+
+    function closeSearch() {
+      const modal = document.getElementById('search-modal');
+      const input = document.getElementById('search-input');
+      const container = document.getElementById('search-results');
+      if (!modal || !input || !container) return;
+      modal.classList.remove('is-visible');
+      modal.setAttribute('hidden', 'true');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('search-locked');
+      input.value = '';
+      renderPlaceholder(container, 'Type to search the entire archive.');
+    }
+
+    function setupSearch() {
+      if (SEARCH_STATE.cleanup) {
+        SEARCH_STATE.cleanup();
+        SEARCH_STATE.cleanup = null;
+      }
+
+      const modal = document.getElementById('search-modal');
+      if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+      }
+
+      const trigger = document.getElementById('search-trigger');
+      const overlay = document.getElementById('search-overlay');
+      const closeButton = document.getElementById('search-close');
+      const input = document.getElementById('search-input');
+      const results = document.getElementById('search-results');
+      if (!trigger || !overlay || !closeButton || !input || !results) {
+        return;
+      }
+
+      loadSearchData();
+      ensureCardStore();
+
+      let debounce;
+
+      const inputHandler = (event) => {
+        const query = event.target.value;
+        clearTimeout(debounce);
+        debounce = window.setTimeout(() => performSearch(query), 220);
+      };
+
+      const keyHandler = (event) => {
+        const isInputTarget =
+          event.target instanceof HTMLElement &&
+          (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA');
+
+        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+          event.preventDefault();
+          openSearch();
+        } else if (event.key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey) {
+          if (!isInputTarget) {
+            event.preventDefault();
+            openSearch();
+          }
+        } else if (event.key === 'Escape') {
+          const modal = document.getElementById('search-modal');
+          if (modal && modal.classList.contains('is-visible')) {
+            event.preventDefault();
+            closeSearch();
+          }
+        }
+      };
+
+      const triggerHandler = () => openSearch();
+      const overlayHandler = () => closeSearch();
+      const closeHandler = () => closeSearch();
+
+      trigger.addEventListener('click', triggerHandler);
+      overlay.addEventListener('click', overlayHandler);
+      closeButton.addEventListener('click', closeHandler);
+      input.addEventListener('input', inputHandler);
+      document.addEventListener('keydown', keyHandler);
+
+      SEARCH_STATE.cleanup = () => {
+        trigger.removeEventListener('click', triggerHandler);
+        overlay.removeEventListener('click', overlayHandler);
+        closeButton.removeEventListener('click', closeHandler);
+        input.removeEventListener('input', inputHandler);
+        document.removeEventListener('keydown', keyHandler);
+      };
+    }
+
+    function init() {
+      setupSearch();
+      const shortcut = document.querySelector('.nav-search__shortcut');
+      if (shortcut) {
+        const isMac = navigator.platform.toLowerCase().includes('mac');
+        shortcut.textContent = isMac ? '⌘K' : 'Ctrl+K';
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+      init();
+    }
+
+    document.addEventListener('astro:page-load', init);
+  })();
+</script>
