@@ -2,24 +2,67 @@
 interface Props {
   tag?: string;
   href?: string;
+  variant?: "default" | "filter" | "display";
+  size?: "small" | "medium" | "large";
+  selected?: boolean;
+  clickable?: boolean;
 }
 
-const { tag = '', href } = Astro.props as Props;
-const label = tag?.trim() ?? '';
+const {
+  tag = "",
+  href,
+  variant = "default",
+  size = "medium",
+  selected = false,
+  clickable = true,
+} = Astro.props as Props;
+
+const label = tag?.trim() ?? "";
 const url =
   href ??
   (label ? `/tags/${encodeURIComponent(label.toLowerCase())}/` : undefined);
+const classes = [
+  "tag",
+  `tag--${variant}`,
+  `tag--${size}`,
+  !clickable ? "tag--static" : "",
+]
+  .filter(Boolean)
+  .join(" ");
+const dataAttrs = {
+  "data-tag": label || undefined,
+  "data-selected": selected ? "true" : "false",
+};
 ---
 
-{label && url ? (
-  <a class="tag" href={url}>
-    #{label}
-  </a>
-) : null}
+{
+  label ? (
+    variant === "filter" ? (
+      <button
+        class={classes}
+        type="button"
+        {...dataAttrs}
+        aria-pressed={selected ? "true" : "false"}
+      >
+        #{label}
+      </button>
+    ) : clickable && url ? (
+      <a class={classes} href={url} {...dataAttrs}>
+        #{label}
+      </a>
+    ) : (
+      <span class={classes} {...dataAttrs}>
+        #{label}
+      </span>
+    )
+  ) : null
+}
 
 <style>
   .tag {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 0.15rem 0.55rem;
     border-radius: 999px;
     border: 1px solid var(--border);
@@ -28,5 +71,59 @@ const url =
     text-transform: lowercase;
     color: var(--fg);
     background: rgba(0, 0, 0, 0.03);
+    font-family: inherit;
+    line-height: 1.2;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .tag--static {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .tag--small {
+    font-size: 0.75rem;
+    padding: 0.1rem 0.45rem;
+  }
+
+  .tag--large {
+    font-size: 0.9rem;
+    padding: 0.2rem 0.75rem;
+  }
+
+  .tag--filter {
+    border-radius: 0.5rem;
+    border-color: rgba(15, 23, 42, 0.12);
+    background: rgba(15, 23, 42, 0.05);
+    text-transform: none;
+  }
+
+  .tag--filter[data-selected="true"] {
+    background: rgba(15, 23, 42, 0.85);
+    color: #fff;
+    border-color: rgba(15, 23, 42, 0.85);
+  }
+
+  .tag--filter[data-selected="true"]:hover {
+    background: rgba(15, 23, 42, 0.85);
+  }
+
+  .tag--filter:hover {
+    background: rgba(15, 23, 42, 0.12);
+  }
+
+  .tag--display {
+    background: rgba(15, 23, 42, 0.02);
+    border-radius: 0.45rem;
+    font-size: 0.75rem;
+    margin: 0 0.35rem;
+    text-transform: none;
+  }
+
+  a.tag {
+    text-decoration: none;
   }
 </style>

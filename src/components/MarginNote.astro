@@ -1,6 +1,7 @@
 ---
-const { title = 'Note' } = Astro.props;
+const { title = "Note" } = Astro.props;
 ---
+
 <aside class="margin-note">
   <strong>{title}</strong>
   <slot />
@@ -12,19 +13,37 @@ const { title = 'Note' } = Astro.props;
     padding-left: 1.5rem;
     margin: 1.5rem 0;
     color: var(--muted);
-    border-left: 3px solid var(--border);
   }
 
-  @media (min-width: 960px) {
+  .margin-note::before {
+    content: "";
+    position: absolute;
+    top: 0rem;
+    bottom: -0.25rem;
+    left: 0.75rem;
+    width: 0.35rem;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+  }
+
+  @media (min-width: 761px) {
     .margin-note {
       float: right;
       clear: right;
       margin: 0 0 1rem 1.5rem;
+      width: min(18rem, 40%);
       max-width: 18rem;
-      border-left: none;
-      border-right: 3px solid var(--border);
       padding: 0 0 0 1rem;
       font-size: 0.9rem;
+    }
+
+    .margin-note::before {
+      content: "";
+      position: absolute;
+      top: 0rem;
+      bottom: -0.25rem;
+      left: 0rem;
+      width: 0.35rem;
+      border: 1px solid rgba(0, 0, 0, 0.5);
     }
   }
 </style>

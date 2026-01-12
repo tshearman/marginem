@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HomeLayout from '../layouts/HomeLayout.astro';
 import Pagination from '../components/Pagination.astro';
+import PageIntro from '../components/PageIntro.astro';
 import { getCollection } from 'astro:content';
 import { POSTS_PER_PAGE } from '../lib/blog';
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
@@ -16,7 +17,13 @@ const formatDate = (date) =>
   title="Notebook"
   description="Ideas on math, visualization, and systems"
   hero="Notebook"
+  showHero={false}
 >
+  <PageIntro
+    eyebrow="Ideas on math, visualization, and systems"
+    title="Notebook"
+    description="Fresh research notes, experiments, and essays."
+  />
   <HomeLayout posts={pagePosts} formatDate={formatDate} />
   <Pagination currentPage={1} totalPages={pageCount} />
 </BaseLayout>

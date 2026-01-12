@@ -1,5 +1,6 @@
 ---
 import Tag from "./Tag.astro";
+import { ellipsizeText } from "../lib/text";
 
 interface Props {
   id?: string;
@@ -8,6 +9,7 @@ interface Props {
   pubDate?: string;
   displayDate?: string;
   description?: string;
+  abstract?: string;
   tags?: string[];
 }
 
@@ -18,8 +20,16 @@ const {
   pubDate = "",
   displayDate = "",
   description = "",
+  abstract = "",
   tags = [],
 } = Astro.props as Props;
+
+const EXCERPT_LIMIT = 340;
+
+const excerptSource = abstract || description || "";
+const excerptPreview = ellipsizeText(excerptSource, EXCERPT_LIMIT, {
+  alwaysAppend: true,
+});
 ---
 
 <article class="post-preview" data-search-id={id || undefined}>
@@ -30,6 +40,27 @@ const {
     <div class="post-preview__authors">
       {displayDate ? <time datetime={pubDate}>{displayDate}</time> : null}
     </div>
+    <div class="post-preview__section">
+      {
+        excerptPreview ? (
+          <>
+            <p
+              class="post-preview__excerpt"
+              data-default-excerpt={excerptPreview}
+              hidden={excerptPreview ? undefined : true}
+            >
+              {excerptPreview}
+            </p>
+          </>
+        ) : (
+          <p
+            class="post-preview__excerpt"
+            data-default-excerpt=""
+            hidden={true}
+          />
+        )
+      }
+    </div>
     <div class="post-preview__meta">
       {
         tags.length ? (
@@ -38,15 +69,6 @@ const {
           <span class="post-preview__meta-empty">Research Notes</span>
         )
       }
-    </div>
-    <div class="post-preview__section">
-      <p
-        class="post-preview__excerpt"
-        data-default-excerpt={description}
-        hidden={description ? undefined : true}
-      >
-        {description}
-      </p>
     </div>
   </div>
 </article>
@@ -110,7 +132,7 @@ const {
   }
 
   .post-preview__meta {
-    margin: 0.8rem 0 1.3rem;
+    margin: 0rem 0 1.3rem;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;

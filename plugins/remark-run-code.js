@@ -31,14 +31,10 @@ export default function remarkRunCode() {
       const language = node.lang ?? 'js';
       if (!['js', 'javascript'].includes(language)) return;
 
-      const { output, success } = executeSnippet(node.value, file?.path);
-      const status = success ? 'ok' : 'error';
-      parent.children.splice(index + 1, 0, {
-        type: 'code',
-        lang: 'plaintext',
-        meta: `result ${status}`,
-        value: output || '(no output)'
-      });
+      const { output } = executeSnippet(node.value, file?.path);
+      const lines = (output || '(no output)').split('\n').map((line) => `> ${line}`);
+      const suffix = ['', ...lines].join('\n');
+      node.value = `${node.value.replace(/\s+$/, '')}\n\n${suffix}`;
     });
   };
 }

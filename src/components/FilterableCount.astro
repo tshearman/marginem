@@ -1,0 +1,42 @@
+---
+interface Props {
+  contentType: "posts" | "notes";
+  totalCount: number;
+  class?: string;
+}
+
+const { contentType, totalCount, class: className = "" } = Astro.props as Props;
+const countId = `${contentType}Count`;
+const clearHintId = `${contentType}ClearHint`;
+---
+<div class={`count-section ${className}`}>
+  <p class="count-text" id={countId}>
+    Showing all {totalCount} {contentType}
+  </p>
+  <p class="clear-hint" id={clearHintId} hidden>
+    Right-click any tag to clear filters
+  </p>
+</div>
+
+<style>
+  .count-section {
+    margin: 1rem 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: rgba(15, 23, 42, 0.7);
+  }
+
+  .count-text {
+    margin: 0;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .clear-hint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: rgba(15, 23, 42, 0.55);
+  }
+</style>

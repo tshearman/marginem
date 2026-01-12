@@ -4,11 +4,13 @@ import "katex/dist/katex.min.css";
 import SiteNav from "../components/SiteNav.astro";
 import PostPreview from "../components/PostPreview.astro";
 import { getCollection } from "astro:content";
+import footnoteScript from "../scripts/init-footnotes.js?url";
 
 const {
   title = "Notebook",
   description = "Explorations in math, code, and visualization",
   hero = "Notebook",
+  showHero = true,
 } = Astro.props;
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -20,10 +22,12 @@ const searchDateFormatter = new Intl.DateTimeFormat("en", {
 const searchEntries = posts.map((post) => {
   const pubDate = post.data.pubDate ?? null;
   const isoDate = pubDate ? pubDate.toISOString() : "";
+  const abstract = post.data.abstract ?? post.data.description ?? "";
   return {
     id: post.slug,
     title: post.data.title,
     description: post.data.description ?? "",
+    abstract,
     pubDate: isoDate,
     displayDate: pubDate ? searchDateFormatter.format(pubDate) : "",
     tags: post.data.tags ?? [],
@@ -61,6 +65,7 @@ const searchDataJson = JSON.stringify(searchEntries);
             pubDate={entry.pubDate}
             displayDate={entry.displayDate}
             description={entry.description}
+            abstract={entry.abstract}
             tags={entry.tags}
           />
         ))
@@ -68,28 +73,29 @@ const searchDataJson = JSON.stringify(searchEntries);
     </div>
     <SiteNav />
     <main class="site-main">
-      <header class="site-header">
-        <p>{description}</p>
-        <h1>{hero}</h1>
-      </header>
+      {
+        showHero && (
+          <header class="site-header">
+            <p>{description}</p>
+            <h1>{hero}</h1>
+          </header>
+        )
+      }
       <slot />
       <footer class="site-footer"></footer>
     </main>
-    <script type="module" is:inline>
-      import initFootnotes from "/src/scripts/footnotes.js";
-      initFootnotes();
-    </script>
+    <script type="module" src={footnoteScript}></script>
   </body>
 </html>
 
 <style>
   .site-main {
-    width: min(74ch, 100%);
+    width: min(var(--site-max-width), 100%);
     margin: 0 auto;
     padding: 2.25rem 1.5rem 3rem;
     background: #fff;
-    border: 1px solid var(--border);
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.04);
+    border: 0px solid var(--border);
+    /* box-shadow: 0 18px 45px rgba(0, 0, 0, 0.04); */
   }
 
   .site-header p {

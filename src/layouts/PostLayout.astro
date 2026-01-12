@@ -1,47 +1,127 @@
 ---
-import BaseLayout from './BaseLayout.astro';
-import TagList from '../components/TagList.astro';
+import BaseLayout from "./BaseLayout.astro";
+import TagList from "../components/TagList.astro";
 
 const { frontmatter } = Astro.props;
 const formattedDate = frontmatter?.pubDate
-  ? new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric', year: 'numeric' }).format(
-      frontmatter.pubDate
-    )
-  : '';
+  ? new Intl.DateTimeFormat("en", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(frontmatter.pubDate)
+  : "";
+const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
 ---
+
 <BaseLayout
   title={`${frontmatter.title} | Notebook`}
   description={frontmatter.description}
   hero={frontmatter.title}
+  showHero={false}
 >
-  <header class="paper-header">
-    <div class="paper-meta">
-      <span>{formattedDate}</span>
+  <section class="paper-title">
+    <div class="paper-title__rule paper-title__rule--thick" aria-hidden="true">
+    </div>
+    <h1 class="paper-title__heading">{frontmatter.title}</h1>
+    <div class="paper-title__rule paper-title__rule--thin" aria-hidden="true">
+    </div>
+    <div class="paper-title__meta">
+      {formattedDate ? <span>{formattedDate}</span> : null}
       {frontmatter.readingTime ? <span>{frontmatter.readingTime}</span> : null}
     </div>
-    <TagList tags={frontmatter.tags} />
-  </header>
+    {
+      frontmatter.tags?.length ? (
+        <div class="paper-title__tags">
+          <TagList tags={frontmatter.tags} align="center" />
+        </div>
+      ) : null
+    }
+    {
+      abstractText ? (
+        <section class="paper-abstract">
+          <strong class="paper-abstract__heading">Abstract.</strong>
+          <p class="paper-abstract__body">{abstractText}</p>
+        </section>
+      ) : null
+    }
+    <div class="paper-title__rule paper-title__rule--thin" aria-hidden="true">
+    </div>
+  </section>
   <article class="paper-body">
     <slot />
   </article>
 </BaseLayout>
 
 <style>
-  .paper-header {
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 1.25rem;
+  .paper-title {
+    text-align: center;
     margin-bottom: 2.5rem;
+    margin-top: 2.5rem;
   }
 
-  .paper-meta {
+  .paper-title__heading {
+    margin: 0;
+    font-size: clamp(2.1rem, 4vw, 3rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .paper-title__rule {
+    width: 100%;
+    margin: 0 auto;
+    background: var(--fg);
+  }
+
+  .paper-title__rule--thick {
+    height: 8px;
+    margin-bottom: 1.75rem;
+  }
+
+  .paper-title__rule--thin {
+    height: 1px;
+    margin: 1.25rem auto;
+  }
+
+  .paper-title__meta {
     font-size: 0.95rem;
     color: var(--muted);
     display: flex;
-    gap: 1rem;
+    justify-content: center;
+    gap: 1.25rem;
     flex-wrap: wrap;
     font-style: italic;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  .paper-title__tags {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .paper-title__tags .tag-list {
+    margin: 0.5rem 0 1.25rem;
+  }
+
+  .paper-abstract {
+    max-width: 60ch;
+    margin: 0 auto 2.5rem;
+    text-align: left;
+  }
+
+  .paper-abstract__heading {
+    display: block;
+    text-align: center;
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .paper-abstract__body {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.7;
+    text-align: left;
   }
 
   .paper-body {

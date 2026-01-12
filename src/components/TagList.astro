@@ -1,13 +1,45 @@
 ---
-import Tag from './Tag.astro';
+import Tag from "./Tag.astro";
 
-const { tags = [] } = Astro.props;
+interface Props {
+  tags?: string[];
+  align?: "start" | "center" | "end";
+}
+
+const { tags = [], align = "start" } = Astro.props as Props;
 const normalized = tags.filter(Boolean);
+const alignmentClass =
+  align === "center"
+    ? "tag-list--center"
+    : align === "end"
+      ? "tag-list--end"
+      : "";
 ---
-{normalized.length ? (
-  <p style="margin: 0.5rem 0 1.5rem; display: flex; flex-wrap: wrap; gap: 0.35rem;">
-    {normalized.map((tag) => (
-      <Tag tag={tag} />
-    ))}
-  </p>
-) : null}
+
+{
+  normalized.length ? (
+    <p class={`tag-list ${alignmentClass}`}>
+      {normalized.map((tag) => (
+        <Tag tag={tag} />
+      ))}
+    </p>
+  ) : null
+}
+
+<style>
+  .tag-list {
+    margin: 0.5rem 0 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: flex-start;
+  }
+
+  .tag-list--center {
+    justify-content: center;
+  }
+
+  .tag-list--end {
+    justify-content: flex-end;
+  }
+</style>

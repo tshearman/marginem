@@ -34,6 +34,7 @@ const formatDate = (date) =>
       pubDate={post.data.pubDate?.toISOString?.() ?? ''}
       displayDate={formatDate(post.data.pubDate)}
       description={post.data.description ?? ''}
+      abstract={post.data.abstract ?? post.data.description ?? ''}
       tags={post.data.tags}
     />
   ))}

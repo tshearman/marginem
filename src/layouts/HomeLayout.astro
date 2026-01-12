@@ -19,46 +19,34 @@ const heroStyle = (post, overlay = "rgba(0,0,0,0.45)") => {
   return `linear-gradient(135deg, ${overlay}, rgba(0,0,0,0.2)), url(${src})`;
 };
 const getUrl = (post) => `/posts/${post.slug}/`;
-const getExcerpt = (post) => post.data.description ?? "";
+const getAbstract = (post) => post.data.abstract ?? post.data.description ?? "";
 const hasPosts = posts.length > 0;
-const hybridHero = posts[0];
+const mostRecentPost = posts[0];
 const hybridListPosts = posts.slice(1, posts.length);
-const featuredPosts = posts.filter((post) => post?.data?.featured);
-const marqueeSource = featuredPosts.length ? featuredPosts : posts;
-const marqueeCopies = 6;
-const hybridMarqueePosts = Array.from({ length: marqueeCopies }, () =>
-  marqueeSource.slice(0, 6),
-).flat();
-const marqueeEntries = hybridMarqueePosts.map((post) => ({
-  title: post.data.title,
-  url: getUrl(post),
-  dateLabel: format(post.data.pubDate),
-  excerpt: getExcerpt(post),
-  tags: post.data.tags,
-  background:
-    heroStyle(post, "rgba(20,20,20,0.65)") ??
-    "linear-gradient(135deg, rgba(20,20,20,0.75), rgba(95,95,95,0.45))",
-}));
 ---
 
 {
   !hasPosts ? (
     <p>No posts yet. Check back soon.</p>
   ) : (
-    hybridHero && (
+    mostRecentPost && (
       <section class="home-layout home-layout--stack">
-        <HeroFeature
-          title={hybridHero.data.title}
-          url={getUrl(hybridHero)}
-          dateLabel={format(hybridHero.data.pubDate)}
-          description={getExcerpt(hybridHero)}
-          tags={hybridHero.data.tags}
-          backgroundImage={
-            heroStyle(hybridHero, "rgba(18,18,18,0.75)") ??
-            "linear-gradient(135deg, rgba(12,12,12,0.85), rgba(90,90,90,0.55))"
-          }
-        />
-        <div class="stack-post-previews">
+        <div class="home-layout__lead-row">
+          <div class="home-layout__hero">
+            <HeroFeature
+              title={mostRecentPost.data.title}
+              url={getUrl(mostRecentPost)}
+              dateLabel={format(mostRecentPost.data.pubDate)}
+              description={getAbstract(mostRecentPost)}
+              tags={mostRecentPost.data.tags}
+              backgroundImage={
+                heroStyle(mostRecentPost, "rgba(18,18,18,0.75)") ??
+                "linear-gradient(135deg, rgba(12,12,12,0.85), rgba(90,90,90,0.55))"
+              }
+            />
+          </div>
+        </div>
+        <div class="home-layout__posts">
           {hybridListPosts.map((post) => (
             <PostPreview
               id={post.slug}
@@ -66,7 +54,8 @@ const marqueeEntries = hybridMarqueePosts.map((post) => ({
               url={getUrl(post)}
               pubDate={post.data.pubDate?.toISOString?.() ?? ""}
               displayDate={format(post.data.pubDate)}
-              description={getExcerpt(post)}
+              description={post.data.description ?? ""}
+              abstract={getAbstract(post)}
               tags={post.data.tags}
             />
           ))}
@@ -84,6 +73,23 @@ const marqueeEntries = hybridMarqueePosts.map((post) => ({
 
   .home-layout--stack {
     margin-top: 2rem;
+  }
+
+  .home-layout__lead-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin: 2.5rem 0;
+  }
+
+  .home-layout__hero {
+    flex: 2 1 60%;
+  }
+
+  .home-layout__posts {
+    margin-top: 2rem;
+    display: grid;
+    gap: 1rem;
   }
 
   .stack-notes {
@@ -125,20 +131,34 @@ const marqueeEntries = hybridMarqueePosts.map((post) => ({
     top: auto;
   }
 
-  .stack-post-previews {
-    margin-top: 2.5rem;
-    display: grid;
-    gap: 1rem;
-  }
-
-  @media (max-width: 720px) {
+  @media (max-width: 760px) {
+    .home-layout__lead-row {
+      flex-direction: column;
+      margin: 1.5rem 0 1rem;
+      padding-bottom: 2.5rem;
+    }
+    .home-layout__hero {
+      max-height: none;
+    }
+    .home-layout__posts {
+      margin-top: 1rem;
+    }
     .stack-note {
       flex-direction: column;
     }
-
     .stack-note__meta {
       text-align: left;
       min-width: auto;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .home-layout__lead-row {
+      flex-direction: row;
+      align-items: stretch;
+    }
+    .home-layout__hero {
+      flex: 2 1 66%;
     }
   }
 </style>
