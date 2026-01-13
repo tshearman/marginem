@@ -13,6 +13,12 @@ const currentPath = Astro.url.pathname;
     >
       Commonplace
     </a>
+    <a
+      href="/archive/"
+      class={currentPath.startsWith("/archive") ? "is-active" : undefined}
+    >
+      Archive
+    </a>
   </div>
   <div class="site-nav__search">
     <Search />

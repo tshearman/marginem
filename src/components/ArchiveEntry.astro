@@ -1,0 +1,145 @@
+---
+import Tag from "./Tag.astro";
+import { ellipsizeText } from "../lib/text";
+
+interface Props {
+  title: string;
+  url: string;
+  date: Date;
+  description?: string;
+  abstract?: string;
+  tags?: string[];
+  class?: string;
+}
+
+const {
+  title,
+  url,
+  date,
+  description = "",
+  abstract = "",
+  tags = [],
+  class: className = "",
+} = Astro.props as Props;
+
+const getOrdinal = (value: number) => {
+  const remainder = value % 100;
+  if (remainder >= 11 && remainder <= 13) return "th";
+  switch (value % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+};
+
+const monthLabel = new Intl.DateTimeFormat("en", {
+  month: "long",
+}).format(date);
+const dayNumber = date.getDate();
+const dayOrdinal = getOrdinal(dayNumber);
+
+const preview = ellipsizeText(abstract || description || "", 220);
+---
+
+<article class={`archive-entry ${className}`} data-tags={JSON.stringify(tags)}>
+  <div class="archive-entry__meta">
+    <time datetime={date.toISOString()}>
+      {monthLabel}
+      {dayNumber}<sup class="archive-entry__ordinal">{dayOrdinal}</sup>
+    </time>
+  </div>
+  <div class="archive-entry__body">
+    <h3 class="archive-entry__title">
+      <a href={url}>{title}</a>
+    </h3>
+    {preview ? <p class="archive-entry__excerpt">{preview}</p> : null}
+    {
+      tags.length ? (
+        <div class="archive-entry__tags">
+          {tags.map((tag) => (
+            <Tag tag={tag} variant="filter" size="small" />
+          ))}
+        </div>
+      ) : null
+    }
+  </div>
+</article>
+
+<style>
+  .archive-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    background: #fff;
+    transition: border-color 0.2s ease;
+  }
+
+  .archive-entry:hover {
+    border-color: rgba(15, 23, 42, 0.25);
+  }
+
+  .archive-entry.hidden {
+    display: none;
+  }
+
+  .archive-entry__meta time {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.6);
+  }
+
+  .archive-entry__ordinal {
+    font-size: 0.6em;
+    vertical-align: super;
+  }
+
+  .archive-entry__title {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .archive-entry__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .archive-entry__title a:hover {
+    text-decoration: underline;
+  }
+
+  .archive-entry__excerpt {
+    margin: 0.35rem 0 0;
+    color: rgba(15, 23, 42, 0.8);
+  }
+
+  .archive-entry__tags {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  @media (min-width: 761px) {
+    .archive-entry {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .archive-entry__meta {
+      min-width: 7rem;
+    }
+
+    .archive-entry__body {
+      flex: 1;
+    }
+  }
+</style>

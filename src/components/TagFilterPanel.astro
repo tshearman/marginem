@@ -1,0 +1,53 @@
+---
+import Tag from "./Tag.astro";
+
+interface Props {
+  title?: string;
+  tags?: string[];
+}
+
+const { title = "Filter by tags:", tags = [] } = Astro.props as Props;
+---
+
+<div class="tag-filter-container">
+  <div class="tag-filter-section">
+    <h3>{title}</h3>
+    <div class="tag-list">
+      {tags.map((tag) => <Tag tag={tag} variant="filter" size="medium" />)}
+    </div>
+  </div>
+</div>
+
+<style>
+  .tag-filter-container {
+    width: 100%;
+  }
+
+  .tag-filter-section {
+    margin: 0;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    text-align: center;
+  }
+
+  .tag-filter-section h3 {
+    margin: 0 0 0.65rem;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.8);
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+  }
+
+  @media (max-width: 760px) {
+    .tag-filter-section {
+      padding: 1rem;
+    }
+  }
+</style>

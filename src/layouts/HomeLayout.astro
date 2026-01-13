@@ -1,6 +1,7 @@
 ---
 import PostPreview from "../components/PostPreview.astro";
 import HeroFeature from "../components/HeroFeature.astro";
+import FeaturedMarquee from "../components/FeaturedMarquee.astro";
 
 const { posts = [], formatDate } = Astro.props;
 const format = formatDate
@@ -23,6 +24,9 @@ const getAbstract = (post) => post.data.abstract ?? post.data.description ?? "";
 const hasPosts = posts.length > 0;
 const mostRecentPost = posts[0];
 const hybridListPosts = posts.slice(1, posts.length);
+const featuredPosts = posts.filter(
+  (post) => post?.data?.featured && post.slug !== mostRecentPost?.slug,
+);
 ---
 
 {
@@ -39,13 +43,16 @@ const hybridListPosts = posts.slice(1, posts.length);
               dateLabel={format(mostRecentPost.data.pubDate)}
               description={getAbstract(mostRecentPost)}
               tags={mostRecentPost.data.tags}
-              backgroundImage={
-                heroStyle(mostRecentPost, "rgba(18,18,18,0.75)") ??
-                "linear-gradient(135deg, rgba(12,12,12,0.85), rgba(90,90,90,0.55))"
-              }
+              backgroundImage={heroStyle(mostRecentPost, "rgba(18,18,18,0.75)")}
             />
           </div>
         </div>
+        {featuredPosts.length ? (
+          <div class="home-layout__featured">
+            <p class="home-layout__featured-label">Featured</p>
+            <FeaturedMarquee posts={featuredPosts} formatDate={format} />
+          </div>
+        ) : null}
         <div class="home-layout__posts">
           {hybridListPosts.map((post) => (
             <PostPreview
@@ -90,6 +97,18 @@ const hybridListPosts = posts.slice(1, posts.length);
     margin-top: 2rem;
     display: grid;
     gap: 1rem;
+  }
+
+  .home-layout__featured {
+    margin-top: 1rem;
+  }
+
+  .home-layout__featured-label {
+    margin: 0 0 0.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: var(--muted);
   }
 
   .stack-notes {

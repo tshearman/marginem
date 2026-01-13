@@ -1,0 +1,100 @@
+---
+import Tag from "./Tag.astro";
+import type { CollectionEntry } from "astro:content";
+
+type BlogEntry = CollectionEntry<"blog">;
+
+interface Props {
+  post: BlogEntry;
+  formatDate: (date: Date) => string;
+}
+
+const { post, formatDate } = Astro.props as Props;
+const heroImage = post?.data?.heroImage ?? null;
+const cardClass = heroImage
+  ? "featured-card featured-card--image"
+  : "featured-card";
+const style = heroImage
+  ? `--featured-card-image: url(${heroImage});`
+  : undefined;
+---
+
+<a class={cardClass} href={`/posts/${post.slug}/`} style={style}>
+  <p class="featured-card__eyebrow">{formatDate(post.data.pubDate)}</p>
+  <h4 class="featured-card__title">{post.data.title}</h4>
+  <div class="featured-card__tags">
+    <Tag
+      tag={post.data.tags?.[0] || "Notebook"}
+      variant="display"
+      size="small"
+      clickable={false}
+      has_image_background={Boolean(heroImage)}
+    />
+  </div>
+</a>
+
+<style>
+  .featured-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 15rem;
+    min-height: 15rem;
+    padding: 0.85rem 1rem;
+    border-radius: 0.85rem;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.9);
+    color: inherit;
+    text-decoration: none;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.2s ease;
+  }
+
+  .featured-card--image {
+    background-image:
+      linear-gradient(135deg, rgba(7, 7, 7, 0.85), rgba(7, 7, 7, 0.45)),
+      var(--featured-card-image);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .featured-card__eyebrow {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.55);
+  }
+
+  .featured-card__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .featured-card__tags {
+    margin-top: 0.35rem;
+  }
+
+  .featured-card--image .featured-card__eyebrow,
+  .featured-card--image .featured-card__title,
+  .featured-card--image :global(.tag) {
+    color: #fff;
+    text-shadow:
+      0 0 4px rgba(0, 0, 0, 0.85),
+      0 0 12px rgba(0, 0, 0, 0.75);
+  }
+
+  .featured-card--image .featured-card__eyebrow {
+    border-radius: 0.35rem;
+    padding: 0.15rem 0.4rem;
+  }
+
+  @media (max-width: 760px) {
+    .featured-card {
+      min-width: 12rem;
+      padding: 0.75rem 0.85rem;
+    }
+  }
+</style>

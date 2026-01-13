@@ -1,9 +1,10 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import NoteCard from "../../components/NoteCard.astro";
-import Tag from "../../components/Tag.astro";
 import FilterableCount from "../../components/FilterableCount.astro";
 import PageIntro from "../../components/PageIntro.astro";
+import TagFilterPanel from "../../components/TagFilterPanel.astro";
+import filterScript from "../../scripts/filterable-content.js?url";
 import { getCollection } from "astro:content";
 
 const notesCollection = await getCollection("notes");
@@ -61,6 +62,14 @@ const { notes: notesWithGrid } = createGridFillingLayout(sortedNotes);
 const allTags = [
   ...new Set(sortedNotes.flatMap((note) => note.tags || [])),
 ].sort((a, b) => a.localeCompare(b));
+const commonplaceFilterConfig = JSON.stringify({
+  countId: "notesCount",
+  hintId: "notesClearHint",
+  itemSelector: ".note-card",
+  itemTagSelector: ".note-card .tag--display",
+  stateKey: "commonplace-notes",
+  countLabel: "notes",
+});
 ---
 
 <BaseLayout
@@ -69,7 +78,10 @@ const allTags = [
   hero="Commonplace"
   showHero={false}
 >
-  <section class="commonplace-page">
+  <section
+    class="commonplace-page"
+    data-filter-config={commonplaceFilterConfig}
+  >
     <PageIntro
       eyebrow="Notebook Series"
       title="Commonplace"
@@ -77,18 +89,7 @@ const allTags = [
     />
 
     <div class="content-layout">
-      <div class="tag-filter-container">
-        <div class="tag-filter-section">
-          <h3>Filter by tags:</h3>
-          <div class="tag-list" id="tagList">
-            {
-              allTags.map((tag) => (
-                <Tag tag={tag} variant="filter" size="medium" />
-              ))
-            }
-          </div>
-        </div>
-      </div>
+      <TagFilterPanel tags={allTags} />
 
       <FilterableCount
         contentType="notes"
@@ -127,28 +128,6 @@ const allTags = [
     width: 100%;
   }
 
-  .tag-filter-section {
-    margin: 0 0 1.5rem;
-    padding: 1.25rem;
-    border-radius: 1rem;
-    text-align: center;
-  }
-
-  .tag-filter-section h3 {
-    margin: 0 0 0.65rem;
-    font-size: 1rem;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: rgba(15, 23, 42, 0.8);
-  }
-
-  .tag-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    justify-content: center;
-  }
-
   .commonplace-count {
     padding: 0 1rem;
   }
@@ -178,10 +157,6 @@ const allTags = [
       padding: 0;
     }
 
-    .tag-filter-section {
-      padding: 1rem;
-    }
-
     .notes-masonry {
       grid-template-columns: 1fr;
     }
@@ -207,118 +182,4 @@ const allTags = [
   }
 </style>
 
-<script>
-  (() => {
-    const pageFilterStates = new Map();
-    let cleanupHandlers = [];
-
-    const getPageKey = () => window.location.pathname;
-    const getSelectedTags = () => {
-      const key = getPageKey();
-      if (!pageFilterStates.has(key)) {
-        pageFilterStates.set(key, new Set());
-      }
-      return pageFilterStates.get(key);
-    };
-
-    const syncTagButtonStates = (buttons, noteTagButtons) => {
-      const selected = getSelectedTags();
-      [...buttons, ...noteTagButtons].forEach((button) => {
-        const tag = button.dataset.tag;
-        if (!tag) return;
-        button.dataset.selected = selected.has(tag) ? "true" : "false";
-      });
-    };
-
-    const updateCounts = (visible, total, hasFilters) => {
-      const countEl = document.getElementById("notesCount");
-      const hintEl = document.getElementById("notesClearHint");
-      if (countEl) {
-        countEl.textContent = hasFilters
-          ? `Showing ${visible} of ${total} notes`
-          : `Showing all ${total} notes`;
-      }
-      if (hintEl) {
-        hintEl.hidden = !hasFilters;
-      }
-    };
-
-    const filterNotes = (noteCards, tagButtons, noteTagButtons) => {
-      const selected = getSelectedTags();
-      const total = noteCards.length;
-      let visible = 0;
-
-      noteCards.forEach((card) => {
-        const tags = JSON.parse(card.dataset.tags || "[]");
-        const shouldShow =
-          selected.size === 0 || tags.some((tag) => selected.has(tag));
-        if (shouldShow) {
-          card.classList.remove("hidden");
-          visible += 1;
-        } else {
-          card.classList.add("hidden");
-        }
-      });
-
-      syncTagButtonStates(tagButtons, noteTagButtons);
-      updateCounts(visible, total, selected.size > 0);
-    };
-
-    const clearHandlers = () => {
-      cleanupHandlers.forEach((cleanup) => cleanup());
-      cleanupHandlers = [];
-    };
-
-    const attachHandler = (element, event, handler) => {
-      element.addEventListener(event, handler);
-      cleanupHandlers.push(() => element.removeEventListener(event, handler));
-    };
-
-    const initializeFiltering = () => {
-      const tagButtons = document.querySelectorAll(".tag.tag--filter");
-      const noteTagButtons = document.querySelectorAll(".tag.tag--display");
-      const noteCards = document.querySelectorAll(".note-card");
-
-      if (!noteCards.length) return;
-
-      clearHandlers();
-
-      const handleClick = (tag) => (event) => {
-        event.preventDefault();
-        const selected = getSelectedTags();
-        if (selected.has(tag)) {
-          selected.delete(tag);
-        } else {
-          selected.add(tag);
-        }
-        filterNotes(noteCards, tagButtons, noteTagButtons);
-      };
-
-      const handleClear = (event) => {
-        event.preventDefault();
-        const selected = getSelectedTags();
-        selected.clear();
-        filterNotes(noteCards, tagButtons, noteTagButtons);
-      };
-
-      tagButtons.forEach((button) => {
-        const tag = button.dataset.tag;
-        if (!tag) return;
-        attachHandler(button, "click", handleClick(tag));
-        attachHandler(button, "contextmenu", handleClear);
-      });
-
-      noteTagButtons.forEach((button) => {
-        const tag = button.dataset.tag;
-        if (!tag) return;
-        attachHandler(button, "click", handleClick(tag));
-        attachHandler(button, "contextmenu", handleClear);
-      });
-
-      filterNotes(noteCards, tagButtons, noteTagButtons);
-    };
-
-    document.addEventListener("DOMContentLoaded", initializeFiltering);
-    document.addEventListener("astro:page-load", initializeFiltering);
-  })();
-</script>
+<script type="module" src={filterScript}></script>

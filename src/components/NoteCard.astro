@@ -53,12 +53,7 @@ const noteId = generateNoteId({ content, author, tags, date });
       tags.length ? (
         <div class="note-tags">
           {tags.map((tagValue) => (
-            <Tag
-              tag={tagValue}
-              variant="display"
-              size="small"
-              clickable={false}
-            />
+            <Tag tag={tagValue} variant="filter" size="small" />
           ))}
         </div>
       ) : null
