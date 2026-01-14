@@ -290,6 +290,13 @@ import searchScript from "../scripts/search-modal.ts?url";
     padding: 0;
   }
 
+  .search-modal :global(.note-card--interactive:hover),
+  .search-modal :global(.note-card--interactive:focus-visible) {
+    box-shadow: none;
+    transform: none;
+    outline: none;
+  }
+
   :global(body.search-locked) {
     overflow: hidden;
   }

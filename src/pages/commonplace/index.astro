@@ -6,6 +6,7 @@ import PageIntro from "../../components/PageIntro.astro";
 import TagFilterPanel from "../../components/TagFilterPanel.astro";
 import filterScript from "../../scripts/filterable-content.js?url";
 import { getCollection } from "astro:content";
+import { generateNoteId } from "../../lib/noteUtils";
 
 const notesCollection = await getCollection("notes");
 const allNotes: Array<{
@@ -33,39 +34,30 @@ const sortedNotes = allNotes.sort((a, b) => {
 	return b.date.getTime() - a.date.getTime();
 });
 
-const createGridFillingLayout = (notes: typeof sortedNotes) => {
-	const withSpans = notes.map((note) => {
-		const contentLength = note.content.length;
-		let columnSpan = 1;
-
-		if (contentLength > 400) {
-			columnSpan = 3;
-		} else if (contentLength > 200) {
-			columnSpan = 2;
-		} else if (contentLength > 100 && Math.random() < 0.15) {
-			columnSpan = 2;
-		}
-
-		return { ...note, columnSpan };
-	});
-
-	const shuffled = [...withSpans];
-	for (let i = shuffled.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-	}
-
-	return { notes: shuffled };
+const annotateColumnSpan = (contentLength: number) => {
+	if (contentLength > 400) return 3;
+	if (contentLength > 220) return 2;
+	if (contentLength > 140) return 2;
+	return 1;
 };
 
-const { notes: notesWithGrid } = createGridFillingLayout(sortedNotes);
+const notesWithGrid = sortedNotes.map((note) => ({
+	...note,
+	columnSpan: annotateColumnSpan(note.content.length),
+	noteId: generateNoteId({
+		content: note.content,
+		author: note.author,
+		tags: note.tags,
+		date: note.date,
+	}),
+}));
 const allTags = [
 	...new Set(sortedNotes.flatMap((note) => note.tags || [])),
 ].sort((a, b) => a.localeCompare(b));
 const commonplaceFilterConfig = JSON.stringify({
 	countId: "notesCount",
 	hintId: "notesClearHint",
-	itemSelector: ".note-card",
+	itemSelector: ".note-section",
 	itemTagSelector: ".note-card .tag--display",
 	stateKey: "commonplace-notes",
 	countLabel: "notes",
@@ -103,14 +95,21 @@ const commonplaceFilterConfig = JSON.stringify({
             const spanClass =
               note.columnSpan > 1 ? `span-${note.columnSpan}` : "";
             return (
-              <NoteCard
-                content={note.content}
-                source={note.source}
-                author={note.author}
-                date={note.date}
-                tags={note.tags}
-                class={spanClass}
-              />
+              <section
+                id={note.noteId}
+                class={`note-section ${spanClass}`}
+                aria-label="Commonplace note"
+                data-tags={JSON.stringify(note.tags)}
+              >
+                <NoteCard
+                  content={note.content}
+                  source={note.source}
+                  author={note.author}
+                  date={note.date}
+                  tags={note.tags}
+                  idOverride={note.noteId}
+                />
+              </section>
             );
           })
         }
@@ -143,12 +142,15 @@ const commonplaceFilterConfig = JSON.stringify({
     contain: layout style paint;
     grid-template-rows: auto;
   }
+  :global(.note-section.hidden) {
+    display: none;
+  }
 
-  :global(.note-card.span-2) {
+  :global(.note-section.span-2) {
     grid-column: span 2 !important;
   }
 
-  :global(.note-card.span-3) {
+  :global(.note-section.span-3) {
     grid-column: span 3 !important;
   }
 
@@ -161,8 +163,8 @@ const commonplaceFilterConfig = JSON.stringify({
       grid-template-columns: 1fr;
     }
 
-    :global(.note-card.span-2),
-    :global(.note-card.span-3) {
+    :global(.note-section.span-2),
+    :global(.note-section.span-3) {
       grid-column: span 1 !important;
     }
 
@@ -176,7 +178,7 @@ const commonplaceFilterConfig = JSON.stringify({
       grid-template-columns: repeat(2, 1fr);
     }
 
-    :global(.note-card.span-3) {
+    :global(.note-section.span-3) {
       grid-column: span 2 !important;
     }
   }

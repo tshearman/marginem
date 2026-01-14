@@ -9,6 +9,8 @@ import remarkRunCode, {
 	getSnippetDependents,
 } from "./plugins/remark-run-code.js";
 import rehypePrism from "rehype-prism-plus";
+import "prismjs/components/prism-haskell.js";
+import "prismjs/components/prism-lisp.js";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const snippetsDir = path.join(rootDir, "src/content/snippets");

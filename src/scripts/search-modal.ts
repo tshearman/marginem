@@ -6,6 +6,11 @@ type SearchItem = {
 	content?: string;
 	tags?: string[];
 	pubDate?: string;
+	displayDate?: string;
+	url?: string;
+	kind?: "post" | "note";
+	author?: string;
+	source?: string;
 };
 
 type SearchState = {
@@ -145,6 +150,41 @@ function renderResults(container: HTMLElement, results: SearchItem[]) {
 	container.appendChild(fragment);
 }
 
+function activateNoteCard(card: HTMLElement) {
+	const url = card.getAttribute("data-search-url");
+	if (!url) return;
+	closeSearch();
+	window.location.href = url;
+}
+
+function ensureNoteCardDelegation(container: HTMLElement) {
+	if (container.dataset.noteDelegation === "true") {
+		return;
+	}
+
+	const clickHandler = (event: Event) => {
+		const target = event.target as HTMLElement | null;
+		const card = target?.closest<HTMLElement>(".note-card[data-search-url]");
+		if (!card) return;
+		event.preventDefault();
+		activateNoteCard(card);
+	};
+
+	const keyHandler = (event: Event) => {
+		if (!(event instanceof KeyboardEvent)) return;
+		if (event.key !== "Enter" && event.key !== " ") return;
+		const target = event.target as HTMLElement | null;
+		const card = target?.closest<HTMLElement>(".note-card[data-search-url]");
+		if (!card) return;
+		event.preventDefault();
+		activateNoteCard(card);
+	};
+
+	container.addEventListener("click", clickHandler);
+	container.addEventListener("keydown", keyHandler);
+	container.dataset.noteDelegation = "true";
+}
+
 function performSearch(query: string) {
 	const container = document.getElementById("search-results");
 	if (!(container instanceof HTMLElement)) return;
@@ -252,6 +292,7 @@ function setupSearch() {
 		return;
 	}
 
+	ensureNoteCardDelegation(results);
 	loadSearchData();
 	ensureCardStore();
 

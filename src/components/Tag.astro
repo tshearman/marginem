@@ -37,11 +37,13 @@ const dataAttrs = {
 	"data-tag": label || undefined,
 	"data-selected": selected ? "true" : "false",
 };
+const shouldRenderFilterButton =
+	variant === "filter" && clickable && !(asLink && clickable && url);
 ---
 
 {
   label ? (
-    variant === "filter" && !(asLink && clickable && url) ? (
+    shouldRenderFilterButton ? (
       <button
         class={classes}
         type="button"

@@ -10,6 +10,9 @@ interface Props {
 	date?: Date;
 	class?: string;
 	style?: string;
+	searchId?: string;
+	searchUrl?: string;
+	idOverride?: string;
 }
 
 const {
@@ -20,16 +23,35 @@ const {
 	date,
 	class: className,
 	style,
+	searchId,
+	searchUrl,
+	idOverride,
 } = Astro.props as Props;
-const noteId = generateNoteId({ content, author, tags, date });
+const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
+const interactive = Boolean(searchUrl);
 ---
 
 <article
-  class={`note-card ${className || ""}`}
+  class={`note-card ${className || ""} ${interactive ? "note-card--interactive" : ""}`}
   data-tags={JSON.stringify(tags)}
   id={noteId}
+  data-search-id={searchId ?? undefined}
+  data-search-url={searchUrl ?? undefined}
   style={style}
+  role={interactive ? "link" : undefined}
+  tabindex={interactive ? "0" : undefined}
 >
+  {
+    !interactive ? (
+      <a
+        class="note-card__anchor-link"
+        href={`#${noteId}`}
+        aria-label="Permalink to this note"
+      >
+        #
+      </a>
+    ) : null
+  }
   <div class="note-content-wrapper">
     <div class="note-content">
       <blockquote class="note-text">{content}</blockquote>
@@ -53,7 +75,7 @@ const noteId = generateNoteId({ content, author, tags, date });
       tags.length ? (
         <div class="note-tags">
           {tags.map((tagValue) => (
-            <Tag tag={tagValue} variant="filter" size="small" />
+            <Tag tag={tagValue} variant="filter" size="small" clickable={!interactive} />
           ))}
         </div>
       ) : null
@@ -74,6 +96,20 @@ const noteId = generateNoteId({ content, author, tags, date });
     position: relative;
   }
 
+  .note-card--interactive {
+    cursor: pointer;
+  }
+
+  .note-card--interactive:hover {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    transform: translateY(-3px);
+  }
+
+  .note-card--interactive:focus-visible {
+    outline: 2px solid rgba(15, 23, 42, 0.5);
+    outline-offset: 4px;
+  }
+
   .note-card::after {
     content: "";
     position: absolute;
@@ -81,6 +117,22 @@ const noteId = generateNoteId({ content, author, tags, date });
     border-radius: inherit;
     border: 1px solid rgba(255, 255, 255, 0.45);
     pointer-events: none;
+  }
+
+  .note-card__anchor-link {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 0.85rem;
+    color: rgba(15, 23, 42, 0.4);
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .note-card:hover .note-card__anchor-link,
+  .note-card:focus-within .note-card__anchor-link {
+    opacity: 1;
   }
 
   .note-content-wrapper {

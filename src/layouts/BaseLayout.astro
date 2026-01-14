@@ -3,8 +3,10 @@ import "../styles/global.css";
 import "katex/dist/katex.min.css";
 import SiteNav from "../components/SiteNav.astro";
 import PostPreview from "../components/PostPreview.astro";
+import NoteCard from "../components/NoteCard.astro";
 import { getCollection } from "astro:content";
 import footnoteScript from "../scripts/init-footnotes.js?url";
+import { generateNoteId } from "../lib/noteUtils";
 
 const {
 	title = "Notebook",
@@ -14,16 +16,18 @@ const {
 } = Astro.props;
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
+const notesCollection = await getCollection("notes");
 const searchDateFormatter = new Intl.DateTimeFormat("en", {
 	month: "short",
 	day: "numeric",
 	year: "numeric",
 });
-const searchEntries = posts.map((post) => {
+const postEntries = posts.map((post) => {
 	const pubDate = post.data.pubDate ?? null;
 	const isoDate = pubDate ? pubDate.toISOString() : "";
 	const abstract = post.data.abstract ?? post.data.description ?? "";
 	return {
+		kind: "post" as const,
 		id: post.slug,
 		title: post.data.title,
 		description: post.data.description ?? "",
@@ -35,6 +39,32 @@ const searchEntries = posts.map((post) => {
 		content: post.body ?? "",
 	};
 });
+const flattenedNotes = notesCollection.flatMap((file) =>
+	file.data.map((entry) => {
+		const noteDate = entry.date ? new Date(entry.date) : undefined;
+		const id = generateNoteId({
+			content: entry.content,
+			author: entry.author,
+			tags: entry.tags,
+			date: noteDate,
+		});
+		return {
+			kind: "note" as const,
+			id,
+			title: entry.author ?? "Commonplace note",
+			description: entry.source ?? "",
+			abstract: "",
+			content: entry.content,
+			tags: entry.tags ?? [],
+			pubDate: noteDate ? noteDate.toISOString() : "",
+			displayDate: noteDate ? searchDateFormatter.format(noteDate) : "",
+			url: `/commonplace/#${id}`,
+			author: entry.author,
+			source: entry.source,
+		};
+	}),
+);
+const searchEntries = [...postEntries, ...flattenedNotes];
 const searchDataJson = JSON.stringify(searchEntries);
 ---
 
@@ -57,18 +87,31 @@ const searchDataJson = JSON.stringify(searchEntries);
     </div>
     <div id="search-result-store" hidden aria-hidden="true">
       {
-        searchEntries.map((entry) => (
-          <PostPreview
-            id={entry.id}
-            title={entry.title}
-            url={entry.url}
-            pubDate={entry.pubDate}
-            displayDate={entry.displayDate}
-            description={entry.description}
-            abstract={entry.abstract}
-            tags={entry.tags}
-          />
-        ))
+        searchEntries.map((entry) =>
+          entry.kind === "note" ? (
+            <NoteCard
+              content={entry.content}
+              source={entry.source}
+              author={entry.author}
+              tags={entry.tags}
+              date={entry.pubDate ? new Date(entry.pubDate) : undefined}
+              searchId={entry.id}
+              searchUrl={entry.url}
+              idOverride={`search-${entry.id}`}
+            />
+          ) : (
+            <PostPreview
+              id={entry.id}
+              title={entry.title}
+              url={entry.url}
+              pubDate={entry.pubDate}
+              displayDate={entry.displayDate}
+              description={entry.description}
+              abstract={entry.abstract}
+              tags={entry.tags}
+            />
+          ),
+        )
       }
     </div>
     <SiteNav />
