@@ -1,28 +1,40 @@
 ---
+import type { CollectionEntry } from "astro:content";
 import PostPreview from "../components/PostPreview.astro";
 import HeroFeature from "../components/HeroFeature.astro";
 
-const { posts = [], formatDate } = Astro.props;
-const format = formatDate
-  ? (date) => formatDate(date)
-  : (date) =>
-      new Intl.DateTimeFormat("en", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }).format(date);
+type BlogEntry = CollectionEntry<"blog">;
+interface Props {
+	posts?: BlogEntry[];
+	formatDate?: (date: Date) => string;
+}
 
-const heroImage = (post) => post?.data?.heroImage ?? null;
-const heroStyle = (post, overlay = "rgba(0,0,0,0.45)") => {
-  const src = heroImage(post);
-  if (!src) return null;
-  return `linear-gradient(135deg, ${overlay}, rgba(0,0,0,0.2)), url(${src})`;
+const { posts = [], formatDate } = Astro.props as Props;
+const format = formatDate
+	? (date: Date) => formatDate(date)
+	: (date: Date) =>
+			new Intl.DateTimeFormat("en", {
+				month: "short",
+				day: "numeric",
+				year: "numeric",
+			}).format(date);
+
+const heroImage = (post: BlogEntry | undefined) =>
+	post?.data?.heroImage ?? null;
+const heroStyle = (
+	post: BlogEntry | undefined,
+	overlay = "rgba(0,0,0,0.45)",
+) => {
+	const src = heroImage(post);
+	if (!src) return null;
+	return `linear-gradient(135deg, ${overlay}, rgba(0,0,0,0.2)), url(${src})`;
 };
-const getUrl = (post) => `/posts/${post.slug}/`;
-const getAbstract = (post) => post.data.abstract ?? post.data.description ?? "";
+const getUrl = (post: BlogEntry) => `/posts/${post.slug}/`;
+const getAbstract = (post: BlogEntry) =>
+	post.data.abstract ?? post.data.description ?? "";
 const hasPosts = posts.length > 0;
 const mostRecentPost = posts[0];
-const hybridListPosts = posts.slice(1, posts.length);
+const hybridListPosts = posts.slice(1);
 ---
 
 {

@@ -31,6 +31,12 @@
             alejandra
             python312
             uv
+            ghc
+            sbcl
+            ormolu
+            biome
+            hlint
+            ruff
           ];
           shellHook = ''
             export NODE_OPTIONS="--enable-source-maps --trace-warnings"

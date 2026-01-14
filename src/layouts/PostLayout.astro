@@ -4,12 +4,12 @@ import TagList from "../components/TagList.astro";
 
 const { frontmatter } = Astro.props;
 const formattedDate = frontmatter?.pubDate
-  ? new Intl.DateTimeFormat("en", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    }).format(frontmatter.pubDate)
-  : "";
+	? new Intl.DateTimeFormat("en", {
+			month: "long",
+			day: "numeric",
+			year: "numeric",
+		}).format(frontmatter.pubDate)
+	: "";
 const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
 ---
 

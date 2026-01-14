@@ -1,4 +1,5 @@
 ---
+import type { CollectionEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageIntro from "../../components/PageIntro.astro";
 import FilterableCount from "../../components/FilterableCount.astro";
@@ -7,34 +8,38 @@ import TagFilterPanel from "../../components/TagFilterPanel.astro";
 import { getCollection } from "astro:content";
 import filterScript from "../../scripts/filterable-content.js?url";
 
-const posts = (
-  await getCollection("blog", ({ data }) => !data.draft)
-).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+type BlogEntry = CollectionEntry<"blog">;
+type PostsByYear = Record<string, BlogEntry[]>;
 
-const postsByYear = posts.reduce((acc, post) => {
-  const year = post.data.pubDate.getFullYear().toString();
-  if (!acc[year]) acc[year] = [];
-  acc[year].push(post);
-  return acc;
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+) as BlogEntry[];
+
+const postsByYear = posts.reduce<PostsByYear>((acc, post) => {
+	const year = post.data.pubDate.getFullYear().toString();
+	if (!acc[year]) {
+		acc[year] = [];
+	}
+	acc[year].push(post);
+	return acc;
 }, {});
 
 const groupedYears = Object.entries(postsByYear).sort(
-  (a, b) => Number(b[0]) - Number(a[0])
+	(a, b) => Number(b[0]) - Number(a[0]),
 );
 
 const allTags = [
-  ...new Set(posts.flatMap((post) => post.data.tags || [])),
+	...new Set(posts.flatMap((post) => post.data.tags || [])),
 ].sort((a, b) => a.localeCompare(b));
 
 const archiveFilterConfig = JSON.stringify({
-  countId: "postsCount",
-  hintId: "postsClearHint",
-  itemSelector: ".archive-entry",
-  itemTagSelector: ".archive-entry .tag--display",
-  stateKey: "archive-posts",
-  countLabel: "posts",
+	countId: "postsCount",
+	hintId: "postsClearHint",
+	itemSelector: ".archive-entry",
+	itemTagSelector: ".archive-entry .tag--display",
+	stateKey: "archive-posts",
+	countLabel: "posts",
 });
-
 ---
 <BaseLayout
   title="Archive | Notebook"
@@ -136,4 +141,4 @@ const archiveFilterConfig = JSON.stringify({
   }
 </style>
 
-<script type="module" src={filterScript}></script>
+<script type="module" is:inline src={filterScript}></script>

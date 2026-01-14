@@ -8,7 +8,13 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "lint:source": "biome lint src plugins astro.config.mjs",
+    "lint:snippets": "node scripts/lint-snippets.mjs",
+    "lint": "npm run check && npm run lint:source && npm run lint:snippets",
+    "format:source": "biome format --write src plugins astro.config.mjs",
+    "format:snippets": "node scripts/format-snippets.mjs",
+    "format": "npm run format:source && npm run format:snippets"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",

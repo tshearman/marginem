@@ -1,6 +1,11 @@
 ---
 const { currentPage = 1, totalPages = 1 } = Astro.props;
-const prevHref = currentPage > 1 ? (currentPage === 2 ? '/' : `/page/${currentPage - 1}/`) : null;
+const prevHref =
+	currentPage > 1
+		? currentPage === 2
+			? "/"
+			: `/page/${currentPage - 1}/`
+		: null;
 const nextHref = currentPage < totalPages ? `/page/${currentPage + 1}/` : null;
 ---
 {totalPages > 1 ? (

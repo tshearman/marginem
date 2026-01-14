@@ -3,32 +3,32 @@ import Tag from "./Tag.astro";
 import { ellipsizeText } from "../lib/text";
 
 interface Props {
-  id?: string;
-  title: string;
-  url: string;
-  pubDate?: string;
-  displayDate?: string;
-  description?: string;
-  abstract?: string;
-  tags?: string[];
+	id?: string;
+	title: string;
+	url: string;
+	pubDate?: string;
+	displayDate?: string;
+	description?: string;
+	abstract?: string;
+	tags?: string[];
 }
 
 const {
-  id,
-  title,
-  url,
-  pubDate = "",
-  displayDate = "",
-  description = "",
-  abstract = "",
-  tags = [],
+	id,
+	title,
+	url,
+	pubDate = "",
+	displayDate = "",
+	description = "",
+	abstract = "",
+	tags = [],
 } = Astro.props as Props;
 
 const EXCERPT_LIMIT = 340;
 
 const excerptSource = abstract || description || "";
 const excerptPreview = ellipsizeText(excerptSource, EXCERPT_LIMIT, {
-  alwaysAppend: true,
+	alwaysAppend: true,
 });
 ---
 

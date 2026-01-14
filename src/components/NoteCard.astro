@@ -3,23 +3,23 @@ import Tag from "./Tag.astro";
 import { generateNoteId } from "../lib/noteUtils";
 
 interface Props {
-  content: string;
-  source?: string;
-  author?: string;
-  tags?: string[];
-  date?: Date;
-  class?: string;
-  style?: string;
+	content: string;
+	source?: string;
+	author?: string;
+	tags?: string[];
+	date?: Date;
+	class?: string;
+	style?: string;
 }
 
 const {
-  content,
-  source,
-  author,
-  tags = [],
-  date,
-  class: className,
-  style,
+	content,
+	source,
+	author,
+	tags = [],
+	date,
+	class: className,
+	style,
 } = Astro.props as Props;
 const noteId = generateNoteId({ content, author, tags, date });
 ---

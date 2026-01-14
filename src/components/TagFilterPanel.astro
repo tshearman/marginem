@@ -2,8 +2,8 @@
 import Tag from "./Tag.astro";
 
 interface Props {
-  title?: string;
-  tags?: string[];
+	title?: string;
+	tags?: string[];
 }
 
 const { title = "Filter by tags:", tags = [] } = Astro.props as Props;

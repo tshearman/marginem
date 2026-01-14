@@ -37,18 +37,19 @@ Add `run` to the meta string of any fenced JavaScript block and the snippet exec
 
 ```js run
 const fibonacci = (count) => {
-  const seq = [0, 1];
-  for (let i = 2; i < count; i++) {
-    seq[i] = seq[i - 1] + seq[i - 2];
-  }
-  return seq;
+	const seq = [0, 1];
+	for (let i = 2; i < count; i++) {
+		seq[i] = seq[i - 1] + seq[i - 2];
+	}
+	return seq;
 };
 
-'First eight terms:', fibonacci(8);
+console.log("First eight terms:", fibonacci(8));
 ```
 
 ```js run
-const average = (...values) => values.reduce((sum, value) => sum + value, 0) / values.length;
+const average = (...values) =>
+	values.reduce((sum, value) => sum + value, 0) / values.length;
 average(2, 4, 6, 8);
 ```
 

@@ -2,18 +2,18 @@
 import Tag from "./Tag.astro";
 
 interface Props {
-  tags?: string[];
-  align?: "start" | "center" | "end";
+	tags?: string[];
+	align?: "start" | "center" | "end";
 }
 
 const { tags = [], align = "start" } = Astro.props as Props;
 const normalized = tags.filter(Boolean);
 const alignmentClass =
-  align === "center"
-    ? "tag-list--center"
-    : align === "end"
-      ? "tag-list--end"
-      : "";
+	align === "center"
+		? "tag-list--center"
+		: align === "end"
+			? "tag-list--end"
+			: "";
 ---
 
 {

@@ -1,29 +1,48 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import PostPreview from '../../components/PostPreview.astro';
-import { getCollection } from 'astro:content';
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostPreview from "../../components/PostPreview.astro";
+import { getCollection } from "astro:content";
+
+type BlogEntry = CollectionEntry<"blog">;
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
-  const tags = new Map();
-  posts.forEach((post) => {
-    post.data.tags?.forEach((tag) => {
-      const key = tag.toLowerCase();
-      const existing = tags.get(key) ?? { label: tag, posts: [] };
-      existing.posts.push(post);
-      existing.label = tag;
-      tags.set(key, existing);
-    });
-  });
-  return Array.from(tags.entries()).map(([slug, value]) => ({
-    params: { tag: slug },
-    props: { tag: value.label, slug, posts: value.posts }
-  }));
+	const posts = await getCollection("blog", ({ data }) => !data.draft);
+	const tags = new Map<
+		string,
+		{
+			label: string;
+			posts: BlogEntry[];
+		}
+	>();
+	for (const post of posts) {
+		const tagList = post.data.tags ?? [];
+		for (const tag of tagList) {
+			const key = tag.toLowerCase();
+			const existing = tags.get(key) ?? { label: tag, posts: [] };
+			existing.posts.push(post as BlogEntry);
+			existing.label = tag;
+			tags.set(key, existing);
+		}
+	}
+	return Array.from(tags.entries()).map(([slug, value]) => ({
+		params: { tag: slug },
+		props: { tag: value.label, slug, posts: value.posts },
+	}));
 }
 
-const { tag, posts } = Astro.props;
-const formatDate = (date) =>
-  new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+interface TagPageProps {
+	tag: string;
+	posts: BlogEntry[];
+}
+
+const { tag, posts } = Astro.props as TagPageProps;
+const formatDate = (date: Date) =>
+	new Intl.DateTimeFormat("en", {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	}).format(date);
 ---
 <BaseLayout title={`${tag} — Notebook`} description={`Entries tagged ${tag}`} hero={`#${tag}`}>
   {posts.length === 0 ? (

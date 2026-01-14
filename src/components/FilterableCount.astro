@@ -1,8 +1,8 @@
 ---
 interface Props {
-  contentType: "posts" | "notes";
-  totalCount: number;
-  class?: string;
+	contentType: "posts" | "notes";
+	totalCount: number;
+	class?: string;
 }
 
 const { contentType, totalCount, class: className = "" } = Astro.props as Props;

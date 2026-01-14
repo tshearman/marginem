@@ -9,66 +9,66 @@ import { getCollection } from "astro:content";
 
 const notesCollection = await getCollection("notes");
 const allNotes: Array<{
-  content: string;
-  source?: string;
-  author?: string;
-  tags: string[];
-  date?: Date;
+	content: string;
+	source?: string;
+	author?: string;
+	tags: string[];
+	date?: Date;
 }> = [];
 
-notesCollection.forEach((file) => {
-  allNotes.push(
-    ...file.data.map((entry) => ({
-      ...entry,
-      tags: entry.tags ?? [],
-      date: entry.date ? new Date(entry.date) : undefined,
-    })),
-  );
-});
+for (const file of notesCollection) {
+	allNotes.push(
+		...file.data.map((entry) => ({
+			...entry,
+			tags: entry.tags ?? [],
+			date: entry.date ? new Date(entry.date) : undefined,
+		})),
+	);
+}
 
 const sortedNotes = allNotes.sort((a, b) => {
-  if (!a.date && !b.date) return 0;
-  if (!a.date) return 1;
-  if (!b.date) return -1;
-  return b.date.getTime() - a.date.getTime();
+	if (!a.date && !b.date) return 0;
+	if (!a.date) return 1;
+	if (!b.date) return -1;
+	return b.date.getTime() - a.date.getTime();
 });
 
 const createGridFillingLayout = (notes: typeof sortedNotes) => {
-  const withSpans = notes.map((note) => {
-    const contentLength = note.content.length;
-    let columnSpan = 1;
+	const withSpans = notes.map((note) => {
+		const contentLength = note.content.length;
+		let columnSpan = 1;
 
-    if (contentLength > 400) {
-      columnSpan = 3;
-    } else if (contentLength > 200) {
-      columnSpan = 2;
-    } else if (contentLength > 100 && Math.random() < 0.15) {
-      columnSpan = 2;
-    }
+		if (contentLength > 400) {
+			columnSpan = 3;
+		} else if (contentLength > 200) {
+			columnSpan = 2;
+		} else if (contentLength > 100 && Math.random() < 0.15) {
+			columnSpan = 2;
+		}
 
-    return { ...note, columnSpan };
-  });
+		return { ...note, columnSpan };
+	});
 
-  const shuffled = [...withSpans];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
+	const shuffled = [...withSpans];
+	for (let i = shuffled.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+	}
 
-  return { notes: shuffled };
+	return { notes: shuffled };
 };
 
 const { notes: notesWithGrid } = createGridFillingLayout(sortedNotes);
 const allTags = [
-  ...new Set(sortedNotes.flatMap((note) => note.tags || [])),
+	...new Set(sortedNotes.flatMap((note) => note.tags || [])),
 ].sort((a, b) => a.localeCompare(b));
 const commonplaceFilterConfig = JSON.stringify({
-  countId: "notesCount",
-  hintId: "notesClearHint",
-  itemSelector: ".note-card",
-  itemTagSelector: ".note-card .tag--display",
-  stateKey: "commonplace-notes",
-  countLabel: "notes",
+	countId: "notesCount",
+	hintId: "notesClearHint",
+	itemSelector: ".note-card",
+	itemTagSelector: ".note-card .tag--display",
+	stateKey: "commonplace-notes",
+	countLabel: "notes",
 });
 ---
 
@@ -182,4 +182,4 @@ const commonplaceFilterConfig = JSON.stringify({
   }
 </style>
 
-<script type="module" src={filterScript}></script>
+<script type="module" is:inline src={filterScript}></script>

@@ -1,0 +1,32 @@
+---
+title: "Hello, Haskell Snippets"
+description: "Executable Haskell examples rendered inline through the MDX runner."
+pubDate: 2024-10-14
+tags:
+  - haskell
+  - tooling
+  - mdx
+abstract: >
+  Demonstrates the new runnable Haskell code blocks and how to pull in reusable
+  snippet files for longer examples.
+featured: false
+---
+
+Our MDX pipeline now executes `run` blocks written in **Haskell**. That means we get the same guarantees as the JavaScript and Python demos—compile errors, failed assertions, or unexpected output will stop the build.
+
+```haskell run
+import Control.Monad (when)
+
+main :: IO ()
+main = do
+  putStrLn "Quick Haskell sanity check"
+  let squares = [n * n | n <- [1 .. 5]]
+  print squares
+  when (last squares /= 25) $
+    error "List comprehension misbehaved!"
+```
+
+Longer helpers can live in `src/snippets/` so multiple posts can reuse them while still rendering and executing inline during builds.
+
+```haskell run src="../../snippets/harmonic.hs"
+```

@@ -3,42 +3,42 @@ import Tag from "./Tag.astro";
 import { ellipsizeText } from "../lib/text";
 
 interface Props {
-  title: string;
-  url: string;
-  date: Date;
-  description?: string;
-  abstract?: string;
-  tags?: string[];
-  class?: string;
+	title: string;
+	url: string;
+	date: Date;
+	description?: string;
+	abstract?: string;
+	tags?: string[];
+	class?: string;
 }
 
 const {
-  title,
-  url,
-  date,
-  description = "",
-  abstract = "",
-  tags = [],
-  class: className = "",
+	title,
+	url,
+	date,
+	description = "",
+	abstract = "",
+	tags = [],
+	class: className = "",
 } = Astro.props as Props;
 
 const getOrdinal = (value: number) => {
-  const remainder = value % 100;
-  if (remainder >= 11 && remainder <= 13) return "th";
-  switch (value % 10) {
-    case 1:
-      return "st";
-    case 2:
-      return "nd";
-    case 3:
-      return "rd";
-    default:
-      return "th";
-  }
+	const remainder = value % 100;
+	if (remainder >= 11 && remainder <= 13) return "th";
+	switch (value % 10) {
+		case 1:
+			return "st";
+		case 2:
+			return "nd";
+		case 3:
+			return "rd";
+		default:
+			return "th";
+	}
 };
 
 const monthLabel = new Intl.DateTimeFormat("en", {
-  month: "long",
+	month: "long",
 }).format(date);
 const dayNumber = date.getDate();
 const dayOrdinal = getOrdinal(dayNumber);

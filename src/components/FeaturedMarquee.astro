@@ -1,24 +1,25 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import FeaturedCard from "./FeaturedCard.astro";
+import marqueeScript from "../scripts/featured-marquee.ts?url";
 
 type BlogEntry = CollectionEntry<"blog">;
 
 interface Props {
-  posts?: BlogEntry[];
-  formatDate?: (date: Date) => string;
+	posts?: BlogEntry[];
+	formatDate?: (date: Date) => string;
 }
 
 const { posts = [], formatDate } = Astro.props as Props;
 const featured = posts.filter(Boolean);
 const format = formatDate
-  ? (date: Date) => formatDate(date)
-  : (date: Date) =>
-      new Intl.DateTimeFormat("en", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }).format(date);
+	? (date: Date) => formatDate(date)
+	: (date: Date) =>
+			new Intl.DateTimeFormat("en", {
+				month: "short",
+				day: "numeric",
+				year: "numeric",
+			}).format(date);
 const marqueeRepeats = Array.from({ length: 3 }, (_, index) => index);
 ---
 
@@ -147,121 +148,7 @@ const marqueeRepeats = Array.from({ length: 3 }, (_, index) => index);
   }
 </style>
 
-<script>
-  const initFeaturedMarqueeControls = () => {
-    document.querySelectorAll(".featured-marquee").forEach((marquee) => {
-      if (marquee.dataset.controlsReady === "true") return;
-      const viewport = marquee.querySelector(".featured-marquee__viewport");
-      const inner = marquee.querySelector(".featured-marquee__inner");
-      const prevBtn = marquee.querySelector("[data-control='prev']");
-      const nextBtn = marquee.querySelector("[data-control='next']");
-      if (!viewport || !inner || (!prevBtn && !nextBtn)) return;
-
-      const repeatCount = Number(marquee.dataset.repeatCount) || 4;
-      const baseWidth = inner.scrollWidth / repeatCount;
-      const speed = Number(marquee.dataset.speed) || 45;
-      let resumeTimer;
-      let rafId;
-      let lastTime;
-
-      viewport.scrollLeft = baseWidth;
-      alignToCard();
-
-      function getCardWidth() {
-        const card = marquee.querySelector(".featured-card");
-        if (!card) return 220;
-        const gap = parseFloat(
-          window.getComputedStyle(inner).columnGap ||
-            window.getComputedStyle(inner).gap ||
-            "0",
-        );
-        return card.offsetWidth + gap;
-      }
-
-      function getCenterOffset() {
-        const card = marquee.querySelector(".featured-card");
-        if (!card) return 0;
-        return Math.max((viewport.clientWidth - card.offsetWidth) / 2, 0);
-      }
-
-      function normalizeScroll() {
-        const maxScroll = inner.scrollWidth - viewport.clientWidth;
-        if (viewport.scrollLeft <= baseWidth * 0.5) {
-          viewport.scrollLeft += baseWidth;
-        } else if (viewport.scrollLeft >= maxScroll - baseWidth * 0.5) {
-          viewport.scrollLeft -= baseWidth;
-        }
-      }
-
-      function alignToCard() {
-        const cardWidth = getCardWidth();
-        if (!cardWidth) return;
-        const centerOffset = getCenterOffset();
-        const index = Math.round(
-          (viewport.scrollLeft + centerOffset) / cardWidth,
-        );
-        const target = index * cardWidth - centerOffset;
-        viewport.scrollLeft = target;
-      }
-
-      const step = (timestamp) => {
-        if (!lastTime) lastTime = timestamp;
-        const delta = (timestamp - lastTime) / 1000;
-        lastTime = timestamp;
-        viewport.scrollLeft += speed * delta;
-        normalizeScroll();
-        rafId = requestAnimationFrame(step);
-      };
-
-      const startAutoScroll = () => {
-        if (rafId) return;
-        lastTime = undefined;
-        rafId = requestAnimationFrame(step);
-      };
-
-      const stopAutoScroll = () => {
-        if (rafId) {
-          cancelAnimationFrame(rafId);
-          rafId = undefined;
-        }
-      };
-
-      const resumeAfterDelay = () => {
-        clearTimeout(resumeTimer);
-        resumeTimer = window.setTimeout(() => {
-          startAutoScroll();
-        }, 1400);
-      };
-
-      const scrollToCard = (direction) => {
-        stopAutoScroll();
-        const cardWidth = getCardWidth();
-        if (!cardWidth) return;
-        const centerOffset = getCenterOffset();
-        const currentIndex = Math.round(
-          (viewport.scrollLeft + centerOffset) / cardWidth,
-        );
-        const targetIndex = currentIndex + direction;
-        const target = targetIndex * cardWidth - centerOffset;
-        viewport.scrollTo({ left: target, behavior: "smooth" });
-        setTimeout(() => {
-          normalizeScroll();
-          alignToCard();
-        }, 350);
-        resumeAfterDelay();
-      };
-
-      prevBtn?.addEventListener("click", () => scrollToCard(-1));
-      nextBtn?.addEventListener("click", () => scrollToCard(1));
-      marquee.addEventListener("mouseenter", stopAutoScroll);
-      marquee.addEventListener("mouseleave", () => {
-        resumeAfterDelay();
-      });
-      marquee.dataset.controlsReady = "true";
-      startAutoScroll();
-    });
-  };
-
-  document.addEventListener("DOMContentLoaded", initFeaturedMarqueeControls);
-  document.addEventListener("astro:page-load", initFeaturedMarqueeControls);
-</script>
+---
+import marqueeScript from "../scripts/featured-marquee.ts?url";
+---
+<script type="module" is:inline src={marqueeScript}></script>

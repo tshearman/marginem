@@ -7,33 +7,33 @@ import { getCollection } from "astro:content";
 import footnoteScript from "../scripts/init-footnotes.js?url";
 
 const {
-  title = "Notebook",
-  description = "Explorations in math, code, and visualization",
-  hero = "Notebook",
-  showHero = true,
+	title = "Notebook",
+	description = "Explorations in math, code, and visualization",
+	hero = "Notebook",
+	showHero = true,
 } = Astro.props;
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
 const searchDateFormatter = new Intl.DateTimeFormat("en", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
+	month: "short",
+	day: "numeric",
+	year: "numeric",
 });
 const searchEntries = posts.map((post) => {
-  const pubDate = post.data.pubDate ?? null;
-  const isoDate = pubDate ? pubDate.toISOString() : "";
-  const abstract = post.data.abstract ?? post.data.description ?? "";
-  return {
-    id: post.slug,
-    title: post.data.title,
-    description: post.data.description ?? "",
-    abstract,
-    pubDate: isoDate,
-    displayDate: pubDate ? searchDateFormatter.format(pubDate) : "",
-    tags: post.data.tags ?? [],
-    url: `/posts/${post.slug}/`,
-    content: post.body ?? "",
-  };
+	const pubDate = post.data.pubDate ?? null;
+	const isoDate = pubDate ? pubDate.toISOString() : "";
+	const abstract = post.data.abstract ?? post.data.description ?? "";
+	return {
+		id: post.slug,
+		title: post.data.title,
+		description: post.data.description ?? "",
+		abstract,
+		pubDate: isoDate,
+		displayDate: pubDate ? searchDateFormatter.format(pubDate) : "",
+		tags: post.data.tags ?? [],
+		url: `/posts/${post.slug}/`,
+		content: post.body ?? "",
+	};
 });
 const searchDataJson = JSON.stringify(searchEntries);
 ---
@@ -84,7 +84,7 @@ const searchDataJson = JSON.stringify(searchEntries);
       <slot />
       <footer class="site-footer"></footer>
     </main>
-    <script type="module" src={footnoteScript}></script>
+    <script type="module" is:inline src={footnoteScript}></script>
   </body>
 </html>
 

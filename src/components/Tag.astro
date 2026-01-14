@@ -1,39 +1,39 @@
 ---
 interface Props {
-  tag?: string;
-  href?: string;
-  variant?: "default" | "filter" | "display";
-  size?: "small" | "medium" | "large";
-  selected?: boolean;
-  clickable?: boolean;
-  has_image_background?: boolean;
+	tag?: string;
+	href?: string;
+	variant?: "default" | "filter" | "display";
+	size?: "small" | "medium" | "large";
+	selected?: boolean;
+	clickable?: boolean;
+	has_image_background?: boolean;
 }
 
 const {
-  tag = "",
-  href,
-  variant = "default",
-  size = "medium",
-  selected = false,
-  clickable = true,
-  has_image_background = false,
+	tag = "",
+	href,
+	variant = "default",
+	size = "medium",
+	selected = false,
+	clickable = true,
+	has_image_background = false,
 } = Astro.props as Props;
 
 const label = tag?.trim() ?? "";
 const url =
-  href ??
-  (label ? `/tags/${encodeURIComponent(label.toLowerCase())}/` : undefined);
+	href ??
+	(label ? `/tags/${encodeURIComponent(label.toLowerCase())}/` : undefined);
 const classes = [
-  "tag",
-  `tag--${variant}`,
-  `tag--${size}`,
-  has_image_background ? "tag--on-dark" : "",
+	"tag",
+	`tag--${variant}`,
+	`tag--${size}`,
+	has_image_background ? "tag--on-dark" : "",
 ]
-  .filter(Boolean)
-  .join(" ");
+	.filter(Boolean)
+	.join(" ");
 const dataAttrs = {
-  "data-tag": label || undefined,
-  "data-selected": selected ? "true" : "false",
+	"data-tag": label || undefined,
+	"data-selected": selected ? "true" : "false",
 };
 ---
 

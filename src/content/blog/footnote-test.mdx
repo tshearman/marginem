@@ -43,15 +43,15 @@ We can also drop in code. Here is a mock parser that walks through a document, g
 
 ```js
 const collectFootnotes = (doc) => {
-  const nodes = doc.querySelectorAll('sup a[href^="#fn"]');
-  return Array.from(nodes).map((link) => {
-    const id = link.getAttribute('href').slice(1);
-    const note = document.getElementById(id);
-    return {
-      id,
-      text: note?.textContent?.trim() ?? ''
-    };
-  });
+	const nodes = doc.querySelectorAll('sup a[href^="#fn"]');
+	return Array.from(nodes).map((link) => {
+		const id = link.getAttribute("href").slice(1);
+		const note = document.getElementById(id);
+		return {
+			id,
+			text: note?.textContent?.trim() ?? "",
+		};
+	});
 };
 ```
 
