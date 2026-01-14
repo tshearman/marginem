@@ -1,8 +1,59 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import vm from 'node:vm';
 import { spawnSync } from 'node:child_process';
 import { visit } from 'unist-util-visit';
 
 const PYTHON_COMMAND = process.env.REMARK_RUN_CODE_PYTHON ?? 'python3';
+
+const snippetToConsumers = new Map();
+const consumerToSnippets = new Map();
+
+const normalizePath = (filePath) => path.resolve(filePath);
+
+function registerSnippetDependency(snippetPath, consumerPath) {
+  if (!snippetPath || !consumerPath) return;
+  const normalizedSnippet = normalizePath(snippetPath);
+  const normalizedConsumer = normalizePath(consumerPath);
+  let consumers = snippetToConsumers.get(normalizedSnippet);
+  if (!consumers) {
+    consumers = new Set();
+    snippetToConsumers.set(normalizedSnippet, consumers);
+  }
+  consumers.add(normalizedConsumer);
+
+  let snippets = consumerToSnippets.get(normalizedConsumer);
+  if (!snippets) {
+    snippets = new Set();
+    consumerToSnippets.set(normalizedConsumer, snippets);
+  }
+  snippets.add(normalizedSnippet);
+}
+
+function resetConsumerDependencies(consumerPath) {
+  if (!consumerPath) return;
+  const normalizedConsumer = normalizePath(consumerPath);
+  const snippets = consumerToSnippets.get(normalizedConsumer);
+  if (!snippets) return;
+  for (const snippetPath of snippets) {
+    const normalizedSnippet = normalizePath(snippetPath);
+    const consumers = snippetToConsumers.get(normalizedSnippet);
+    if (consumers) {
+      consumers.delete(normalizedConsumer);
+      if (!consumers.size) {
+        snippetToConsumers.delete(normalizedSnippet);
+      }
+    }
+  }
+  consumerToSnippets.delete(normalizedConsumer);
+}
+
+export function getSnippetDependents(snippetPath) {
+  if (!snippetPath) return new Set();
+  const normalizedSnippet = normalizePath(snippetPath);
+  const dependents = snippetToConsumers.get(normalizedSnippet);
+  return new Set(dependents ?? []);
+}
 
 function executeJavascriptSnippet(code, filePath) {
   const logs = [];
@@ -46,6 +97,33 @@ function executePythonSnippet(code) {
   }
 }
 
+function parseMetaOptions(meta = '') {
+  const options = {};
+  const regex = /(\w+)=("[^"]*"|'[^']*'|[^\s]+)/g;
+  let match;
+  while ((match = regex.exec(meta)) !== null) {
+    const [, key, rawValue] = match;
+    options[key] = rawValue.replace(/^['"]|['"]$/g, '');
+  }
+  return options;
+}
+
+function loadSourceFromMeta(options, filePath) {
+  const sourcePath = options.src ?? options.source ?? options.file;
+  if (!sourcePath) return null;
+  const baseDir = filePath ? path.dirname(filePath) : process.cwd();
+  const resolvedPath = path.resolve(baseDir, sourcePath);
+  try {
+    const contents = fs.readFileSync(resolvedPath, 'utf8');
+    if (filePath) {
+      registerSnippetDependency(resolvedPath, filePath);
+    }
+    return { contents, resolvedPath };
+  } catch (error) {
+    throw new Error(`Failed to load snippet source "${sourcePath}": ${error.message}`);
+  }
+}
+
 function executeSnippet(code, filePath, language) {
   if (language === 'python' || language === 'py') {
     return executePythonSnippet(code);
@@ -55,14 +133,27 @@ function executeSnippet(code, filePath, language) {
 
 export default function remarkRunCode() {
   return function transformer(tree, file) {
+    const consumerPath = file?.path ? normalizePath(file.path) : undefined;
+    if (consumerPath) {
+      resetConsumerDependencies(consumerPath);
+    }
     visit(tree, 'code', (node, index, parent) => {
       if (!parent || typeof index !== 'number') return;
       const meta = node.meta ?? '';
       if (!meta.includes('run')) return;
+      const options = parseMetaOptions(meta);
       const language = node.lang ?? 'js';
       if (!['js', 'javascript', 'python', 'py'].includes(language)) return;
 
-      const { output, success } = executeSnippet(node.value, file?.path, language);
+      let snippetValue = node.value;
+      const sourceResult = loadSourceFromMeta(options, file?.path);
+      if (sourceResult) {
+        snippetValue = sourceResult.contents;
+        node.value = sourceResult.contents.replace(/\s+$/, '');
+      }
+
+      const sourcePathForContext = sourceResult?.resolvedPath ?? file?.path;
+      const { output, success } = executeSnippet(snippetValue, sourcePathForContext, language);
       if (!success) {
         const location = file?.path ? `${file.path}` : 'MDX snippet';
         throw new Error(

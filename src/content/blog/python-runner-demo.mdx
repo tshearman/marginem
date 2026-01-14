@@ -46,3 +46,10 @@ print("determinant:", round(det, 2))
 assert np.allclose(product, np.array([[4, 4], [10, 8]]))
 assert np.isclose(det, -8.0)
 ```
+
+Longer helpers can live as standalone Python modules that multiple posts import. Add `src=path/to/script.py` to the fenced block and the runner will read, display, and execute the file inline.
+
+```python run src="../../snippets/rolling_stats.py"
+```
+
+And some more text below to check the watcher.
