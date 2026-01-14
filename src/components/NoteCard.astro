@@ -10,8 +10,6 @@ interface Props {
 	date?: Date;
 	class?: string;
 	style?: string;
-	searchId?: string;
-	searchUrl?: string;
 	idOverride?: string;
 }
 
@@ -23,35 +21,24 @@ const {
 	date,
 	class: className,
 	style,
-	searchId,
-	searchUrl,
 	idOverride,
 } = Astro.props as Props;
 const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
-const interactive = Boolean(searchUrl);
 ---
 
 <article
-  class={`note-card ${className || ""} ${interactive ? "note-card--interactive" : ""}`}
+  class={`note-card ${className || ""}`}
   data-tags={JSON.stringify(tags)}
   id={noteId}
-  data-search-id={searchId ?? undefined}
-  data-search-url={searchUrl ?? undefined}
   style={style}
-  role={interactive ? "link" : undefined}
-  tabindex={interactive ? "0" : undefined}
 >
-  {
-    !interactive ? (
-      <a
-        class="note-card__anchor-link"
-        href={`#${noteId}`}
-        aria-label="Permalink to this note"
-      >
-        #
-      </a>
-    ) : null
-  }
+  <a
+    class="note-card__anchor-link"
+    href={`#${noteId}`}
+    aria-label="Permalink to this note"
+  >
+    #
+  </a>
   <div class="note-content-wrapper">
     <div class="note-content">
       <blockquote class="note-text">{content}</blockquote>
@@ -75,7 +62,7 @@ const interactive = Boolean(searchUrl);
       tags.length ? (
         <div class="note-tags">
           {tags.map((tagValue) => (
-            <Tag tag={tagValue} variant="filter" size="small" clickable={!interactive} />
+            <Tag tag={tagValue} variant="filter" size="small" />
           ))}
         </div>
       ) : null

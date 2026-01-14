@@ -98,45 +98,6 @@ const hybridListPosts = posts.slice(1);
     gap: 1rem;
   }
 
-  .stack-notes {
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-
-  .stack-note {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1.5rem 0;
-    position: relative;
-  }
-
-  .stack-note__meta {
-    text-align: right;
-    min-width: 11rem;
-    font-size: 0.85rem;
-    color: var(--muted);
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .stack-note__rule {
-    position: absolute;
-    left: 30%;
-    right: 30%;
-    height: 1px;
-    background: var(--border);
-    top: 0;
-  }
-
-  .stack-note__rule--bottom {
-    bottom: 0;
-    top: auto;
-  }
-
   @media (max-width: 760px) {
     .home-layout__lead-row {
       flex-direction: column;
@@ -148,13 +109,6 @@ const hybridListPosts = posts.slice(1);
     }
     .home-layout__posts {
       margin-top: 1rem;
-    }
-    .stack-note {
-      flex-direction: column;
-    }
-    .stack-note__meta {
-      text-align: left;
-      min-width: auto;
     }
   }
 

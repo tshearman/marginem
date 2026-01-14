@@ -25,6 +25,7 @@ const watchSnippets = () => ({
 			const absPath = path.resolve(filePath);
 			if (!absPath.startsWith(snippetsDir)) return;
 			const dependents = Array.from(getSnippetDependents(absPath));
+			if (!dependents.length) return;
 			for (const dependent of dependents) {
 				const modules = await server.moduleGraph.getModulesByFile(dependent);
 				if (modules) {

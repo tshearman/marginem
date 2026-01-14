@@ -219,11 +219,15 @@ function renderResults(container: HTMLElement, results: SearchItem[]) {
 }
 
 let searchRequestId = 0;
+let lastQuery = "";
 
 async function performSearch(query: string) {
 	const container = document.getElementById("search-results");
 	if (!(container instanceof HTMLElement)) return;
 	const trimmed = query.trim();
+	const dataLoaded = Boolean(SEARCH_STATE.data);
+	if (trimmed === lastQuery && dataLoaded) return;
+	lastQuery = trimmed;
 	if (!trimmed) {
 		renderPlaceholder(container, "Type to search the entire archive.");
 		return;
@@ -297,6 +301,7 @@ function closeSearch() {
 	modal.setAttribute("aria-hidden", "true");
 	document.body.classList.remove("search-locked");
 	input.value = "";
+	lastQuery = "";
 	renderPlaceholder(container, "Type to search the entire archive.");
 }
 

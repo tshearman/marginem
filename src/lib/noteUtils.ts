@@ -14,16 +14,6 @@ export const generateNoteId = ({
 	const baseContent = content || "";
 	const baseAuthor = author || "unknown";
 	const isoDate = date ? new Date(date).toISOString() : "";
-
-	const hashSource = `${baseContent}|${baseAuthor}|${isoDate}`;
-	let hash = 0;
-	for (let i = 0; i < hashSource.length; i++) {
-		const charCode = hashSource.charCodeAt(i);
-		hash = (hash << 5) - hash + charCode;
-		hash |= 0;
-	}
-
-	const hashHex = Math.abs(hash).toString(16).padStart(8, "0").slice(0, 8);
 	const slugify = (value: string, max = 30) =>
 		value
 			.toLowerCase()
@@ -34,6 +24,13 @@ export const generateNoteId = ({
 
 	const contentSlug = slugify(baseContent, 30);
 	const authorSlug = slugify(baseAuthor, 20);
-
+	const hashSource = `${baseContent}|${baseAuthor}|${isoDate}`;
+	let hash = 0;
+	for (let i = 0; i < hashSource.length; i++) {
+		const charCode = hashSource.charCodeAt(i);
+		hash = (hash << 5) - hash + charCode;
+		hash |= 0;
+	}
+	const hashHex = Math.abs(hash).toString(16).padStart(8, "0").slice(0, 8);
 	return `${contentSlug}-${authorSlug}-${hashHex}`;
 };

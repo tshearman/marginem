@@ -43,22 +43,8 @@ const excerptPreview = ellipsizeText(excerptSource, EXCERPT_LIMIT, {
     <div class="post-preview__section">
       {
         excerptPreview ? (
-          <>
-            <p
-              class="post-preview__excerpt"
-              data-default-excerpt={excerptPreview}
-              hidden={excerptPreview ? undefined : true}
-            >
-              {excerptPreview}
-            </p>
-          </>
-        ) : (
-          <p
-            class="post-preview__excerpt"
-            data-default-excerpt=""
-            hidden={true}
-          />
-        )
+          <p class="post-preview__excerpt">{excerptPreview}</p>
+        ) : null
       }
     </div>
     <div class="post-preview__meta">

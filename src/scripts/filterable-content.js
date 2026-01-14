@@ -62,6 +62,7 @@
 		const filterButtons = node.querySelectorAll(config.filterSelector);
 		const itemTagButtons = node.querySelectorAll(config.itemTagSelector);
 		const items = node.querySelectorAll(config.itemSelector);
+		const tagCache = new WeakMap();
 
 		if (!items.length) {
 			node.dataset.filterReady = "true";
@@ -72,10 +73,25 @@
 		const selected = getSelectedTags(stateKey);
 		const totalItems = items.length;
 
+		const getTagsForItem = (item) => {
+			if (tagCache.has(item)) return tagCache.get(item);
+			let tags = [];
+			try {
+				const parsed = JSON.parse(item.dataset.tags || "[]");
+				tags = Array.isArray(parsed)
+					? parsed.filter((tag) => typeof tag === "string" && tag.length > 0)
+					: [];
+			} catch {
+				tags = [];
+			}
+			tagCache.set(item, tags);
+			return tags;
+		};
+
 		const applyFilter = () => {
 			let visible = 0;
 			for (const item of items) {
-				const tags = JSON.parse(item.dataset.tags || "[]");
+				const tags = getTagsForItem(item);
 				const shouldShow =
 					selected.size === 0 || tags.some((tag) => tag && selected.has(tag));
 				if (shouldShow) {

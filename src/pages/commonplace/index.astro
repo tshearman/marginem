@@ -10,58 +10,57 @@ import { generateNoteId } from "../../lib/noteUtils";
 
 const notesCollection = await getCollection("notes");
 const allNotes: Array<{
-	content: string;
-	source?: string;
-	author?: string;
-	tags: string[];
-	date?: Date;
+  content: string;
+  source?: string;
+  author?: string;
+  tags: string[];
+  date?: Date;
 }> = [];
 
 for (const file of notesCollection) {
-	allNotes.push(
-		...file.data.map((entry) => ({
-			...entry,
-			tags: entry.tags ?? [],
-			date: entry.date ? new Date(entry.date) : undefined,
-		})),
-	);
+  allNotes.push(
+    ...file.data.map((entry) => ({
+      ...entry,
+      tags: entry.tags ?? [],
+      date: entry.date ? new Date(entry.date) : undefined,
+    })),
+  );
 }
 
 const sortedNotes = allNotes.sort((a, b) => {
-	if (!a.date && !b.date) return 0;
-	if (!a.date) return 1;
-	if (!b.date) return -1;
-	return b.date.getTime() - a.date.getTime();
+  if (!a.date && !b.date) return 0;
+  if (!a.date) return 1;
+  if (!b.date) return -1;
+  return b.date.getTime() - a.date.getTime();
 });
 
 const annotateColumnSpan = (contentLength: number) => {
-	if (contentLength > 400) return 3;
-	if (contentLength > 220) return 2;
-	if (contentLength > 140) return 2;
-	return 1;
+  if (contentLength > 460) return 3;
+  if (contentLength > 180) return 2;
+  return 1;
 };
 
 const notesWithGrid = sortedNotes.map((note) => ({
-	...note,
-	columnSpan: annotateColumnSpan(note.content.length),
-	noteId: generateNoteId({
-		content: note.content,
-		author: note.author,
-		tags: note.tags,
-		date: note.date,
-	}),
+  ...note,
+  columnSpan: annotateColumnSpan(note.content.length),
+  noteId: generateNoteId({
+    content: note.content,
+    author: note.author,
+    tags: note.tags,
+    date: note.date,
+  }),
 }));
 const allTags = [
-	...new Set(sortedNotes.flatMap((note) => note.tags || [])),
+  ...new Set(sortedNotes.flatMap((note) => note.tags || [])),
 ].sort((a, b) => a.localeCompare(b));
 const commonplaceFilterConfig = JSON.stringify({
-	filterSelector: ".tag-filter-container .tag--filter",
-	countId: "notesCount",
-	hintId: "notesClearHint",
-	itemSelector: ".note-section",
-	itemTagSelector: ".note-card .tag--filter",
-	stateKey: "commonplace-notes",
-	countLabel: "notes",
+  filterSelector: ".tag-filter-container .tag--filter",
+  countId: "notesCount",
+  hintId: "notesClearHint",
+  itemSelector: ".note-section",
+  itemTagSelector: ".note-card .tag--filter",
+  stateKey: "commonplace-notes",
+  countLabel: "notes",
 });
 ---
 
@@ -155,7 +154,7 @@ const commonplaceFilterConfig = JSON.stringify({
     grid-column: span 3 !important;
   }
 
-  @media (max-width: 760px) {
+  @media (max-width: 800px) {
     .content-layout {
       padding: 0;
     }
@@ -171,16 +170,6 @@ const commonplaceFilterConfig = JSON.stringify({
 
     .commonplace-count {
       padding: 0;
-    }
-  }
-
-  @media (min-width: 761px) and (max-width: 1200px) {
-    .notes-masonry {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    :global(.note-section.span-3) {
-      grid-column: span 2 !important;
     }
   }
 </style>
