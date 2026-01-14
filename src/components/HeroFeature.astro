@@ -54,9 +54,6 @@ const summary = ellipsizeText(description, 260);
     height: 100%;
     overflow: auto;
     min-height: 450px;
-    box-shadow:
-      0 6px 18px rgba(0, 0, 0, 0.28),
-      0 2px 8px rgba(0, 0, 0, 0.18);
   }
 
   .hero-feature__body {
@@ -130,5 +127,12 @@ const summary = ellipsizeText(description, 260);
     border-color: rgba(15, 23, 42, 0.2);
     color: rgba(15, 23, 42, 0.75);
     text-shadow: none;
+  }
+
+  .hero-feature--fallback :global(.tag:hover),
+  .hero-feature--fallback :global(.tag:focus-visible) {
+    background: rgba(15, 23, 42, 0.12);
+    border-color: rgba(15, 23, 42, 0.35);
+    color: rgba(15, 23, 42, 0.85);
   }
 </style>
