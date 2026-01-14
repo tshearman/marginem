@@ -1,7 +1,6 @@
 ---
 import PostPreview from "../components/PostPreview.astro";
 import HeroFeature from "../components/HeroFeature.astro";
-import FeaturedMarquee from "../components/FeaturedMarquee.astro";
 
 const { posts = [], formatDate } = Astro.props;
 const format = formatDate
@@ -24,9 +23,6 @@ const getAbstract = (post) => post.data.abstract ?? post.data.description ?? "";
 const hasPosts = posts.length > 0;
 const mostRecentPost = posts[0];
 const hybridListPosts = posts.slice(1, posts.length);
-const featuredPosts = posts.filter(
-  (post) => post?.data?.featured && post.slug !== mostRecentPost?.slug,
-);
 ---
 
 {
@@ -47,12 +43,7 @@ const featuredPosts = posts.filter(
             />
           </div>
         </div>
-        {featuredPosts.length ? (
-          <div class="home-layout__featured">
-            <p class="home-layout__featured-label">Featured</p>
-            <FeaturedMarquee posts={featuredPosts} formatDate={format} />
-          </div>
-        ) : null}
+        {/* Featured marquee temporarily disabled to avoid loading its scripts */}
         <div class="home-layout__posts">
           {hybridListPosts.map((post) => (
             <PostPreview
@@ -97,18 +88,6 @@ const featuredPosts = posts.filter(
     margin-top: 2rem;
     display: grid;
     gap: 1rem;
-  }
-
-  .home-layout__featured {
-    margin-top: 1rem;
-  }
-
-  .home-layout__featured-label {
-    margin: 0 0 0.5rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    color: var(--muted);
   }
 
   .stack-notes {
