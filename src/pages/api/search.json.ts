@@ -1,0 +1,117 @@
+import type { APIRoute } from "astro";
+import type { CollectionEntry } from "astro:content";
+import { getCollection } from "astro:content";
+import { generateNoteId } from "../../lib/noteUtils";
+import { ellipsizeText, normalizeWhitespace } from "../../lib/text";
+import { formatDate } from "../../lib/date";
+
+type SearchEntry = {
+	id: string;
+	kind: "post" | "note";
+	title: string;
+	url: string;
+	snippet: string;
+	tags: string[];
+	displayDate?: string;
+	pubDate?: string;
+	timestamp: number;
+	author?: string;
+	source?: string;
+	searchText: string;
+};
+
+const stripFormatting = (value = "") =>
+	value
+		.replace(/[#>*_`[\]\\]/g, " ")
+		.replace(/\s+/g, " ")
+		.trim();
+
+const toSearchText = (segments: Array<string | undefined>) =>
+	segments
+		.map((segment) =>
+			segment ? normalizeWhitespace(segment).toLowerCase() : "",
+		)
+		.filter(Boolean)
+		.join(" ");
+
+type BlogEntry = CollectionEntry<"blog">;
+type NotesFile = CollectionEntry<"notes">;
+type NoteEntry = NotesFile["data"][number];
+
+const buildPostEntries = (posts: BlogEntry[]) =>
+	posts.map((post) => {
+		const tags = post.data.tags ?? [];
+		const pubDate = post.data.pubDate ?? null;
+		const snippetSource =
+			post.data.abstract ??
+			post.data.description ??
+			stripFormatting(post.body ?? "");
+		return {
+			id: post.slug,
+			kind: "post" as const,
+			title: post.data.title,
+			url: `/posts/${post.slug}/`,
+			snippet: ellipsizeText(snippetSource, 240, { alwaysAppend: true }),
+			tags,
+			displayDate: pubDate ? formatDate(pubDate) : "",
+			pubDate: pubDate ? pubDate.toISOString() : "",
+			timestamp: pubDate ? pubDate.getTime() : 0,
+			searchText: toSearchText([
+				post.data.title,
+				post.data.description,
+				post.data.abstract,
+				post.body ?? "",
+				tags.join(" "),
+			]),
+		};
+	});
+
+const buildNoteEntries = (notesCollection: NotesFile[]) =>
+	notesCollection.flatMap((file) =>
+		file.data.map((entry: NoteEntry) => {
+			const noteDate = entry.date ? new Date(entry.date) : undefined;
+			const tags = entry.tags ?? [];
+			const id = generateNoteId({
+				content: entry.content,
+				author: entry.author,
+				tags,
+				date: noteDate,
+			});
+			return {
+				id,
+				kind: "note" as const,
+				title: entry.author ?? "Commonplace note",
+				url: `/commonplace/#${id}`,
+				snippet: ellipsizeText(entry.content, 220, { alwaysAppend: true }),
+				tags,
+				displayDate: noteDate ? formatDate(noteDate) : "",
+				pubDate: noteDate ? noteDate.toISOString() : "",
+				timestamp: noteDate ? noteDate.getTime() : 0,
+				author: entry.author,
+				source: entry.source,
+				searchText: toSearchText([
+					entry.content,
+					entry.author,
+					entry.source,
+					tags.join(" "),
+				]),
+			};
+		}),
+	);
+
+export const GET: APIRoute = async () => {
+	const [posts, notes] = await Promise.all([
+		getCollection("blog", ({ data }) => !data.draft),
+		getCollection("notes"),
+	]);
+	const postEntries = buildPostEntries(posts);
+	const noteEntries = buildNoteEntries(notes);
+	const payload: SearchEntry[] = [...postEntries, ...noteEntries];
+
+	return new Response(JSON.stringify(payload), {
+		headers: {
+			"Content-Type": "application/json",
+			"Cache-Control": "public, max-age=3600",
+		},
+	});
+};

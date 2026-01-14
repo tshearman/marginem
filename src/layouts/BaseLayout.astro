@@ -2,70 +2,23 @@
 import "../styles/global.css";
 import "katex/dist/katex.min.css";
 import SiteNav from "../components/SiteNav.astro";
-import PostPreview from "../components/PostPreview.astro";
-import NoteCard from "../components/NoteCard.astro";
-import { getCollection } from "astro:content";
 import footnoteScript from "../scripts/init-footnotes.js?url";
-import { generateNoteId } from "../lib/noteUtils";
+
+interface BaseLayoutProps {
+	title?: string;
+	description?: string;
+	hero?: string;
+	showHero?: boolean;
+	includeFootnotes?: boolean;
+}
 
 const {
 	title = "Notebook",
 	description = "Explorations in math, code, and visualization",
 	hero = "Notebook",
 	showHero = true,
-} = Astro.props;
-
-const posts = await getCollection("blog", ({ data }) => !data.draft);
-const notesCollection = await getCollection("notes");
-const searchDateFormatter = new Intl.DateTimeFormat("en", {
-	month: "short",
-	day: "numeric",
-	year: "numeric",
-});
-const postEntries = posts.map((post) => {
-	const pubDate = post.data.pubDate ?? null;
-	const isoDate = pubDate ? pubDate.toISOString() : "";
-	const abstract = post.data.abstract ?? post.data.description ?? "";
-	return {
-		kind: "post" as const,
-		id: post.slug,
-		title: post.data.title,
-		description: post.data.description ?? "",
-		abstract,
-		pubDate: isoDate,
-		displayDate: pubDate ? searchDateFormatter.format(pubDate) : "",
-		tags: post.data.tags ?? [],
-		url: `/posts/${post.slug}/`,
-		content: post.body ?? "",
-	};
-});
-const flattenedNotes = notesCollection.flatMap((file) =>
-	file.data.map((entry) => {
-		const noteDate = entry.date ? new Date(entry.date) : undefined;
-		const id = generateNoteId({
-			content: entry.content,
-			author: entry.author,
-			tags: entry.tags,
-			date: noteDate,
-		});
-		return {
-			kind: "note" as const,
-			id,
-			title: entry.author ?? "Commonplace note",
-			description: entry.source ?? "",
-			abstract: "",
-			content: entry.content,
-			tags: entry.tags ?? [],
-			pubDate: noteDate ? noteDate.toISOString() : "",
-			displayDate: noteDate ? searchDateFormatter.format(noteDate) : "",
-			url: `/commonplace/#${id}`,
-			author: entry.author,
-			source: entry.source,
-		};
-	}),
-);
-const searchEntries = [...postEntries, ...flattenedNotes];
-const searchDataJson = JSON.stringify(searchEntries);
+	includeFootnotes = false,
+} = Astro.props as BaseLayoutProps;
 ---
 
 <!doctype html>
@@ -78,48 +31,12 @@ const searchDataJson = JSON.stringify(searchEntries);
     <link rel="icon" href="/favicon.ico" />
   </head>
   <body>
-    <div
-      id="search-data"
-      data-search-data={searchDataJson}
-      hidden
-      aria-hidden="true"
-    >
-    </div>
-    <div id="search-result-store" hidden aria-hidden="true">
-      {
-        searchEntries.map((entry) =>
-          entry.kind === "note" ? (
-            <NoteCard
-              content={entry.content}
-              source={entry.source}
-              author={entry.author}
-              tags={entry.tags}
-              date={entry.pubDate ? new Date(entry.pubDate) : undefined}
-              searchId={entry.id}
-              searchUrl={entry.url}
-              idOverride={`search-${entry.id}`}
-            />
-          ) : (
-            <PostPreview
-              id={entry.id}
-              title={entry.title}
-              url={entry.url}
-              pubDate={entry.pubDate}
-              displayDate={entry.displayDate}
-              description={entry.description}
-              abstract={entry.abstract}
-              tags={entry.tags}
-            />
-          ),
-        )
-      }
-    </div>
     <SiteNav />
     <main class="site-main">
       {
         showHero && (
           <header class="site-header">
-            <p>{description}</p>
+            <p class="eyebrow-text">{description}</p>
             <h1>{hero}</h1>
           </header>
         )
@@ -127,7 +44,9 @@ const searchDataJson = JSON.stringify(searchEntries);
       <slot />
       <footer class="site-footer"></footer>
     </main>
-    <script type="module" is:inline src={footnoteScript}></script>
+    {includeFootnotes ? (
+      <script type="module" is:inline src={footnoteScript}></script>
+    ) : null}
   </body>
 </html>
 
@@ -137,16 +56,7 @@ const searchDataJson = JSON.stringify(searchEntries);
     margin: 0 auto;
     padding: 2.25rem 1.5rem 3rem;
     background: #fff;
-    border: 0px solid var(--border);
-    /* box-shadow: 0 18px 45px rgba(0, 0, 0, 0.04); */
-  }
-
-  .site-header p {
-    margin: 0;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    color: var(--muted);
+    border: 0;
   }
 
   .site-header h1 {

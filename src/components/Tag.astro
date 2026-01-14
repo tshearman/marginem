@@ -6,7 +6,6 @@ interface Props {
 	size?: "small" | "medium" | "large";
 	selected?: boolean;
 	clickable?: boolean;
-	has_image_background?: boolean;
 	asLink?: boolean;
 }
 
@@ -17,7 +16,6 @@ const {
 	size = "medium",
 	selected = false,
 	clickable = true,
-	has_image_background = false,
 	asLink = false,
 } = Astro.props as Props;
 
@@ -25,12 +23,7 @@ const label = tag?.trim() ?? "";
 const url =
 	href ??
 	(label ? `/tags/${encodeURIComponent(label.toLowerCase())}/` : undefined);
-const classes = [
-	"tag",
-	`tag--${variant}`,
-	`tag--${size}`,
-	has_image_background ? "tag--on-dark" : "",
-]
+const classes = ["tag", `tag--${variant}`, `tag--${size}`]
 	.filter(Boolean)
 	.join(" ");
 const dataAttrs = {
@@ -63,76 +56,3 @@ const shouldRenderFilterButton =
     )
   ) : null
 }
-
-<style>
-  .tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.15rem 0.55rem;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    margin: 0 0.5rem 0.4rem 0;
-    font-size: 0.8rem;
-    text-transform: lowercase;
-    color: var(--fg);
-    background: rgba(0, 0, 0, 0.03);
-    font-family: inherit;
-    line-height: 1.2;
-    cursor: pointer;
-    transition:
-      background-color 0.2s ease,
-      color 0.2s ease;
-  }
-
-  .tag--small {
-    font-size: 0.75rem;
-    padding: 0.1rem 0.45rem;
-  }
-
-  .tag--large {
-    font-size: 0.9rem;
-    padding: 0.2rem 0.75rem;
-  }
-
-  .tag--filter {
-    border-color: rgba(15, 23, 42, 0.12);
-    background: rgba(15, 23, 42, 0.05);
-    text-transform: none;
-  }
-
-  .tag--filter[data-selected="true"] {
-    background: rgba(15, 23, 42, 0.85);
-    color: #fff;
-    border-color: rgba(15, 23, 42, 0.85);
-  }
-
-  .tag--filter[data-selected="true"]:hover {
-    background: rgba(15, 23, 42, 0.85);
-  }
-
-  .tag--filter:hover,
-  .tag--default:hover {
-    background: rgba(15, 23, 42, 0.12);
-  }
-
-  .tag--display {
-    background: rgba(15, 23, 42, 0.02);
-    font-size: 0.75rem;
-    margin: 0 0.35rem;
-    text-transform: none;
-  }
-
-  .tag--on-dark {
-    background: rgba(0, 0, 0, 0.65);
-    color: rgba(255, 255, 255, 0.95);
-    border-color: rgba(255, 255, 255, 0.65);
-    text-shadow:
-      0 0 4px rgba(0, 0, 0, 0.85),
-      0 0 12px rgba(0, 0, 0, 0.8);
-  }
-
-  a.tag {
-    text-decoration: none;
-  }
-</style>

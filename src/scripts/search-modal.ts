@@ -1,21 +1,25 @@
+const SEARCH_INDEX_URL = "/api/search.json";
+const MAX_RESULTS = 20;
+
 type SearchItem = {
 	id: string;
 	title: string;
-	description?: string;
-	abstract?: string;
-	content?: string;
+	snippet: string;
 	tags?: string[];
 	pubDate?: string;
 	displayDate?: string;
-	url?: string;
-	kind?: "post" | "note";
+	url: string;
+	kind: "post" | "note";
 	author?: string;
 	source?: string;
+	searchText: string;
+	timestamp: number;
 };
 
 type SearchState = {
 	data?: SearchItem[];
-	cardMap?: Map<string, HTMLElement>;
+	loadPromise?: Promise<SearchItem[]>;
+	error?: string;
 	cleanup?: (() => void) | null;
 };
 
@@ -23,56 +27,36 @@ const SEARCH_STATE: SearchState =
 	(window.__siteSearchState as SearchState | undefined) ?? {};
 window.__siteSearchState = SEARCH_STATE;
 
-function loadSearchData(): SearchItem[] {
+async function fetchSearchIndex() {
+	const response = await fetch(SEARCH_INDEX_URL, { cache: "force-cache" });
+	if (!response.ok) {
+		throw new Error(`Search index responded with ${response.status}`);
+	}
+	const payload = (await response.json()) as SearchItem[];
+	return Array.isArray(payload) ? payload : [];
+}
+
+function loadSearchData(): Promise<SearchItem[]> {
 	if (SEARCH_STATE.data) {
-		return SEARCH_STATE.data;
+		return Promise.resolve(SEARCH_STATE.data);
 	}
-	const el = document.getElementById("search-data");
-	if (!el) return [];
-	const raw = el.getAttribute("data-search-data");
-	if (!raw) return [];
-	try {
-		const parsed = JSON.parse(raw) as SearchItem[];
-		SEARCH_STATE.data = Array.isArray(parsed) ? parsed : [];
-	} catch (error) {
-		console.error("[search] Failed to parse search data", error);
-		SEARCH_STATE.data = [];
+	if (!SEARCH_STATE.loadPromise) {
+		SEARCH_STATE.loadPromise = fetchSearchIndex()
+			.then((items) => {
+				SEARCH_STATE.data = items;
+				SEARCH_STATE.error = undefined;
+				return items;
+			})
+			.catch((error) => {
+				console.error("[search] Failed to load search data", error);
+				SEARCH_STATE.error = "Search data failed to load.";
+				return [];
+			})
+			.finally(() => {
+				SEARCH_STATE.loadPromise = undefined;
+			});
 	}
-	return SEARCH_STATE.data;
-}
-
-function formatDate(value?: string) {
-	if (!value) return "";
-	try {
-		return new Intl.DateTimeFormat("en", {
-			month: "short",
-			day: "numeric",
-			year: "numeric",
-		}).format(new Date(value));
-	} catch {
-		return value;
-	}
-}
-
-function ellipsize(text: string, limit = 220) {
-	if (!text) return "";
-	const normalized = text.replace(/\s+/g, " ").trim();
-	if (!normalized) return "";
-	const truncated =
-		normalized.length > limit ? normalized.slice(0, limit) : normalized;
-	return `${truncated.replace(/[\s.,;:!-]+$/g, "")}…`;
-}
-
-function getSnippet(item: SearchItem) {
-	if (item.abstract) return ellipsize(item.abstract);
-	if (item.description) return ellipsize(item.description);
-	if (item.content) {
-		const sanitized = item.content
-			.replace(/[#>*_`[\]\\]/g, " ")
-			.replace(/\s+/g, " ");
-		return ellipsize(sanitized);
-	}
-	return "";
+	return SEARCH_STATE.loadPromise;
 }
 
 function renderPlaceholder(
@@ -87,143 +71,195 @@ function renderPlaceholder(
 	container.appendChild(wrapper);
 }
 
-function ensureCardStore() {
-	if (SEARCH_STATE.cardMap) return;
-	const store = document.getElementById("search-result-store");
-	const map = new Map<string, HTMLElement>();
-	if (store) {
-		for (const node of store.querySelectorAll<HTMLElement>(
-			"[data-search-id]",
-		)) {
-			const id = node.getAttribute("data-search-id");
-			if (id) map.set(id, node);
-		}
+type TagVariant = "default" | "filter" | "display";
+type TagSize = "small" | "medium" | "large" | "";
+
+function createTag(
+	label: string,
+	variant: TagVariant = "default",
+	size: TagSize = "",
+) {
+	const chip = document.createElement("span");
+	const classes = ["tag"];
+	if (size && size !== "medium") {
+		classes.push(`tag--${size}`);
 	}
-	SEARCH_STATE.cardMap = map;
+	if (variant !== "default") {
+		classes.push(`tag--${variant}`);
+	}
+	chip.className = classes.filter(Boolean).join(" ");
+	chip.textContent = `#${label}`;
+	chip.setAttribute("data-tag", label);
+	return chip;
 }
 
-function cloneCard(id: string) {
-	ensureCardStore();
-	const source = SEARCH_STATE.cardMap?.get(id);
-	if (!source) return null;
-	return source.cloneNode(true) as HTMLElement;
+function renderPostResult(item: SearchItem) {
+	const article = document.createElement("article");
+	article.className = "post-preview";
+
+	const body = document.createElement("div");
+	body.className = "post-preview__body";
+
+	const title = document.createElement("h3");
+	title.className = "post-preview__title";
+	const link = document.createElement("a");
+	link.href = item.url;
+	link.className = "post-preview__link";
+	link.textContent = item.title;
+	title.appendChild(link);
+	body.appendChild(title);
+
+	const authors = document.createElement("div");
+	authors.className = "post-preview__authors";
+	if (item.displayDate) {
+		const time = document.createElement("time");
+		time.dateTime = item.pubDate ?? "";
+		time.textContent = item.displayDate;
+		authors.appendChild(time);
+	}
+	body.appendChild(authors);
+
+	const section = document.createElement("div");
+	section.className = "post-preview__section";
+	const excerpt = document.createElement("p");
+	excerpt.className = "post-preview__excerpt";
+	if (item.snippet) {
+		excerpt.textContent = item.snippet;
+		excerpt.hidden = false;
+	} else {
+		excerpt.hidden = true;
+	}
+	section.appendChild(excerpt);
+	body.appendChild(section);
+
+	const meta = document.createElement("div");
+	meta.className = "post-preview__meta";
+	if (item.tags?.length) {
+		for (const tag of item.tags) {
+			if (!tag) continue;
+			meta.appendChild(createTag(tag));
+		}
+	} else {
+		const placeholder = document.createElement("span");
+		placeholder.className = "post-preview__meta-empty";
+		placeholder.textContent = "Research Notes";
+		meta.appendChild(placeholder);
+	}
+	body.appendChild(meta);
+
+	article.appendChild(body);
+	return article;
 }
 
-function hydrateCard(node: HTMLElement | null, item: SearchItem) {
-	if (!node) return null;
-	const meta = node.querySelector<HTMLElement>(".post-preview__meta");
-	if (meta) {
+function renderNoteResult(item: SearchItem) {
+	const link = document.createElement("a");
+	link.className = "note-card note-card--interactive";
+	link.href = item.url;
+
+	const wrapper = document.createElement("div");
+	wrapper.className = "note-content-wrapper";
+
+	const content = document.createElement("div");
+	content.className = "note-content";
+
+	const blockquote = document.createElement("blockquote");
+	blockquote.className = "note-text";
+	blockquote.textContent = item.snippet || item.title || "";
+	content.appendChild(blockquote);
+
+	const attribution = document.createElement("div");
+	attribution.className = "note-attribution";
+	if (item.author) {
+		const author = document.createElement("div");
+		author.className = "note-author";
+		author.textContent = item.author;
+		attribution.appendChild(author);
+	}
+	if (item.source) {
+		const source = document.createElement("div");
+		source.className = "note-source";
+		source.textContent = item.source;
+		attribution.appendChild(source);
+	}
+	if (item.displayDate) {
+		const time = document.createElement("time");
+		time.className = "note-date";
+		time.textContent = item.displayDate;
 		if (item.pubDate) {
-			meta.setAttribute("datetime", item.pubDate);
-		} else {
-			meta.removeAttribute("datetime");
+			time.dateTime = item.pubDate;
 		}
-		const defaultDisplay = meta.getAttribute("data-default-display") || "";
-		const displayText = defaultDisplay || formatDate(item.pubDate);
-		meta.textContent = displayText;
-		meta.style.fontStyle = "italic";
+		attribution.appendChild(time);
 	}
-	const excerpt = node.querySelector<HTMLElement>(".post-preview__excerpt");
-	if (excerpt) {
-		const defaultSnippet = excerpt.getAttribute("data-default-excerpt") || "";
-		const snippet = getSnippet(item) || defaultSnippet;
-		if (snippet) {
-			excerpt.textContent = snippet;
-			excerpt.hidden = false;
-		} else {
-			excerpt.textContent = "";
-			excerpt.hidden = true;
+	content.appendChild(attribution);
+	wrapper.appendChild(content);
+
+	if (item.tags?.length) {
+		const tagList = document.createElement("div");
+		tagList.className = "note-tags";
+		for (const tag of item.tags) {
+			if (!tag) continue;
+			tagList.appendChild(createTag(tag, "filter", "small"));
 		}
+		wrapper.appendChild(tagList);
 	}
-	return node;
+
+	link.appendChild(wrapper);
+	return link;
 }
 
 function renderResults(container: HTMLElement, results: SearchItem[]) {
 	container.innerHTML = "";
 	const fragment = document.createDocumentFragment();
 	for (const item of results) {
-		const card = hydrateCard(cloneCard(item.id), item);
-		if (card) {
-			fragment.appendChild(card);
-		}
+		const node =
+			item.kind === "note" ? renderNoteResult(item) : renderPostResult(item);
+		fragment.appendChild(node);
 	}
 	container.appendChild(fragment);
 }
 
-function activateNoteCard(card: HTMLElement) {
-	const url = card.getAttribute("data-search-url");
-	if (!url) return;
-	closeSearch();
-	window.location.href = url;
-}
+let searchRequestId = 0;
 
-function ensureNoteCardDelegation(container: HTMLElement) {
-	if (container.dataset.noteDelegation === "true") {
-		return;
-	}
-
-	const clickHandler = (event: Event) => {
-		const target = event.target as HTMLElement | null;
-		const card = target?.closest<HTMLElement>(".note-card[data-search-url]");
-		if (!card) return;
-		event.preventDefault();
-		activateNoteCard(card);
-	};
-
-	const keyHandler = (event: Event) => {
-		if (!(event instanceof KeyboardEvent)) return;
-		if (event.key !== "Enter" && event.key !== " ") return;
-		const target = event.target as HTMLElement | null;
-		const card = target?.closest<HTMLElement>(".note-card[data-search-url]");
-		if (!card) return;
-		event.preventDefault();
-		activateNoteCard(card);
-	};
-
-	container.addEventListener("click", clickHandler);
-	container.addEventListener("keydown", keyHandler);
-	container.dataset.noteDelegation = "true";
-}
-
-function performSearch(query: string) {
+async function performSearch(query: string) {
 	const container = document.getElementById("search-results");
 	if (!(container instanceof HTMLElement)) return;
-	if (!query.trim()) {
+	const trimmed = query.trim();
+	if (!trimmed) {
 		renderPlaceholder(container, "Type to search the entire archive.");
 		return;
 	}
 
-	const data = loadSearchData();
-	if (!data.length) {
-		renderPlaceholder(container, "Search data is still loading…");
+	const currentRequest = ++searchRequestId;
+	const term = trimmed.toLowerCase();
+	if (!SEARCH_STATE.data && !SEARCH_STATE.error) {
+		renderPlaceholder(container, "Loading search index…");
+	}
+
+	const data = await loadSearchData();
+	if (currentRequest !== searchRequestId) {
 		return;
 	}
 
-	const term = query.toLowerCase();
+	if (SEARCH_STATE.error) {
+		renderPlaceholder(
+			container,
+			"Search data failed to load. Please try again later.",
+			"search-modal__empty",
+		);
+		return;
+	}
+
 	const matches = data
-		.filter((item) => {
-			const haystacks = [
-				item.title,
-				item.description,
-				item.content,
-				...(item.tags || []),
-			]
-				.filter(Boolean)
-				.map((value) => String(value).toLowerCase());
-			return haystacks.some((haystack) => haystack.includes(term));
-		})
-		.sort((a, b) => {
-			const aDate = a.pubDate ? new Date(a.pubDate).getTime() : 0;
-			const bDate = b.pubDate ? new Date(b.pubDate).getTime() : 0;
-			return bDate - aDate;
-		});
+		.filter((item) => item.searchText.includes(term))
+		.sort((a, b) => b.timestamp - a.timestamp)
+		.slice(0, MAX_RESULTS);
 
 	if (!matches.length) {
 		renderPlaceholder(container, "No matches found.", "search-modal__empty");
 		return;
 	}
 
-	renderResults(container, matches.slice(0, 20));
+	renderResults(container, matches);
 }
 
 function openSearch() {
@@ -236,7 +272,7 @@ function openSearch() {
 	modal.removeAttribute("hidden");
 	modal.setAttribute("aria-hidden", "false");
 	document.body.classList.add("search-locked");
-	loadSearchData();
+	void loadSearchData();
 	requestAnimationFrame(() => {
 		input.focus();
 		input.select();
@@ -292,9 +328,7 @@ function setupSearch() {
 		return;
 	}
 
-	ensureNoteCardDelegation(results);
-	loadSearchData();
-	ensureCardStore();
+	void loadSearchData();
 
 	let debounce: number | undefined;
 
@@ -302,7 +336,9 @@ function setupSearch() {
 		const target = event.target as HTMLInputElement | null;
 		const query = target?.value ?? "";
 		if (debounce) clearTimeout(debounce);
-		debounce = window.setTimeout(() => performSearch(query), 220);
+		debounce = window.setTimeout(() => {
+			void performSearch(query);
+		}, 220);
 	};
 
 	const keyHandler = (event: KeyboardEvent) => {
@@ -335,11 +371,18 @@ function setupSearch() {
 	const triggerHandler = () => openSearch();
 	const overlayHandler = () => closeSearch();
 	const closeHandler = () => closeSearch();
+	const resultClickHandler = (event: Event) => {
+		const target = event.target as HTMLElement | null;
+		const link = target?.closest<HTMLAnchorElement>("a[href]");
+		if (!link) return;
+		closeSearch();
+	};
 
 	trigger.addEventListener("click", triggerHandler);
 	overlay.addEventListener("click", overlayHandler);
 	closeButton.addEventListener("click", closeHandler);
 	input.addEventListener("input", inputHandler);
+	results.addEventListener("click", resultClickHandler);
 	document.addEventListener("keydown", keyHandler);
 
 	SEARCH_STATE.cleanup = () => {
@@ -347,6 +390,7 @@ function setupSearch() {
 		overlay.removeEventListener("click", overlayHandler);
 		closeButton.removeEventListener("click", closeHandler);
 		input.removeEventListener("input", inputHandler);
+		results.removeEventListener("click", resultClickHandler);
 		document.removeEventListener("keydown", keyHandler);
 	};
 }

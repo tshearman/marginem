@@ -1,14 +1,15 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
 import TagList from "../components/TagList.astro";
+import { formatDate } from "../lib/date";
 
 const { frontmatter } = Astro.props;
 const formattedDate = frontmatter?.pubDate
-	? new Intl.DateTimeFormat("en", {
+	? formatDate(frontmatter.pubDate, {
 			month: "long",
 			day: "numeric",
 			year: "numeric",
-		}).format(frontmatter.pubDate)
+		})
 	: "";
 const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
 ---
@@ -18,6 +19,7 @@ const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
   description={frontmatter.description}
   hero={frontmatter.title}
   showHero={false}
+  includeFootnotes={true}
 >
   <section class="paper-title">
     <div class="paper-title__rule paper-title__rule--thick" aria-hidden="true">
@@ -32,7 +34,12 @@ const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
     {
       frontmatter.tags?.length ? (
         <div class="paper-title__tags">
-          <TagList tags={frontmatter.tags} align="center" linkToTags />
+          <TagList
+            tags={frontmatter.tags}
+            align="center"
+            linkToTags
+            variant="default"
+          />
         </div>
       ) : null
     }

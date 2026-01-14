@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import PostPreview from "../components/PostPreview.astro";
 import HeroFeature from "../components/HeroFeature.astro";
+import { formatDate as formatDateHelper } from "../lib/date";
 
 type BlogEntry = CollectionEntry<"blog">;
 interface Props {
@@ -9,15 +10,10 @@ interface Props {
 	formatDate?: (date: Date) => string;
 }
 
-const { posts = [], formatDate } = Astro.props as Props;
-const format = formatDate
-	? (date: Date) => formatDate(date)
-	: (date: Date) =>
-			new Intl.DateTimeFormat("en", {
-				month: "short",
-				day: "numeric",
-				year: "numeric",
-			}).format(date);
+const { posts = [], formatDate: customFormatDate } = Astro.props as Props;
+const format =
+	customFormatDate ??
+	((date: Date) => formatDateHelper(date));
 
 const heroImage = (post: BlogEntry | undefined) =>
 	post?.data?.heroImage ?? null;

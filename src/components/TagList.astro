@@ -5,10 +5,18 @@ interface Props {
 	tags?: string[];
 	align?: "start" | "center" | "end";
 	linkToTags?: boolean;
+	variant?: "default" | "filter" | "display";
 }
 
-const { tags = [], align = "start", linkToTags = false } = Astro.props as Props;
+const {
+	tags = [],
+	align = "start",
+	linkToTags,
+	variant = "display",
+} = Astro.props as Props;
 const normalized = tags.filter(Boolean);
+const shouldLinkToTags =
+	typeof linkToTags === "boolean" ? linkToTags : variant !== "filter";
 const alignmentClass =
 	align === "center"
 		? "tag-list--center"
@@ -21,26 +29,8 @@ const alignmentClass =
   normalized.length ? (
     <p class={`tag-list ${alignmentClass}`}>
       {normalized.map((tag) => (
-        <Tag tag={tag} variant="filter" asLink={linkToTags} />
+        <Tag tag={tag} variant={variant} asLink={shouldLinkToTags} />
       ))}
     </p>
   ) : null
 }
-
-<style>
-  .tag-list {
-    margin: 0.5rem 0 0.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    justify-content: flex-start;
-  }
-
-  .tag-list--center {
-    justify-content: center;
-  }
-
-  .tag-list--end {
-    justify-content: flex-end;
-  }
-</style>

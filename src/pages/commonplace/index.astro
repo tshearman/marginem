@@ -55,10 +55,11 @@ const allTags = [
 	...new Set(sortedNotes.flatMap((note) => note.tags || [])),
 ].sort((a, b) => a.localeCompare(b));
 const commonplaceFilterConfig = JSON.stringify({
+	filterSelector: ".tag-filter-container .tag--filter",
 	countId: "notesCount",
 	hintId: "notesClearHint",
 	itemSelector: ".note-section",
-	itemTagSelector: ".note-card .tag--display",
+	itemTagSelector: ".note-card .tag--filter",
 	stateKey: "commonplace-notes",
 	countLabel: "notes",
 });

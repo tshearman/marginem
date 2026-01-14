@@ -3,21 +3,21 @@ import TagList from "./TagList.astro";
 import { ellipsizeText } from "../lib/text";
 
 interface Props {
-	title: string;
-	url: string;
-	dateLabel?: string;
-	description?: string;
-	tags?: string[];
-	backgroundImage?: string | null;
+  title: string;
+  url: string;
+  dateLabel?: string;
+  description?: string;
+  tags?: string[];
+  backgroundImage?: string | null;
 }
 
 const {
-	title,
-	url,
-	dateLabel = "",
-	description = "",
-	tags = [],
-	backgroundImage = null,
+  title,
+  url,
+  dateLabel = "",
+  description = "",
+  tags = [],
+  backgroundImage = null,
 } = Astro.props as Props;
 
 const summary = ellipsizeText(description, 260);
@@ -54,6 +54,9 @@ const summary = ellipsizeText(description, 260);
     height: 100%;
     overflow: auto;
     min-height: 450px;
+    box-shadow:
+      0 6px 18px rgba(0, 0, 0, 0.28),
+      0 2px 8px rgba(0, 0, 0, 0.18);
   }
 
   .hero-feature__body {

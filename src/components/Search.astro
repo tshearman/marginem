@@ -283,18 +283,16 @@ import searchScript from "../scripts/search-modal.ts?url";
     font-size: 0.95rem;
   }
 
-  :global(.post-preview) {
-    border: 1px solid var(--border);
-    border-radius: 0;
-    background: #fff;
-    padding: 0;
-  }
-
   .search-modal :global(.note-card--interactive:hover),
   .search-modal :global(.note-card--interactive:focus-visible) {
     box-shadow: none;
     transform: none;
     outline: none;
+  }
+
+  .search-modal :global(.tag--filter:hover),
+  .search-modal :global(.tag--default:hover) {
+    background: rgba(15, 23, 42, 0.05);
   }
 
   :global(body.search-locked) {

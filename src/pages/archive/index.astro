@@ -33,10 +33,11 @@ const allTags = [
 ].sort((a, b) => a.localeCompare(b));
 
 const archiveFilterConfig = JSON.stringify({
+	filterSelector: ".tag-filter-container .tag--filter",
 	countId: "postsCount",
 	hintId: "postsClearHint",
 	itemSelector: ".archive-entry",
-	itemTagSelector: ".archive-entry .tag--display",
+	itemTagSelector: ".archive-entry .tag--filter",
 	stateKey: "archive-posts",
 	countLabel: "posts",
 });
