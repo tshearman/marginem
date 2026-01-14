@@ -3,21 +3,21 @@ import TagList from "./TagList.astro";
 import { ellipsizeText } from "../lib/text";
 
 interface Props {
-  title: string;
-  url: string;
-  dateLabel?: string;
-  description?: string;
-  tags?: string[];
-  backgroundImage?: string | null;
+	title: string;
+	url: string;
+	dateLabel?: string;
+	description?: string;
+	tags?: string[];
+	backgroundImage?: string | null;
 }
 
 const {
-  title,
-  url,
-  dateLabel = "",
-  description = "",
-  tags = [],
-  backgroundImage = null,
+	title,
+	url,
+	dateLabel = "",
+	description = "",
+	tags = [],
+	backgroundImage = null,
 } = Astro.props as Props;
 
 const summary = ellipsizeText(description, 260);

@@ -18,7 +18,7 @@ export const ellipsizeText = (
 	if (!normalized) return "";
 	const limited =
 		normalized.length > limit ? normalized.slice(0, limit).trim() : normalized;
-	const cleaned = limited.replace(/[\s.,;:!-]+$/u, "");
 	const shouldAppend = normalized.length > limit || alwaysAppend;
+	const cleaned = shouldAppend ? limited.replace(/[\s.,;:!-]+$/u, "") : limited;
 	return shouldAppend ? `${cleaned}…` : cleaned;
 };

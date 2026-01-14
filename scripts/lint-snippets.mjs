@@ -285,7 +285,20 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+function isDirectRun() {
+  try {
+    if (!process.argv?.[1]) return false;
+    return new URL(process.argv[1], "file://").href === import.meta.url;
+  } catch {
+    return false;
+  }
+}
+
+if (isDirectRun()) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}
+
+export { normalizeLanguage, parseMeta, extractCodeBlocks };

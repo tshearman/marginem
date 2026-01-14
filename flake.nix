@@ -42,6 +42,13 @@
             export NODE_OPTIONS="--enable-source-maps --trace-warnings"
             export PATH="$PWD/node_modules/.bin:$PATH"
 
+            if [ -f package-lock.json ]; then
+              if [ ! -d node_modules ] || [ package-lock.json -nt node_modules ]; then
+                echo "Installing npm dependencies..." >&2
+                npm install || echo "npm install failed; rerun manually to inspect the error." >&2
+              fi
+            fi
+
             if command -v uv >/dev/null 2>&1 && [ -f pyproject.toml ]; then
               export UV_CACHE_DIR="''${UV_CACHE_DIR:-$PWD/.uv-cache}"
               mkdir -p "$UV_CACHE_DIR"

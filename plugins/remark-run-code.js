@@ -269,3 +269,5 @@ export default function remarkRunCode() {
 		});
 	};
 }
+
+export { parseMetaOptions };
