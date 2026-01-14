@@ -1,0 +1,48 @@
+---
+title: "Sanity-checking Python Blocks"
+description: "Showing how runnable Python snippets are evaluated during the Astro build."
+pubDate: 2024-10-12
+tags:
+  - python
+  - tooling
+  - mdx
+abstract: >
+  A tiny post demonstrating the new Python runner that executes fenced code blocks
+  with the `run` meta flag during the build so that regressions are caught automatically.
+featured: false
+---
+
+Thanks to the updated MDX pipeline, fenced Python blocks annotated with `run` now execute while the site builds. That means any exception or failed assertion will stop the release.
+
+```python run
+from statistics import mean, pstdev
+
+samples = [4.0, 4.5, 5.5, 6.0, 6.5]
+avg = mean(samples)
+spread = pstdev(samples)
+
+print("Mean runtime:", round(avg, 2))
+print("Spread:", round(spread, 3))
+
+assert 4.0 <= avg <= 7.0, "Unexpected average"
+```
+
+If the assertion fails—or even if the snippet prints unexpected text—the output is captured right below the block, just like the JavaScript examples. That feedback loop keeps blog posts honest and prevents stale notebooks from sneaking into the main branch.
+
+Need a heavier dependency? The runner now uses the flake-managed Python that bundles NumPy, so numerical demos are also validated.
+
+```python run
+import numpy as np
+
+A = np.array([[1, 2], [3, 4]])
+B = np.array([[2, 0], [1, 2]])
+product = A @ B
+det = np.linalg.det(product)
+
+print("A @ B =")
+print(product)
+print("determinant:", round(det, 2))
+
+assert np.allclose(product, np.array([[4, 4], [10, 8]]))
+assert np.isclose(det, -8.0)
+```

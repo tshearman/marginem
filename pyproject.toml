@@ -1,0 +1,11 @@
+[project]
+name = "blogupdate-runner"
+version = "0.1.0"
+description = "Python dependencies for runnable MDX snippets."
+requires-python = ">=3.12"
+dependencies = [
+  "numpy>=1.26,<2.0"
+]
+
+[tool.uv]
+package = true

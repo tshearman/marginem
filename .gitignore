@@ -7,8 +7,11 @@ dist/
 
 # local environment / tooling
 .direnv/
+.venv/
+.uv-cache/
 .npm/
 .cache/
+src/blogupdate_runner.egg-info/
 
 # env files
 .env
