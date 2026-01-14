@@ -32,7 +32,7 @@ const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
     {
       frontmatter.tags?.length ? (
         <div class="paper-title__tags">
-          <TagList tags={frontmatter.tags} align="center" />
+          <TagList tags={frontmatter.tags} align="center" linkToTags />
         </div>
       ) : null
     }

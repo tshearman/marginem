@@ -9,6 +9,7 @@ tags:
 abstract: >
   Shows how the runnable snippet pipeline now supports Common Lisp, covering both
   inline code fences and reusable snippet files.
+heroImage: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1800&q=80"
 featured: false
 ---
 
@@ -26,7 +27,7 @@ Common Lisp `run` fences now compile and execute during the Astro build. Just li
   (WHEN (/= VALUE 120) (ERROR "Factorial logic regressed!")))
 ```
 
-Longer helpers benefit from the `src=...` meta attribute so we can keep them in `src/snippets/` while still rendering the file inline and executing it at build time.
+Longer helpers benefit from the `src=...` meta attribute so we can keep them in `src/content/snippets/` while still rendering the file inline and executing it at build time.
 
-```lisp run src="../../snippets/harmonic.lisp"
+```lisp run src="../snippets/harmonic.lisp"
 ```

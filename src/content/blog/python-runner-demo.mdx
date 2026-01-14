@@ -47,9 +47,9 @@ assert np.allclose(product, np.array([[4, 4], [10, 8]]))
 assert np.isclose(det, -8.0)
 ```
 
-Longer helpers can live as standalone Python modules that multiple posts import. Add `src=path/to/script.py` to the fenced block and the runner will read, display, and execute the file inline.
+Longer helpers can live as standalone Python modules that multiple posts import. Add `src=path/to/script.py` to the fenced block and the runner will read, display, and execute the file inline. Keep shared helpers in `src/content/snippets/` so they remain close to the MDX content.
 
-```python run src="../../snippets/rolling_stats.py"
+```python run src="../snippets/rolling_stats.py"
 ```
 
 And some more text below to check the watcher.

@@ -4,9 +4,10 @@ import Tag from "./Tag.astro";
 interface Props {
 	tags?: string[];
 	align?: "start" | "center" | "end";
+	linkToTags?: boolean;
 }
 
-const { tags = [], align = "start" } = Astro.props as Props;
+const { tags = [], align = "start", linkToTags = false } = Astro.props as Props;
 const normalized = tags.filter(Boolean);
 const alignmentClass =
 	align === "center"
@@ -20,7 +21,7 @@ const alignmentClass =
   normalized.length ? (
     <p class={`tag-list ${alignmentClass}`}>
       {normalized.map((tag) => (
-        <Tag tag={tag} variant="filter" />
+        <Tag tag={tag} variant="filter" asLink={linkToTags} />
       ))}
     </p>
   ) : null

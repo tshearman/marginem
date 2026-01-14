@@ -11,7 +11,7 @@ import remarkRunCode, {
 import rehypePrism from "rehype-prism-plus";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
-const snippetsDir = path.join(rootDir, "src/snippets");
+const snippetsDir = path.join(rootDir, "src/content/snippets");
 
 const watchSnippets = () => ({
 	name: "watch-snippets",
