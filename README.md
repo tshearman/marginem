@@ -60,9 +60,27 @@ A minimalist, technical blog starter built with [Astro](https://astro.build/) an
 - Mark fenced code blocks with ```` ```js run ```` to execute snippets during build time. Output is injected below the block as ```` ```output ```` code for quick inspection.
 - Math is rendered via KaTeX; wrap inline math with `$...$` and block math with `$$...$$`.
 
+## Docker
+
+Build a production image and run it locally:
+
+```bash
+docker build -t blogupdate .
+docker run -p 4321:4321 --env PORT=4321 blogupdate
+```
+
+The container uses the Astro Node adapter in standalone mode (`node dist/server/entry.mjs`) and listens on `PORT` (default `4321`) with `HOST=0.0.0.0`. The image includes SQLite runtime support for the likes API; swap in your own database later by pointing `LIKES_DB_PATH` at a different location.
+
+The build stage also installs `ghc`, `sbcl`, and `python3-numpy`, so `runghc`, Common Lisp, and Python+NumPy MDX snippets (e.g. `src/content/blog/haskell-runner-demo.mdx`, `common-lisp-runner-demo.mdx`, and `python-runner-demo.mdx`) can execute during `astro build`.
+
 ## Next steps
 
 - Update `astro.config.mjs` `site` with your production URL.
 - Style or extend `src/styles/global.css` to match your brand.
 - Deploy to a Node-capable host; the likes API uses `output: "server"` with the Node adapter.
 - Format the flake with `nix fmt` and keep `flake.lock` under version control so teammates share the same toolchain.
+
+## Dev container
+
+- Use the VS Code Dev Containers extension to reopen this repo in a container; VS Code will build `.devcontainer/Dockerfile` and install npm dependencies automatically (`npm install` runs via `postCreateCommand`).
+- `ghc`, `sbcl`, Python with NumPy, and native build tools are pre-installed so snippets that rely on `runghc`, Common Lisp runners, Python+NumPy, or `better-sqlite3` build cleanly, and port `4321` is forwarded for the Astro dev server.
