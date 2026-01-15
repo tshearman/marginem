@@ -11,6 +11,7 @@ import remarkRunCode, {
 import rehypePrism from "rehype-prism-plus";
 import "prismjs/components/prism-haskell.js";
 import "prismjs/components/prism-lisp.js";
+import node from "@astrojs/node";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const snippetsDir = path.join(rootDir, "src/content/snippets");
@@ -44,6 +45,8 @@ const watchSnippets = () => ({
 
 export default defineConfig({
 	site: "https://example.com",
+	adapter: node({ mode: "standalone" }),
+	output: "server",
 	integrations: [mdx()],
 	markdown: {
 		syntaxHighlight: "prism",

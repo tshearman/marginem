@@ -46,6 +46,14 @@ A minimalist, technical blog starter built with [Astro](https://astro.build/) an
    ```
 4. Create new posts inside `src/content/blog`. Use frontmatter that matches `src/content/config.ts`.
 
+## Likes API (posts + notes)
+
+- On first request a `visitor_id` cookie is issued (httpOnly, same-site). Likes are stored in `data/likes.db` (SQLite via `better-sqlite3`) keyed by `visitor_id`, `type` (`post` | `note`), and `slug`.
+- `GET /api/likes?type=post&slug=my-post` → `{ count, liked }`
+- `POST /api/likes` with JSON `{ type, slug, action?: "like" | "unlike" | "toggle" }` → `{ count, liked }` (also available as `DELETE /api/likes` to unlike).
+- The storage layer is isolated in `src/lib/likes/store.ts` so it can be swapped for a remote database later.
+- Use `LIKES_DB_PATH=/absolute/or/relative/path/to/db` to point at a different database file (dev defaults to `data/likes.dev.db`, prod to `data/likes.db`).
+
 ## MDX helpers
 
 - Use `<PlotlyChart />`, `<ImageFigure />`, and `<MarginNote />` inside MDX documents for interactive plots, responsive images, and unobtrusive notes.
@@ -56,5 +64,5 @@ A minimalist, technical blog starter built with [Astro](https://astro.build/) an
 
 - Update `astro.config.mjs` `site` with your production URL.
 - Style or extend `src/styles/global.css` to match your brand.
-- Deploy via any static host (Astro builds static HTML + assets by default).
+- Deploy to a Node-capable host; the likes API uses `output: "server"` with the Node adapter.
 - Format the flake with `nix fmt` and keep `flake.lock` under version control so teammates share the same toolchain.

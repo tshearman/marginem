@@ -376,6 +376,12 @@ a.note-card {
   justify-content: flex-end;
 }
 
+.note-like {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.35rem;
+}
+
 .note-card.hidden {
   display: none;
 }

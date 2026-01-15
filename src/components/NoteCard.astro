@@ -1,27 +1,28 @@
 ---
 import Tag from "./Tag.astro";
+import LikeButton from "./LikeButton.astro";
 import { generateNoteId } from "../lib/noteUtils";
 
 interface Props {
-	content: string;
-	source?: string;
-	author?: string;
-	tags?: string[];
-	date?: Date;
-	class?: string;
-	style?: string;
-	idOverride?: string;
+  content: string;
+  source?: string;
+  author?: string;
+  tags?: string[];
+  date?: Date;
+  class?: string;
+  style?: string;
+  idOverride?: string;
 }
 
 const {
-	content,
-	source,
-	author,
-	tags = [],
-	date,
-	class: className,
-	style,
-	idOverride,
+  content,
+  source,
+  author,
+  tags = [],
+  date,
+  class: className,
+  style,
+  idOverride,
 } = Astro.props as Props;
 const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
 ---
@@ -67,5 +68,8 @@ const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
         </div>
       ) : null
     }
+    <div class="note-like">
+      <LikeButton slug={noteId} target="note" align="right" />
+    </div>
   </div>
 </article>

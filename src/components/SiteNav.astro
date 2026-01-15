@@ -6,7 +6,9 @@ const currentPath = Astro.url.pathname;
 
 <nav class="site-nav">
   <div class="site-nav__links">
-    <a href="/" class={currentPath === "/" ? "is-active" : undefined}>Home</a>
+    <a href="/" class={currentPath === "/" ? "is-active" : undefined}
+      >Notebook</a
+    >
     <a
       href="/commonplace/"
       class={currentPath.startsWith("/commonplace") ? "is-active" : undefined}

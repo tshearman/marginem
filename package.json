@@ -18,8 +18,10 @@
     "format": "npm run format:source && npm run format:snippets"
   },
   "dependencies": {
+    "@astrojs/node": "^9.0.0",
     "@astrojs/mdx": "^4.3.13",
     "astro": "^5.16.9",
+    "better-sqlite3": "^11.8.1",
     "katex": "^0.16.9",
     "plotly.js-dist-min": "^3.3.1",
     "prismjs": "^1.29.0",

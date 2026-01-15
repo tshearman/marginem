@@ -1,9 +1,15 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
 import TagList from "../components/TagList.astro";
+import LikeButton from "../components/LikeButton.astro";
 import { formatDate } from "../lib/date";
 
-const { frontmatter } = Astro.props;
+interface Props {
+	frontmatter: Record<string, any>;
+	slug: string;
+}
+
+const { frontmatter, slug } = Astro.props as Props;
 const formattedDate = frontmatter?.pubDate
 	? formatDate(frontmatter.pubDate, {
 			month: "long",
@@ -52,6 +58,9 @@ const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
       ) : null
     }
     <div class="paper-title__rule paper-title__rule--thin" aria-hidden="true">
+    </div>
+    <div class="paper-title__likes">
+      <LikeButton slug={slug} target="post" />
     </div>
   </section>
   <article class="paper-body">
@@ -139,5 +148,11 @@ const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
 
   .paper-body > *:first-child {
     margin-top: 0;
+  }
+
+  .paper-title__likes {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
   }
 </style>
