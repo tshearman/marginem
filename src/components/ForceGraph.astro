@@ -1,0 +1,160 @@
+---
+import NoteCard from "./NoteCard.astro";
+import PostPreview from "./PostPreview.astro";
+import forceGraphClient from "../scripts/force-graph.ts?url";
+
+type GraphNode = {
+  id: string;
+  group?: number;
+  url?: string;
+  tooltipId?: string;
+};
+
+type GraphLink = {
+  source: string;
+  target: string;
+  value?: number;
+};
+
+type ForceGraphProps = {
+  nodes: GraphNode[];
+  links: GraphLink[];
+  width?: number;
+  height?: number;
+  labelKey?: string;
+  className?: string;
+  noteTooltips?: Array<{
+    id: string;
+    content: string;
+    source?: string;
+    author?: string;
+    tags?: string[];
+    date?: Date;
+  }>;
+  postTooltips?: Array<{
+    id: string;
+    title: string;
+    url: string;
+    pubDate?: string;
+    displayDate?: string;
+    description?: string;
+    abstract?: string;
+    tags?: string[];
+  }>;
+};
+
+const {
+  nodes,
+  links,
+  width = 640,
+  height = 420,
+  labelKey = "id",
+  className = "",
+  noteTooltips = [],
+  postTooltips = [],
+} = Astro.props as ForceGraphProps;
+
+const graphId = `force-graph-${
+  globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
+}`;
+const payloadAttr = JSON.stringify({ nodes, links, width, height, labelKey }).replace(
+  /</g,
+  "\\u003c",
+);
+---
+<div
+  class={`force-graph ${className}`.trim()}
+  style={`--force-graph-height: ${height}px;`}
+>
+  <div
+    id={graphId}
+    class="force-graph__stage"
+    data-force-graph={payloadAttr}
+  ></div>
+  {
+    noteTooltips.length || postTooltips.length ? (
+      <div class="force-graph__tooltip-layer" aria-hidden="true">
+        {noteTooltips.map((note) => (
+          <div class="force-graph__tooltip" data-force-tooltip-id={note.id}>
+            <NoteCard
+              content={note.content}
+              source={note.source}
+              author={note.author}
+              tags={note.tags}
+              date={note.date}
+              class="force-graph__tooltip-card"
+              idOverride={`tooltip-${note.id}`}
+            />
+          </div>
+        ))}
+        {postTooltips.map((post) => (
+          <div class="force-graph__tooltip" data-force-tooltip-id={post.id}>
+            <PostPreview
+              title={post.title}
+              url={post.url}
+              pubDate={post.pubDate}
+              displayDate={post.displayDate}
+              description={post.description}
+              abstract={post.abstract}
+              tags={post.tags}
+            />
+          </div>
+        ))}
+      </div>
+    ) : null
+  }
+</div>
+<script type="module" is:inline src={forceGraphClient}></script>
+
+<style>
+  .force-graph {
+    width: 100%;
+    min-height: var(--force-graph-height, 420px);
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background:
+      radial-gradient(circle at top, rgba(45, 116, 255, 0.08), transparent 58%),
+      radial-gradient(circle at 20% 90%, rgba(255, 153, 55, 0.1), transparent 52%),
+      #f8fafc;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .force-graph__stage {
+    width: 100%;
+    min-height: var(--force-graph-height, 420px);
+  }
+
+  .force-graph__tooltip-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .force-graph__tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: min(360px, 85vw);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease;
+  }
+
+  .force-graph__tooltip :global(.note-card) {
+    margin: 0;
+  }
+
+  .force-graph__tooltip :global(.post-preview) {
+    margin: 0;
+  }
+
+  .force-graph__tooltip :global(.note-card__anchor-link) {
+    display: none;
+  }
+
+  .force-graph__tooltip :global(.note-like) {
+    display: none;
+  }
+</style>
+import NoteCard from "./NoteCard.astro";
