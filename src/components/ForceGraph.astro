@@ -57,20 +57,21 @@ const {
 const graphId = `force-graph-${
   globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
 }`;
-const payloadAttr = JSON.stringify({ nodes, links, width, height, labelKey }).replace(
-  /</g,
-  "\\u003c",
-);
+const payloadAttr = JSON.stringify({
+  nodes,
+  links,
+  width,
+  height,
+  labelKey,
+}).replace(/</g, "\\u003c");
 ---
+
 <div
   class={`force-graph ${className}`.trim()}
   style={`--force-graph-height: ${height}px;`}
 >
-  <div
-    id={graphId}
-    class="force-graph__stage"
-    data-force-graph={payloadAttr}
-  ></div>
+  <div id={graphId} class="force-graph__stage" data-force-graph={payloadAttr}>
+  </div>
   {
     noteTooltips.length || postTooltips.length ? (
       <div class="force-graph__tooltip-layer" aria-hidden="true">
@@ -110,19 +111,14 @@ const payloadAttr = JSON.stringify({ nodes, links, width, height, labelKey }).re
   .force-graph {
     width: 100%;
     min-height: var(--force-graph-height, 420px);
-    border-radius: 18px;
-    border: 1px solid rgba(15, 23, 42, 0.12);
-    background:
-      radial-gradient(circle at top, rgba(45, 116, 255, 0.08), transparent 58%),
-      radial-gradient(circle at 20% 90%, rgba(255, 153, 55, 0.1), transparent 52%),
-      #f8fafc;
-    overflow: hidden;
     position: relative;
+    overflow: visible;
   }
 
   .force-graph__stage {
     width: 100%;
     min-height: var(--force-graph-height, 420px);
+    overflow: hidden;
   }
 
   .force-graph__tooltip-layer {
@@ -139,14 +135,18 @@ const payloadAttr = JSON.stringify({ nodes, links, width, height, labelKey }).re
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.15s ease;
+    border: 1px solid #0f172a;
+    border-radius: 6px;
   }
 
   .force-graph__tooltip :global(.note-card) {
     margin: 0;
+    border-radius: 6px;
   }
 
   .force-graph__tooltip :global(.post-preview) {
     margin: 0;
+    border-radius: 6px;
   }
 
   .force-graph__tooltip :global(.note-card__anchor-link) {
@@ -157,4 +157,3 @@ const payloadAttr = JSON.stringify({ nodes, links, width, height, labelKey }).re
     display: none;
   }
 </style>
-import NoteCard from "./NoteCard.astro";
