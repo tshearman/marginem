@@ -1,0 +1,131 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import FilterableCount from "../../components/FilterableCount.astro";
+import { formatDate } from "../../lib/date";
+import { loadGardenNotes, resolveVaultRoot } from "../../lib/garden";
+
+const notes = await loadGardenNotes();
+const vaultRoot = resolveVaultRoot();
+
+const plainExcerpt = (content: string) => {
+  const withoutLinks = content.replace(/!?\[\[[^\]]+\]\]/g, " ");
+  const condensed = withoutLinks.replace(/[`#>*]/g, " ").replace(/\s+/g, " ").trim();
+  return condensed.length > 160 ? `${condensed.slice(0, 160)}…` : condensed;
+};
+
+const gardenNotes = notes.map((note) => ({
+  ...note,
+  excerpt: plainExcerpt(note.content),
+}));
+---
+<BaseLayout
+  title="Garden | Notebook"
+  description="Living notes pulled from an Obsidian vault."
+  hero="Garden"
+  showHero={false}
+>
+  <PageIntro
+    eyebrow="Evergreen notes"
+    title="Garden"
+    description="Notes are imported from the OBSIDIAN_VAULT path at build time, keeping Obsidian and the site in sync."
+  />
+
+  {
+    !gardenNotes.length ? (
+      <div class="garden-empty">
+        <p>
+          Set <code>OBSIDIAN_VAULT</code> to the root of an Obsidian vault and
+          rebuild to generate Garden pages. A sample vault lives at{" "}
+          <code>./data/obsidian-vault-sample</code>.
+        </p>
+      </div>
+    ) : (
+      <section class="garden-content">
+        <FilterableCount
+          contentType="notes"
+          totalCount={gardenNotes.length}
+          class="garden-count"
+        />
+        <div class="garden-grid">
+          {gardenNotes.map((note) => (
+            <a class="garden-card" href={`/garden/${note.slug}/`}>
+              <p class="garden-card__eyebrow">Updated {formatDate(note.updatedAt)}</p>
+              <h3>{note.title}</h3>
+              <p class="garden-card__excerpt">{note.excerpt}</p>
+              <p class="garden-card__path">
+                {note.relativePath} {vaultRoot ? `(from ${vaultRoot})` : ""}
+              </p>
+            </a>
+          ))}
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .garden-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .garden-count {
+    padding: 0 0.25rem;
+  }
+
+  .garden-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .garden-card {
+    display: block;
+    padding: 1rem;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 0.85rem;
+    background: #fff;
+    text-decoration: none;
+    color: inherit;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.15s ease;
+  }
+
+  .garden-card__eyebrow {
+    margin: 0 0 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    color: rgba(15, 23, 42, 0.6);
+  }
+
+  .garden-card h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1.1rem;
+    color: rgba(15, 23, 42, 0.95);
+  }
+
+  .garden-card__excerpt {
+    margin: 0 0 0.7rem;
+    color: rgba(15, 23, 42, 0.85);
+  }
+
+  .garden-card__path {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(15, 23, 42, 0.65);
+  }
+
+  .garden-empty {
+    margin-top: 1.25rem;
+    padding: 1rem 1.25rem;
+    border: 1px dashed rgba(15, 23, 42, 0.18);
+    border-radius: 0.85rem;
+    background: rgba(15, 23, 42, 0.02);
+  }
+</style>

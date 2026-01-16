@@ -12,6 +12,7 @@ import rehypePrism from "rehype-prism-plus";
 import "prismjs/components/prism-haskell.js";
 import "prismjs/components/prism-lisp.js";
 import node from "@astrojs/node";
+import remarkObsidianLinks from "./plugins/remark-obsidian-links.js";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const snippetsDir = path.join(rootDir, "src/content/snippets");
@@ -53,7 +54,7 @@ export default defineConfig({
 		prism: {
 			theme: "prism-solarizedlight",
 		},
-		remarkPlugins: [remarkMath, remarkGfm, remarkRunCode],
+		remarkPlugins: [remarkMath, remarkGfm, remarkRunCode, remarkObsidianLinks],
 		rehypePlugins: [rehypeKatex, [rehypePrism, { showLineNumbers: true }]],
 	},
 	vite: {

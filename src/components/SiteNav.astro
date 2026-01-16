@@ -16,6 +16,12 @@ const currentPath = Astro.url.pathname;
       Commonplace
     </a>
     <a
+      href="/garden/"
+      class={currentPath.startsWith("/garden") ? "is-active" : undefined}
+    >
+      Garden
+    </a>
+    <a
       href="/archive/"
       class={currentPath.startsWith("/archive") ? "is-active" : undefined}
     >
