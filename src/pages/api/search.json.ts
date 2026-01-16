@@ -1,13 +1,14 @@
 import type { APIRoute } from "astro";
 import type { CollectionEntry } from "astro:content";
 import { getCollection } from "astro:content";
+import { loadGardenNotes } from "../../lib/garden";
 import { generateNoteId } from "../../lib/noteUtils";
 import { ellipsizeText, normalizeWhitespace } from "../../lib/text";
 import { formatDate } from "../../lib/date";
 
 type SearchEntry = {
 	id: string;
-	kind: "post" | "note";
+	kind: "post" | "note" | "garden";
 	title: string;
 	url: string;
 	snippet: string;
@@ -37,6 +38,9 @@ const toSearchText = (segments: Array<string | undefined>) =>
 type BlogEntry = CollectionEntry<"blog">;
 type NotesFile = CollectionEntry<"notes">;
 type NoteEntry = NotesFile["data"][number];
+
+const plainExcerpt = (value = "") =>
+	stripFormatting(value.replace(/!?\[\[[^\]]+\]\]/g, " "));
 
 const buildPostEntries = (posts: BlogEntry[]) =>
 	posts.map((post) => {
@@ -99,14 +103,43 @@ const buildNoteEntries = (notesCollection: NotesFile[]) =>
 		}),
 	);
 
+const buildGardenEntries = (
+	gardenNotes: Awaited<ReturnType<typeof loadGardenNotes>>,
+) =>
+	gardenNotes.map((note) => {
+		const snippetSource = plainExcerpt(note.content);
+		return {
+			id: note.slug,
+			kind: "garden" as const,
+			title: note.title,
+			url: `/garden/${note.slug}/`,
+			snippet: ellipsizeText(snippetSource, 220, { alwaysAppend: true }),
+			tags: [],
+			displayDate: formatDate(note.updatedAt),
+			pubDate: note.updatedAt.toISOString(),
+			timestamp: note.updatedAt.getTime(),
+			searchText: toSearchText([
+				note.title,
+				note.relativePath,
+				note.content,
+			]),
+		};
+	});
+
 export const GET: APIRoute = async () => {
-	const [posts, notes] = await Promise.all([
+	const [posts, notes, gardenNotes] = await Promise.all([
 		getCollection("blog", ({ data }) => !data.draft),
 		getCollection("notes"),
+		loadGardenNotes(),
 	]);
 	const postEntries = buildPostEntries(posts);
 	const noteEntries = buildNoteEntries(notes);
-	const payload: SearchEntry[] = [...postEntries, ...noteEntries];
+	const gardenEntries = buildGardenEntries(gardenNotes);
+	const payload: SearchEntry[] = [
+		...postEntries,
+		...noteEntries,
+		...gardenEntries,
+	];
 
 	return new Response(JSON.stringify(payload), {
 		headers: {

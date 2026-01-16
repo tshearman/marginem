@@ -286,8 +286,8 @@ figcaption {
 }
 
 .note-card {
-    background: #fff;
-    border: 0;
+  background: #fff;
+  border: 0;
   padding: 1.4rem;
   transition:
     transform 0.2s ease,
@@ -400,8 +400,14 @@ a.note-card {
   .note-card {
     padding: 1rem;
   }
+
   .note-content {
     padding-left: 1rem;
+  }
+
+  pre[class*="language-"],
+  pre[class*="language-"]>code[class*="language-"] {
+    font-size: 0.85em;
   }
 }
 

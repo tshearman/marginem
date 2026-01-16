@@ -139,7 +139,6 @@ import searchScript from "../scripts/search-modal.ts?url";
 
   @media (max-width: 760px) {
     .nav-search__trigger {
-      width: 100%;
       min-width: 0;
     }
     .nav-search__text {
@@ -302,11 +301,72 @@ import searchScript from "../scripts/search-modal.ts?url";
     font-size: 0.95rem;
   }
 
+  .search-modal :global(.search-kind) {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.5);
+    position: absolute;
+    top: 0.7rem;
+    right: 0.85rem;
+  }
+
+  .search-modal :global(.post-preview__body) {
+    position: relative;
+    padding-right: 3.5rem;
+  }
+
+  .search-modal :global(.note-card--interactive) {
+    position: relative;
+    padding-right: 3.5rem;
+  }
+
+  .search-modal :global(.garden-search) {
+    position: relative;
+  }
+
+  .search-modal :global(.garden-search__header) {
+    padding-right: 3.5rem;
+  }
+
   .search-modal :global(.note-card--interactive:hover),
   .search-modal :global(.note-card--interactive:focus-visible) {
     box-shadow: none;
     transform: none;
     outline: none;
+  }
+
+  .search-modal :global(.garden-search) {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 0.85rem;
+    padding: 0.85rem 1rem;
+    background: #fff;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .search-modal :global(.garden-search__header) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .search-modal :global(.garden-search__title) {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .search-modal :global(.garden-search__date) {
+    font-size: 0.85rem;
+  }
+
+  .search-modal :global(.garden-search__excerpt) {
+    margin: 0.4rem 0 0;
+    color: rgba(15, 23, 42, 0.75);
   }
 
   .search-modal :global(.tag--filter:hover),

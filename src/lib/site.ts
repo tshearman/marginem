@@ -32,9 +32,11 @@ export const MAIN_PAGES = {
   },
 } as const;
 
+export const WRITING_PAGE_POST_LIMIT = 5;
+
 export const MAIN_NAV = [
   MAIN_PAGES.writing,
   MAIN_PAGES.commonplace,
   MAIN_PAGES.garden,
-  // MAIN_PAGES.archive,
+  MAIN_PAGES.archive,
 ];

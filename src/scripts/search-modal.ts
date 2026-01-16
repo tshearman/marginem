@@ -11,7 +11,7 @@ type SearchItem = {
 	pubDate?: string;
 	displayDate?: string;
 	url: string;
-	kind: "post" | "note";
+	kind: "post" | "note" | "garden";
 	author?: string;
 	source?: string;
 	searchText: string;
@@ -123,6 +123,10 @@ function renderPostResult(item: SearchItem) {
 		time.innerHTML = formatDateLabelHtml(label);
 		authors.appendChild(time);
 	}
+	const kind = document.createElement("span");
+	kind.className = "search-kind";
+	kind.textContent = "Writing";
+	authors.appendChild(kind);
 	body.appendChild(authors);
 
 	const section = document.createElement("div");
@@ -199,6 +203,10 @@ function renderNoteResult(item: SearchItem) {
 		}
 		attribution.appendChild(time);
 	}
+	const kind = document.createElement("span");
+	kind.className = "search-kind";
+	kind.textContent = "Note";
+	attribution.appendChild(kind);
 	content.appendChild(attribution);
 	wrapper.appendChild(content);
 
@@ -216,12 +224,56 @@ function renderNoteResult(item: SearchItem) {
 	return link;
 }
 
+function renderGardenResult(item: SearchItem) {
+	const link = document.createElement("a");
+	link.className = "garden-search";
+	link.href = item.url;
+
+	const header = document.createElement("div");
+	header.className = "garden-search__header";
+
+	const title = document.createElement("h3");
+	title.className = "garden-search__title";
+	title.textContent = item.title;
+	header.appendChild(title);
+
+	if (item.displayDate || item.pubDate) {
+		const label = item.pubDate
+			? formatDate(item.pubDate)
+			: item.displayDate ?? "";
+		const time = document.createElement("time");
+		time.className = "date-stamp garden-search__date";
+		time.dateTime = item.pubDate ?? "";
+		time.innerHTML = formatDateLabelHtml(label);
+		header.appendChild(time);
+	}
+	const kind = document.createElement("span");
+	kind.className = "search-kind";
+	kind.textContent = "Garden";
+	header.appendChild(kind);
+
+	link.appendChild(header);
+
+	if (item.snippet) {
+		const excerpt = document.createElement("p");
+		excerpt.className = "garden-search__excerpt";
+		excerpt.textContent = item.snippet;
+		link.appendChild(excerpt);
+	}
+
+	return link;
+}
+
 function renderResults(container: HTMLElement, results: SearchItem[]) {
 	container.innerHTML = "";
 	const fragment = document.createDocumentFragment();
 	for (const item of results) {
 		const node =
-			item.kind === "note" ? renderNoteResult(item) : renderPostResult(item);
+			item.kind === "note"
+				? renderNoteResult(item)
+				: item.kind === "garden"
+					? renderGardenResult(item)
+					: renderPostResult(item);
 		fragment.appendChild(node);
 	}
 	container.appendChild(fragment);

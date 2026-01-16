@@ -1,5 +1,9 @@
 ---
 import Search from "./Search.astro";
+import IconWriting from "./icons/IconWriting.astro";
+import IconCommonplace from "./icons/IconCommonplace.astro";
+import IconGarden from "./icons/IconGarden.astro";
+import IconArchive from "./icons/IconArchive.astro";
 import { MAIN_NAV } from "../lib/site";
 
 const currentPath = Astro.url.pathname;
@@ -7,15 +11,36 @@ const currentPath = Astro.url.pathname;
 
 <nav class="site-nav">
   <div class="site-nav__links">
-    {MAIN_NAV.map((item) => {
-      const isActive =
-        item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href);
-      return (
-        <a href={item.href} class={isActive ? "is-active" : undefined}>
-          {item.label}
-        </a>
-      );
-    })}
+    {
+      MAIN_NAV.map((item) => {
+        const isActive =
+          item.href === "/"
+            ? currentPath === "/"
+            : currentPath.startsWith(item.href);
+        const icon =
+          item.label === "Writing" ? (
+            <IconWriting />
+          ) : item.label === "Commonplace" ? (
+            <IconCommonplace />
+          ) : item.label === "Archive" ? (
+            <IconArchive />
+          ) : (
+            <IconGarden />
+          );
+        const linkClass = [
+          isActive ? "is-active" : null,
+          item.label === "Archive" ? "is-compact" : null,
+        ]
+          .filter(Boolean)
+          .join(" ");
+        return (
+          <a href={item.href} class={linkClass || undefined}>
+            <span class="site-nav__text">{item.label}</span>
+            <span class="site-nav__icon">{icon}</span>
+          </a>
+        );
+      })
+    }
   </div>
   <div class="site-nav__search">
     <Search />
@@ -54,6 +79,9 @@ const currentPath = Astro.url.pathname;
     letter-spacing: 0.08em;
     font-weight: 500;
     transition: color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
   }
 
   .site-nav__links a::after {
@@ -100,6 +128,18 @@ const currentPath = Astro.url.pathname;
     justify-content: flex-end;
   }
 
+  .site-nav__icon {
+    display: none;
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .site-nav__icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
   @media (max-width: 760px) {
     .site-nav {
       flex-wrap: wrap;
@@ -107,7 +147,7 @@ const currentPath = Astro.url.pathname;
       padding: 0.85rem 1rem 0.4rem;
     }
     .site-nav__links {
-      /* width: auto; */
+      width: auto;
       order: 1;
       font-size: 0.8rem;
       flex-wrap: wrap;
@@ -116,9 +156,23 @@ const currentPath = Astro.url.pathname;
     }
     .site-nav__search {
       order: 2;
-      /* width: 100%; */
       margin-left: 0;
-      width: 100%;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .site-nav {
+      padding: 1rem 1rem 0.6rem;
+    }
+
+    .site-nav__links a.is-compact .site-nav__text {
+      display: none;
+    }
+
+    .site-nav__links a.is-compact .site-nav__icon {
+      display: inline-flex;
+      width: 1.35rem;
+      height: 1.35rem;
     }
   }
 </style>
