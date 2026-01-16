@@ -2,21 +2,22 @@
 import BaseLayout from "./BaseLayout.astro";
 import TagList from "../components/TagList.astro";
 import LikeButton from "../components/LikeButton.astro";
+import DateStamp from "../components/DateStamp.astro";
 import { formatDate } from "../lib/date";
 
 interface Props {
-	frontmatter: Record<string, any>;
-	slug: string;
+  frontmatter: Record<string, any>;
+  slug: string;
 }
 
 const { frontmatter, slug } = Astro.props as Props;
 const formattedDate = frontmatter?.pubDate
-	? formatDate(frontmatter.pubDate, {
-			month: "long",
-			day: "numeric",
-			year: "numeric",
-		})
-	: "";
+  ? formatDate(frontmatter.pubDate, {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    })
+  : "";
 const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
 ---
 
@@ -34,8 +35,11 @@ const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
     <div class="paper-title__rule paper-title__rule--thin" aria-hidden="true">
     </div>
     <div class="paper-title__meta">
-      {formattedDate ? <span>{formattedDate}</span> : null}
-      {frontmatter.readingTime ? <span>{frontmatter.readingTime}</span> : null}
+      {
+        formattedDate ? (
+          <DateStamp datetime={frontmatter.pubDate} label={formattedDate} />
+        ) : null
+      }
     </div>
     {
       frontmatter.tags?.length ? (
@@ -57,10 +61,10 @@ const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
         </section>
       ) : null
     }
-    <div class="paper-title__rule paper-title__rule--thin" aria-hidden="true">
-    </div>
     <div class="paper-title__likes">
       <LikeButton slug={slug} target="post" />
+    </div>
+    <div class="paper-title__rule paper-title__rule--thin" aria-hidden="true">
     </div>
   </section>
   <article class="paper-body">
@@ -96,18 +100,6 @@ const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
   .paper-title__rule--thin {
     height: 1px;
     margin: 1.25rem auto;
-  }
-
-  .paper-title__meta {
-    font-size: 0.95rem;
-    color: var(--muted);
-    display: flex;
-    justify-content: center;
-    gap: 1.25rem;
-    flex-wrap: wrap;
-    font-style: italic;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 
   .paper-title__tags {

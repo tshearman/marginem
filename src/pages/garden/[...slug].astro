@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import GardenLayout from "../../layouts/GardenLayout.astro";
 import ForceGraph from "../../components/ForceGraph.astro";
+import DateStamp from "../../components/DateStamp.astro";
 import { formatDate } from "../../lib/date";
 import {
   createGardenLinkResolver,
@@ -281,7 +282,11 @@ const { html } =
       <article class="garden-entry">
         <header class="garden-entry__header">
           <p class="garden-entry__eyebrow">
-            Updated {formatDate(note.updatedAt)}
+            Updated{" "}
+            <DateStamp
+              datetime={note.updatedAt}
+              label={formatDate(note.updatedAt)}
+            />
           </p>
           <nav class="garden-entry__breadcrumbs" aria-label="Breadcrumb">
             <a href="/garden/">Garden</a>

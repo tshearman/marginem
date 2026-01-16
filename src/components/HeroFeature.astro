@@ -1,11 +1,13 @@
 ---
 import TagList from "./TagList.astro";
+import DateStamp from "./DateStamp.astro";
 import { ellipsizeText } from "../lib/text";
 
 interface Props {
   title: string;
   url: string;
   dateLabel?: string;
+  dateTime?: string | Date;
   description?: string;
   tags?: string[];
   backgroundImage?: string | null;
@@ -15,6 +17,7 @@ const {
   title,
   url,
   dateLabel = "",
+  dateTime,
   description = "",
   tags = [],
   backgroundImage = null,
@@ -32,7 +35,15 @@ const summary = ellipsizeText(description, 260);
       backgroundImage ? "hero-feature__body--image" : ""
     }`}
   >
-    {dateLabel ? <p class="hero-feature__date">{dateLabel}</p> : null}
+    {
+      dateLabel && dateTime ? (
+        <DateStamp
+          datetime={dateTime}
+          label={dateLabel}
+          class="hero-feature__date"
+        />
+      ) : null
+    }
     <h2 class="hero-feature__title">
       <a href={url}>{title}</a>
     </h2>
@@ -65,14 +76,6 @@ const summary = ellipsizeText(description, 260);
       0 0 3px rgba(0, 0, 0, 0.85),
       0 0 6px rgba(0, 0, 0, 0.7),
       0 0 12px rgba(0, 0, 0, 0.6);
-  }
-
-  .hero-feature__date {
-    margin: 0;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.95);
   }
 
   .hero-feature__title {

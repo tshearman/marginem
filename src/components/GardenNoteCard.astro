@@ -1,4 +1,5 @@
 ---
+import DateStamp from "./DateStamp.astro";
 import { formatDate } from "../lib/date";
 
 interface Props {
@@ -16,9 +17,11 @@ const { slug, title, excerpt, updatedAt, relativePath, vaultRoot } =
 
 <a class="garden-card" href={`/garden/${slug}/`}>
   <div class="garden-card__row">
-    <time datetime={updatedAt.toISOString()} class="garden-card__date">
-      {formatDate(updatedAt)}
-    </time>
+    <DateStamp
+      datetime={updatedAt}
+      class="garden-card__date"
+      label={formatDate(updatedAt)}
+    />
     <h3>{title}</h3>
   </div>
   <p class="garden-card__excerpt">{excerpt}</p>
@@ -53,7 +56,6 @@ const { slug, title, excerpt, updatedAt, relativePath, vaultRoot } =
 
   .garden-card__date {
     font-size: 0.85rem;
-    color: rgba(15, 23, 42, 0.6);
     white-space: nowrap;
   }
 

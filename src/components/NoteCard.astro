@@ -1,6 +1,8 @@
 ---
 import Tag from "./Tag.astro";
 import LikeButton from "./LikeButton.astro";
+import DateStamp from "./DateStamp.astro";
+import { formatDate } from "../lib/date";
 import { generateNoteId } from "../lib/noteUtils";
 
 interface Props {
@@ -48,13 +50,11 @@ const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
         {source ? <div class="note-source">{source}</div> : null}
         {
           date ? (
-            <time class="note-date" datetime={date.toISOString()}>
-              {date.toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })}
-            </time>
+            <DateStamp
+              datetime={date}
+              class="note-date"
+              label={formatDate(date)}
+            />
           ) : null
         }
       </div>

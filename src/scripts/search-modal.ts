@@ -1,3 +1,5 @@
+import { formatDate, formatDateLabelHtml } from "../lib/date";
+
 const SEARCH_INDEX_URL = "/api/search.json";
 const MAX_RESULTS = 20;
 
@@ -111,10 +113,14 @@ function renderPostResult(item: SearchItem) {
 
 	const authors = document.createElement("div");
 	authors.className = "post-preview__authors";
-	if (item.displayDate) {
+	if (item.displayDate || item.pubDate) {
+		const label = item.pubDate
+			? formatDate(item.pubDate)
+			: item.displayDate ?? "";
 		const time = document.createElement("time");
 		time.dateTime = item.pubDate ?? "";
-		time.textContent = item.displayDate;
+		time.className = "date-stamp";
+		time.innerHTML = formatDateLabelHtml(label);
 		authors.appendChild(time);
 	}
 	body.appendChild(authors);
@@ -181,10 +187,13 @@ function renderNoteResult(item: SearchItem) {
 		source.textContent = item.source;
 		attribution.appendChild(source);
 	}
-	if (item.displayDate) {
+	if (item.displayDate || item.pubDate) {
+		const label = item.pubDate
+			? formatDate(item.pubDate)
+			: item.displayDate ?? "";
 		const time = document.createElement("time");
-		time.className = "note-date";
-		time.textContent = item.displayDate;
+		time.className = "date-stamp note-date";
+		time.innerHTML = formatDateLabelHtml(label);
 		if (item.pubDate) {
 			time.dateTime = item.pubDate;
 		}
@@ -278,7 +287,7 @@ function openSearch() {
 	document.body.classList.add("search-locked");
 	void loadSearchData();
 	requestAnimationFrame(() => {
-		input.focus();
+		input.focus({ preventScroll: true });
 		input.select();
 	});
 }
@@ -296,6 +305,10 @@ function closeSearch() {
 	) {
 		return;
 	}
+	if (document.activeElement instanceof HTMLElement) {
+		document.activeElement.blur();
+	}
+	input.blur();
 	modal.classList.remove("is-visible");
 	modal.setAttribute("hidden", "true");
 	modal.setAttribute("aria-hidden", "true");

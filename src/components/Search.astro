@@ -200,6 +200,19 @@ import searchScript from "../scripts/search-modal.ts?url";
     }
   }
 
+  @media (max-width: 420px) {
+    .search-modal {
+      padding: 0.75rem;
+    }
+
+    .search-modal__panel {
+      border-radius: 0.85rem;
+      padding: 0.85rem;
+      max-width: 100%;
+      max-height: calc(100vh - 1.5rem);
+    }
+  }
+
   .search-modal__header {
     display: flex;
     align-items: center;
@@ -247,6 +260,12 @@ import searchScript from "../scripts/search-modal.ts?url";
   .search-modal__close:focus-visible {
     background: rgba(0, 0, 0, 0.08);
     color: var(--fg, #111);
+  }
+
+  @media (max-width: 760px) {
+    .search-modal__input {
+      font-size: 16px;
+    }
   }
 
   .search-modal__results {

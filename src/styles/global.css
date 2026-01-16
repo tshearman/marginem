@@ -62,6 +62,7 @@ code {
 code:not(pre code) {
   background: rgba(15, 23, 42, 0.08);
   padding: 0.15rem 0.35rem;
+  font-size: 0.9em;
 }
 
 .eyebrow-text {
@@ -241,7 +242,7 @@ figcaption {
   gap: 0.15rem;
 }
 
-.post-preview__authors time {
+.date-stamp {
   font-style: italic;
   color: var(--muted);
 }
@@ -252,6 +253,16 @@ figcaption {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.35rem;
+}
+
+.post-preview__likes {
+  display: flex;
+  justify-content: center;
+  margin: -0.8rem 0 1rem;
+}
+
+.post-preview__like-button .like-button {
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.04);
 }
 
 .post-preview__meta-empty {
@@ -365,7 +376,6 @@ a.note-card {
 .note-date {
   display: block;
   font-size: 0.8rem;
-  color: rgba(15, 23, 42, 0.55);
 }
 
 .note-tags {

@@ -1,6 +1,8 @@
 ---
 import Tag from "./Tag.astro";
+import DateStamp from "./DateStamp.astro";
 import { ellipsizeText } from "../lib/text";
+import { formatDate } from "../lib/date";
 
 interface Props {
 	title: string;
@@ -22,36 +24,13 @@ const {
 	class: className = "",
 } = Astro.props as Props;
 
-const getOrdinal = (value: number) => {
-	const remainder = value % 100;
-	if (remainder >= 11 && remainder <= 13) return "th";
-	switch (value % 10) {
-		case 1:
-			return "st";
-		case 2:
-			return "nd";
-		case 3:
-			return "rd";
-		default:
-			return "th";
-	}
-};
-
-const monthLabel = new Intl.DateTimeFormat("en", {
-	month: "long",
-}).format(date);
-const dayNumber = date.getDate();
-const dayOrdinal = getOrdinal(dayNumber);
-
+const dateLabel = formatDate(date, { month: "long", day: "numeric" });
 const preview = ellipsizeText(abstract || description || "", 220);
 ---
 
 <article class={`archive-entry ${className}`} data-tags={JSON.stringify(tags)}>
   <div class="archive-entry__meta">
-    <time datetime={date.toISOString()}>
-      {monthLabel}
-      {dayNumber}<sup class="archive-entry__ordinal">{dayOrdinal}</sup>
-    </time>
+    <DateStamp datetime={date} label={dateLabel} />
   </div>
   <div class="archive-entry__body">
     <h3 class="archive-entry__title">
@@ -89,16 +68,12 @@ const preview = ellipsizeText(abstract || description || "", 220);
     display: none;
   }
 
-  .archive-entry__meta time {
-    font-size: 0.85rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: rgba(15, 23, 42, 0.6);
+  .archive-entry__meta {
+    font-size: 0.95rem;
   }
 
-  .archive-entry__ordinal {
-    font-size: 0.6em;
-    vertical-align: super;
+  .archive-entry__meta .date-stamp {
+    display: inline-block;
   }
 
   .archive-entry__title {

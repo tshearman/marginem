@@ -1,5 +1,7 @@
 ---
 import Tag from "./Tag.astro";
+import LikeButton from "./LikeButton.astro";
+import DateStamp from "./DateStamp.astro";
 import { ellipsizeText } from "../lib/text";
 
 interface Props {
@@ -11,6 +13,7 @@ interface Props {
 	description?: string;
 	abstract?: string;
 	tags?: string[];
+	showLikes?: boolean;
 }
 
 const {
@@ -22,6 +25,7 @@ const {
 	description = "",
 	abstract = "",
 	tags = [],
+	showLikes = false,
 } = Astro.props as Props;
 
 const EXCERPT_LIMIT = 340;
@@ -38,7 +42,11 @@ const excerptPreview = ellipsizeText(excerptSource, EXCERPT_LIMIT, {
       <a class="post-preview__link" href={url}>{title}</a>
     </h3>
     <div class="post-preview__authors">
-      {displayDate ? <time datetime={pubDate}>{displayDate}</time> : null}
+      {
+        displayDate ? (
+          <DateStamp datetime={pubDate} label={displayDate} />
+        ) : null
+      }
     </div>
     <div class="post-preview__section">
       {
@@ -56,5 +64,16 @@ const excerptPreview = ellipsizeText(excerptSource, EXCERPT_LIMIT, {
         )
       }
     </div>
+    {
+      showLikes && id ? (
+        <div class="post-preview__likes">
+          <LikeButton
+            slug={id}
+            target="post"
+            class="post-preview__like-button"
+          />
+        </div>
+      ) : null
+    }
   </div>
 </article>

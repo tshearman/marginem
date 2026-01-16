@@ -45,6 +45,7 @@ const hybridListPosts = posts.slice(1);
               title={mostRecentPost.data.title}
               url={getUrl(mostRecentPost)}
               dateLabel={format(mostRecentPost.data.pubDate)}
+              dateTime={mostRecentPost.data.pubDate}
               description={getAbstract(mostRecentPost)}
               tags={mostRecentPost.data.tags}
               backgroundImage={heroStyle(mostRecentPost, "rgba(18,18,18,0.75)")}
@@ -63,6 +64,7 @@ const hybridListPosts = posts.slice(1);
               description={post.data.description ?? ""}
               abstract={getAbstract(post)}
               tags={post.data.tags}
+              showLikes={true}
             />
           ))}
         </div>

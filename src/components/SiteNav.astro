@@ -104,16 +104,21 @@ const currentPath = Astro.url.pathname;
     .site-nav {
       flex-wrap: wrap;
       gap: 0.75rem;
+      padding: 0.85rem 1rem 0.4rem;
     }
     .site-nav__links {
       /* width: auto; */
       order: 1;
       font-size: 0.8rem;
+      flex-wrap: wrap;
+      min-width: 0;
+      row-gap: 0.35rem;
     }
     .site-nav__search {
       order: 2;
       /* width: 100%; */
       margin-left: 0;
+      width: 100%;
     }
   }
 </style>
