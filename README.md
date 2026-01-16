@@ -52,6 +52,9 @@ A minimalist, technical blog starter built with [Astro](https://astro.build/) an
 - `GET /api/likes?type=post&slug=my-post` → `{ count, liked }`
 - `POST /api/likes` with JSON `{ type, slug, action?: "like" | "unlike" | "toggle" }` → `{ count, liked }` (also available as `DELETE /api/likes` to unlike).
 - The storage layer is isolated in `src/lib/likes/store.ts` so it can be swapped for a remote database later.
+- Likes are only accepted for slugs that exist at build time (blog posts + generated note IDs).
+- Visitor cookies are HMAC-signed; set `VISITOR_COOKIE_SECRET` to a strong, private value (deployment will fail if absent). The issued cookie remains httpOnly, same-site, secure in prod, and lasts one year.
+- Rate limiting defaults to 60 requests per minute per visitor/IP combination; override with `RATE_LIMIT_MAX_REQUESTS` and `RATE_LIMIT_WINDOW_MS` if needed.
 - Use `LIKES_DB_PATH=/absolute/or/relative/path/to/db` to point at a different database file (dev defaults to `data/likes.dev.db`, prod to `data/likes.db`).
 
 ## MDX helpers
