@@ -33,6 +33,7 @@ type GraphPayload = {
 
 const DEFAULT_WIDTH = 640;
 const DEFAULT_HEIGHT = 420;
+const AUTO_PAD = 56;
 
 function labelFor(node: GraphNode, labelKey?: string) {
   if (!labelKey) return node.id;
@@ -42,19 +43,64 @@ function labelFor(node: GraphNode, labelKey?: string) {
     : node.id;
 }
 
+function withAlpha(colorValue: string, alpha: number) {
+  if (!colorValue.startsWith("#")) return colorValue;
+  const hex = colorValue.slice(1);
+  const normalized = hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex;
+  if (normalized.length !== 6) return colorValue;
+  const r = Number.parseInt(normalized.slice(0, 2), 16);
+  const g = Number.parseInt(normalized.slice(2, 4), 16);
+  const b = Number.parseInt(normalized.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 function navigateTo(node: GraphNode) {
   if (!node.url) return;
   window.location.assign(node.url);
 }
 
-function positionTooltip(
-  root: HTMLElement,
-  tooltip: HTMLElement,
-  event: PointerEvent,
+function applyAutoBounds(
+  svg: ReturnType<typeof select>,
+  stage: HTMLElement,
+  nodes: GraphNode[],
+  fallbackWidth: number,
+  fallbackHeight: number,
 ) {
-  const bounds = root.getBoundingClientRect();
-  const x = event.clientX - bounds.left;
-  const y = event.clientY - bounds.top;
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+
+  for (const node of nodes) {
+    if (typeof node.x !== "number" || typeof node.y !== "number") continue;
+    minX = Math.min(minX, node.x);
+    minY = Math.min(minY, node.y);
+    maxX = Math.max(maxX, node.x);
+    maxY = Math.max(maxY, node.y);
+  }
+
+  if (!Number.isFinite(minX) || !Number.isFinite(minY)) return;
+
+  const contentWidth = maxX - minX;
+  const contentHeight = maxY - minY;
+  const paddedWidth = contentWidth + AUTO_PAD * 2;
+  const paddedHeight = contentHeight + AUTO_PAD * 2;
+  const viewWidth = Math.max(paddedWidth, fallbackWidth);
+  const viewHeight = Math.max(paddedHeight, fallbackHeight);
+  const offsetX = (viewWidth - paddedWidth) / 2;
+  const offsetY = (viewHeight - paddedHeight) / 2;
+  const viewX = minX - AUTO_PAD - offsetX;
+  const viewY = minY - AUTO_PAD - offsetY;
+
+  svg.attr("viewBox", `${viewX} ${viewY} ${viewWidth} ${viewHeight}`);
+  svg.attr("height", viewHeight);
+  stage.style.height = `${viewHeight}px`;
+  stage.style.minHeight = `${viewHeight}px`;
+}
+
+function positionTooltip(tooltip: HTMLElement, event: PointerEvent) {
+  const x = event.clientX;
+  const y = event.clientY;
   tooltip.style.transform = `translate(${x + 16}px, ${y + 16}px)`;
 }
 
@@ -73,9 +119,18 @@ function hydrateGraph(el: HTMLElement) {
     el.removeAttribute("data-force-graph");
     el.innerHTML = "";
 
+    const graphId = el.id;
     const root = el.closest<HTMLElement>(".force-graph") ?? el;
-    const tooltipNodes = root.querySelectorAll<HTMLElement>(
-      "[data-force-tooltip-id]",
+    const tooltipLayer = document.querySelector<HTMLElement>(
+      `[data-force-tooltip-owner="${graphId}"]`,
+    );
+    if (tooltipLayer && !tooltipLayer.dataset.portalized) {
+      tooltipLayer.dataset.portalized = "true";
+      document.body.appendChild(tooltipLayer);
+    }
+
+    const tooltipNodes = document.querySelectorAll<HTMLElement>(
+      `[data-force-tooltip-owner="${graphId}"] [data-force-tooltip-id]`,
     );
     const tooltipMap = new Map<string, HTMLElement>();
     for (const tooltipEl of tooltipNodes) {
@@ -116,13 +171,13 @@ function hydrateGraph(el: HTMLElement) {
       activeTooltip = tooltip;
       tooltip.style.opacity = "1";
       tooltip.style.visibility = "visible";
-      positionTooltip(root, tooltip, event);
+      positionTooltip(tooltip, event);
     };
 
     const moveTooltip = (event: PointerEvent, nodeData: GraphNode) => {
       if (!nodeData.tooltipId || !activeTooltip) return;
       if (activeTooltip.dataset.forceTooltipId !== nodeData.tooltipId) return;
-      positionTooltip(root, activeTooltip, event);
+      positionTooltip(activeTooltip, event);
     };
 
     const hideTooltip = (nodeData: GraphNode) => {
@@ -135,13 +190,9 @@ function hydrateGraph(el: HTMLElement) {
 
     const node = svg
       .append("g")
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 1.4)
-      .selectAll("circle")
+      .selectAll("g")
       .data(nodes)
-      .join("circle")
-      .attr("r", 9)
-      .attr("fill", (d) => color(String(d.group ?? 0)))
+      .join("g")
       .style("cursor", (d) => (d.url ? "pointer" : "default"))
       .on("click", (_event, d) => {
         navigateTo(d);
@@ -156,7 +207,7 @@ function hydrateGraph(el: HTMLElement) {
         hideTooltip(d);
       })
       .call(
-        drag<SVGCircleElement, GraphNode>()
+        drag<SVGGElement, GraphNode>()
           .on("start", (event, d) => {
             if (!event.active) simulation.alphaTarget(0.3).restart();
             d.fx = d.x;
@@ -173,10 +224,28 @@ function hydrateGraph(el: HTMLElement) {
           }),
       );
 
+    node.append("circle").attr("r", 9).attr("fill", "#f8fafc");
+
+    node
+      .append("circle")
+      .attr("r", 9)
+      .attr("fill", (d) => {
+        const stroke = color(String(d.group ?? 0));
+        if (d.id.startsWith("folder:")) {
+          return withAlpha(stroke, 1.0);
+        }
+        return "#f8fafc";
+      })
+      .attr("stroke", (d) => color(String(d.group ?? 0)))
+      .attr("stroke-width", 2);
+
     const labels = svg
       .append("g")
       .attr("font-size", "12px")
       .attr("fill", "rgba(15, 23, 42, 0.8)")
+      .attr("paint-order", "stroke")
+      .attr("stroke", "rgba(255, 255, 255, 0.95)")
+      .attr("stroke-width", 3)
       .selectAll("text")
       .data(nodes)
       .join("text")
@@ -213,12 +282,13 @@ function hydrateGraph(el: HTMLElement) {
         .attr("x2", (d) => (d.target as GraphNode).x ?? 0)
         .attr("y2", (d) => (d.target as GraphNode).y ?? 0);
 
-      node.attr("cx", (d) => d.x ?? 0).attr("cy", (d) => d.y ?? 0);
+      node.attr("transform", (d) => `translate(${d.x ?? 0}, ${d.y ?? 0})`);
 
       labels
         .attr("x", (d) => (d.x ?? 0) + 12)
         .attr("y", (d) => (d.y ?? 0) + 4);
     });
+
   } catch (error) {
     console.error("Failed to initialize force graph", error);
   }

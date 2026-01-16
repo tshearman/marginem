@@ -32,12 +32,14 @@ export async function getStaticPaths() {
 	}));
 }
 
+export const prerender = true;
+
 interface TagPageProps {
 	tag: string;
 	posts: BlogEntry[];
 }
 
-const { tag, posts } = Astro.props as TagPageProps;
+const { tag, posts = [] } = Astro.props as TagPageProps;
 ---
 <BaseLayout title={`${tag} — Notebook`} description={`Entries tagged ${tag}`} hero={`#${tag}`}>
   {posts.length === 0 ? (

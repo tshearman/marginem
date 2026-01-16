@@ -1,16 +1,22 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import PageIntro from "../../components/PageIntro.astro";
-import FilterableCount from "../../components/FilterableCount.astro";
-import { formatDate } from "../../lib/date";
-import { loadGardenNotes, resolveVaultRoot } from "../../lib/garden";
+import GardenLayout from "../../layouts/GardenLayout.astro";
+import {
+  createGardenLinkResolver,
+  loadGardenNotes,
+  resolveVaultRoot,
+} from "../../lib/garden";
+import { slugifyObsidianTarget } from "../../../plugins/remark-obsidian-links.js";
+import { MAIN_PAGES } from "../../lib/site";
 
 const notes = await loadGardenNotes();
 const vaultRoot = resolveVaultRoot();
 
 const plainExcerpt = (content: string) => {
   const withoutLinks = content.replace(/!?\[\[[^\]]+\]\]/g, " ");
-  const condensed = withoutLinks.replace(/[`#>*]/g, " ").replace(/\s+/g, " ").trim();
+  const condensed = withoutLinks
+    .replace(/[`#>*]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   return condensed.length > 160 ? `${condensed.slice(0, 160)}…` : condensed;
 };
 
@@ -18,114 +24,114 @@ const gardenNotes = notes.map((note) => ({
   ...note,
   excerpt: plainExcerpt(note.content),
 }));
+
+const linkResolver = createGardenLinkResolver(gardenNotes);
+
+const extractTargets = (content: string) => {
+  const targets: string[] = [];
+  const pattern = /\[\[([^\]]+)\]\]/g;
+  let match = pattern.exec(content);
+  while (match) {
+    const raw = match[1]?.trim();
+    if (raw) {
+      targets.push(raw.split("|")[0]?.trim() ?? raw);
+    }
+    match = pattern.exec(content);
+  }
+  return targets;
+};
+
+const groupByFolder = new Map<string, number>();
+let groupIndex = 1;
+const groupFor = (relativePath: string) => {
+  const folder = relativePath.split("/").slice(0, -1).join("/") || "root";
+  const existing = groupByFolder.get(folder);
+  if (existing) return existing;
+  const next = groupIndex++;
+  groupByFolder.set(folder, next);
+  return next;
+};
+
+const folderPaths = new Set<string>();
+for (const note of gardenNotes) {
+  const parts = note.relativePath.split("/");
+  parts.pop();
+  for (let index = 0; index < parts.length; index += 1) {
+    const folderPath = parts.slice(0, index + 1).join("/");
+    if (folderPath) folderPaths.add(folderPath);
+  }
+}
+
+const folderNodes = Array.from(folderPaths).map((folderPath) => {
+  const slug = slugifyObsidianTarget(folderPath);
+  const folderId = `folder:${slug}`;
+  const title = folderPath.split("/").slice(-1)[0] || folderPath;
+  return {
+    id: folderId,
+    title,
+    url: `/garden/${slug}/`,
+    group: groupFor(`${folderPath}/_folder`),
+  };
+});
+
+const graphNodes = gardenNotes.map((note) => ({
+  id: note.slug,
+  title: note.title,
+  url: `/garden/${note.slug}/`,
+  group: groupFor(note.relativePath),
+  tooltipId: note.slug,
+}));
+const graphNodeList = [...folderNodes, ...graphNodes];
+
+const linkKeys = new Set<string>();
+const noteLinks = gardenNotes.flatMap((note) => {
+  const targets = extractTargets(note.content);
+  return targets.flatMap((target) => {
+    const resolved = linkResolver({ target });
+    if (!resolved.isLink || !resolved.slug) return [];
+    const key = `${note.slug}->${resolved.slug}`;
+    if (linkKeys.has(key)) return [];
+    linkKeys.add(key);
+    return [{ source: note.slug, target: resolved.slug }];
+  });
+});
+
+const folderLinks = Array.from(folderPaths).flatMap((folderPath) => {
+  const parts = folderPath.split("/");
+  if (parts.length < 2) return [];
+  const parentPath = parts.slice(0, -1).join("/");
+  const source = `folder:${slugifyObsidianTarget(folderPath)}`;
+  const target = `folder:${slugifyObsidianTarget(parentPath)}`;
+  const key = `${source}->${target}`;
+  if (linkKeys.has(key)) return [];
+  linkKeys.add(key);
+  return [{ source, target }];
+});
+
+const noteFolderLinks = gardenNotes.flatMap((note) => {
+  const parts = note.relativePath.split("/");
+  parts.pop();
+  if (!parts.length) return [];
+  const folderPath = parts.join("/");
+  const source = note.slug;
+  const target = `folder:${slugifyObsidianTarget(folderPath)}`;
+  const key = `${source}->${target}`;
+  if (linkKeys.has(key)) return [];
+  linkKeys.add(key);
+  return [{ source, target }];
+});
+
+const graphLinks = [...noteLinks, ...folderLinks, ...noteFolderLinks];
 ---
-<BaseLayout
-  title="Garden | Notebook"
-  description="Living notes pulled from an Obsidian vault."
-  hero="Garden"
-  showHero={false}
->
-  <PageIntro
-    eyebrow="Evergreen notes"
-    title="Garden"
-    description="Notes are imported from the OBSIDIAN_VAULT path at build time, keeping Obsidian and the site in sync."
-  />
 
-  {
-    !gardenNotes.length ? (
-      <div class="garden-empty">
-        <p>
-          Set <code>OBSIDIAN_VAULT</code> to the root of an Obsidian vault and
-          rebuild to generate Garden pages. A sample vault lives at{" "}
-          <code>./data/obsidian-vault-sample</code>.
-        </p>
-      </div>
-    ) : (
-      <section class="garden-content">
-        <FilterableCount
-          contentType="notes"
-          totalCount={gardenNotes.length}
-          class="garden-count"
-        />
-        <div class="garden-grid">
-          {gardenNotes.map((note) => (
-            <a class="garden-card" href={`/garden/${note.slug}/`}>
-              <p class="garden-card__eyebrow">Updated {formatDate(note.updatedAt)}</p>
-              <h3>{note.title}</h3>
-              <p class="garden-card__excerpt">{note.excerpt}</p>
-              <p class="garden-card__path">
-                {note.relativePath} {vaultRoot ? `(from ${vaultRoot})` : ""}
-              </p>
-            </a>
-          ))}
-        </div>
-      </section>
-    )
-  }
-</BaseLayout>
-
-<style>
-  .garden-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .garden-count {
-    padding: 0 0.25rem;
-  }
-
-  .garden-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
-    margin-top: 0.5rem;
-  }
-
-  .garden-card {
-    display: block;
-    padding: 1rem;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    border-radius: 0.85rem;
-    background: #fff;
-    text-decoration: none;
-    color: inherit;
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease,
-      transform 0.15s ease;
-  }
-
-  .garden-card__eyebrow {
-    margin: 0 0 0.35rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.8rem;
-    color: rgba(15, 23, 42, 0.6);
-  }
-
-  .garden-card h3 {
-    margin: 0 0 0.4rem;
-    font-size: 1.1rem;
-    color: rgba(15, 23, 42, 0.95);
-  }
-
-  .garden-card__excerpt {
-    margin: 0 0 0.7rem;
-    color: rgba(15, 23, 42, 0.85);
-  }
-
-  .garden-card__path {
-    margin: 0;
-    font-size: 0.85rem;
-    color: rgba(15, 23, 42, 0.65);
-  }
-
-  .garden-empty {
-    margin-top: 1.25rem;
-    padding: 1rem 1.25rem;
-    border: 1px dashed rgba(15, 23, 42, 0.18);
-    border-radius: 0.85rem;
-    background: rgba(15, 23, 42, 0.02);
-  }
-</style>
+<GardenLayout
+  pageTitle={MAIN_PAGES.garden.pageTitle}
+  description={MAIN_PAGES.garden.description}
+  eyebrow={MAIN_PAGES.garden.eyebrow}
+  heading={MAIN_PAGES.garden.label}
+  intro={MAIN_PAGES.garden.description}
+  notes={gardenNotes}
+  vaultRoot={vaultRoot ?? undefined}
+  graph={{ nodes: graphNodeList, links: graphLinks, labelKey: "title" }}
+  emptyMessage={`Set <code>OBSIDIAN_VAULT</code> to the root of an Obsidian vault and rebuild to generate Garden pages. A sample vault lives at <code>./data/obsidian-vault-sample</code>.`}
+/>

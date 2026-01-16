@@ -7,6 +7,7 @@ import TagFilterPanel from "../../components/TagFilterPanel.astro";
 import filterScript from "../../scripts/filterable-content.js?url";
 import { getCollection } from "astro:content";
 import { generateNoteId } from "../../lib/noteUtils";
+import { MAIN_PAGES } from "../../lib/site";
 
 const notesCollection = await getCollection("notes");
 const allNotes: Array<{
@@ -65,9 +66,9 @@ const commonplaceFilterConfig = JSON.stringify({
 ---
 
 <BaseLayout
-  title="Commonplace | Notebook"
-  description="Collected passages, marginalia, and fragments."
-  hero="Commonplace"
+  title={MAIN_PAGES.commonplace.pageTitle}
+  description={MAIN_PAGES.commonplace.description}
+  hero={MAIN_PAGES.commonplace.label}
   showHero={false}
 >
   <section
@@ -75,9 +76,9 @@ const commonplaceFilterConfig = JSON.stringify({
     data-filter-config={commonplaceFilterConfig}
   >
     <PageIntro
-      eyebrow="Notebook Series"
-      title="Commonplace"
-      description="Collected passages, marginalia, and fragments to revisit when the well runs dry."
+      eyebrow={MAIN_PAGES.commonplace.eyebrow}
+      title={MAIN_PAGES.commonplace.label}
+      description={MAIN_PAGES.commonplace.description}
     />
 
     <div class="content-layout">

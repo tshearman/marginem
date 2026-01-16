@@ -6,12 +6,20 @@ interface Props {
 }
 
 const { eyebrow = "", title, description = "" } = Astro.props as Props;
+const hasSlot = Astro.slots.has("description");
+const hasDescription = description !== "";
 ---
 
 <header class="page-intro">
   {eyebrow ? <p class="page-intro__eyebrow eyebrow-text">{eyebrow}</p> : null}
   <h1>{title}</h1>
-  {description ? <p class="page-intro__lede">{description}</p> : null}
+  {hasSlot ? (
+    <div class="page-intro__lede">
+      <slot name="description" />
+    </div>
+  ) : hasDescription ? (
+    <p class="page-intro__lede">{description}</p>
+  ) : null}
 </header>
 
 <style>
@@ -30,5 +38,9 @@ const { eyebrow = "", title, description = "" } = Astro.props as Props;
     margin: 0 auto;
     max-width: 52ch;
     color: rgba(15, 23, 42, 0.75);
+  }
+
+  .page-intro__lede :global(p) {
+    margin: 0 0 0.75rem;
   }
 </style>

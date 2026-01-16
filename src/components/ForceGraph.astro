@@ -1,10 +1,12 @@
 ---
+import GardenNoteCard from "./GardenNoteCard.astro";
 import NoteCard from "./NoteCard.astro";
 import PostPreview from "./PostPreview.astro";
 import forceGraphClient from "../scripts/force-graph.ts?url";
 
 type GraphNode = {
   id: string;
+  title?: string;
   group?: number;
   url?: string;
   tooltipId?: string;
@@ -41,18 +43,30 @@ type ForceGraphProps = {
     abstract?: string;
     tags?: string[];
   }>;
+  gardenTooltips?: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    excerpt: string;
+    updatedAt: Date;
+    relativePath: string;
+    vaultRoot?: string;
+  }>;
 };
 
 const {
   nodes,
   links,
   width = 640,
-  height = 420,
+  height = 240,
   labelKey = "id",
   className = "",
   noteTooltips = [],
   postTooltips = [],
+  gardenTooltips = [],
 } = Astro.props as ForceGraphProps;
+
+const clampedHeight = Math.min(Math.max(height, 240), 420);
 
 const graphId = `force-graph-${
   globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
@@ -61,20 +75,37 @@ const payloadAttr = JSON.stringify({
   nodes,
   links,
   width,
-  height,
+  height: clampedHeight,
   labelKey,
 }).replace(/</g, "\\u003c");
 ---
 
 <div
   class={`force-graph ${className}`.trim()}
-  style={`--force-graph-height: ${height}px;`}
+  style={`--force-graph-height-desktop: ${clampedHeight}px;`}
+  data-force-graph-id={graphId}
 >
   <div id={graphId} class="force-graph__stage" data-force-graph={payloadAttr}>
   </div>
   {
-    noteTooltips.length || postTooltips.length ? (
-      <div class="force-graph__tooltip-layer" aria-hidden="true">
+    noteTooltips.length || postTooltips.length || gardenTooltips.length ? (
+      <div
+        class="force-graph__tooltip-layer"
+        data-force-tooltip-owner={graphId}
+        aria-hidden="true"
+      >
+        {gardenTooltips.map((note) => (
+          <div class="force-graph__tooltip" data-force-tooltip-id={note.id}>
+            <GardenNoteCard
+              slug={note.slug}
+              title={note.title}
+              excerpt={note.excerpt}
+              updatedAt={note.updatedAt}
+              relativePath={note.relativePath}
+              vaultRoot={note.vaultRoot}
+            />
+          </div>
+        ))}
         {noteTooltips.map((note) => (
           <div class="force-graph__tooltip" data-force-tooltip-id={note.id}>
             <NoteCard
@@ -113,18 +144,21 @@ const payloadAttr = JSON.stringify({
     min-height: var(--force-graph-height, 420px);
     position: relative;
     overflow: visible;
+    --force-graph-height: var(--force-graph-height-desktop, 420px);
   }
 
   .force-graph__stage {
     width: 100%;
     min-height: var(--force-graph-height, 420px);
     overflow: hidden;
+    touch-action: pan-y;
   }
 
   .force-graph__tooltip-layer {
-    position: absolute;
+    position: fixed;
     inset: 0;
     pointer-events: none;
+    z-index: 50;
   }
 
   .force-graph__tooltip {
@@ -137,9 +171,16 @@ const payloadAttr = JSON.stringify({
     transition: opacity 0.15s ease;
     border: 1px solid #0f172a;
     border-radius: 6px;
+    background: #fff;
+    padding: 1rem;
   }
 
   .force-graph__tooltip :global(.note-card) {
+    margin: 0;
+    border-radius: 6px;
+  }
+
+  .force-graph__tooltip :global(.garden-card) {
     margin: 0;
     border-radius: 6px;
   }
@@ -155,5 +196,11 @@ const payloadAttr = JSON.stringify({
 
   .force-graph__tooltip :global(.note-like) {
     display: none;
+  }
+
+  @media (max-width: 720px) {
+    .force-graph {
+      --force-graph-height: 180px;
+    }
   }
 </style>

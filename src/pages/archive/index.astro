@@ -7,6 +7,7 @@ import ArchiveEntry from "../../components/ArchiveEntry.astro";
 import TagFilterPanel from "../../components/TagFilterPanel.astro";
 import { getCollection } from "astro:content";
 import filterScript from "../../scripts/filterable-content.js?url";
+import { MAIN_PAGES } from "../../lib/site";
 
 type BlogEntry = CollectionEntry<"blog">;
 type PostsByYear = Record<string, BlogEntry[]>;
@@ -43,15 +44,15 @@ const archiveFilterConfig = JSON.stringify({
 });
 ---
 <BaseLayout
-  title="Archive | Notebook"
-  description="Every essay and research note in one place."
-  hero="Archive"
+  title={MAIN_PAGES.archive.pageTitle}
+  description={MAIN_PAGES.archive.description}
+  hero={MAIN_PAGES.archive.label}
   showHero={false}
 >
   <PageIntro
-    eyebrow="All posts"
-    title="Archive"
-    description="Browse every note and essay, organized by year."
+    eyebrow={MAIN_PAGES.archive.eyebrow}
+    title={MAIN_PAGES.archive.label}
+    description={MAIN_PAGES.archive.description}
   />
   {
     !posts.length ? (
