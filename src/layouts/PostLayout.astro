@@ -8,9 +8,10 @@ import { formatDate } from "../lib/date";
 interface Props {
   frontmatter: Record<string, any>;
   slug: string;
+  activePage?: string;
 }
 
-const { frontmatter, slug } = Astro.props as Props;
+const { frontmatter, slug, activePage } = Astro.props as Props;
 const formattedDate = frontmatter?.pubDate
   ? formatDate(frontmatter.pubDate, {
       month: "long",
@@ -27,6 +28,7 @@ const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
   hero={frontmatter.title}
   showHero={false}
   includeFootnotes={true}
+  activePage={activePage}
 >
   <section class="paper-title">
     <div class="paper-title__rule paper-title__rule--thick" aria-hidden="true">

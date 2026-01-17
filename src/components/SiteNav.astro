@@ -6,17 +6,20 @@ import IconGarden from "./icons/IconGarden.astro";
 import IconArchive from "./icons/IconArchive.astro";
 import { MAIN_NAV } from "../lib/site";
 
-const currentPath = Astro.url.pathname;
+interface SiteNavProps {
+  activePage?: string;
+}
+
+const { activePage } = Astro.props as SiteNavProps;
 ---
 
 <nav class="site-nav">
   <div class="site-nav__links">
     {
       MAIN_NAV.map((item) => {
-        const isActive =
-          item.href === "/"
-            ? currentPath === "/"
-            : currentPath.startsWith(item.href);
+        const isActive = activePage
+          ? item.label.toLowerCase() === activePage.toLowerCase()
+          : false;
         const icon =
           item.label === "Writing" ? (
             <IconWriting />

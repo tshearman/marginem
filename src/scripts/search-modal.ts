@@ -1,5 +1,16 @@
 import { formatDate, formatDateLabelHtml } from "../lib/date";
 
+// Temporary diagnostics to trace search initialization in build/preview.
+const DEBUG =
+	(typeof window !== "undefined" &&
+		(window as typeof window & { __searchDebug?: boolean }).__searchDebug) ??
+	true;
+const log = (...args: unknown[]) => {
+	if (!DEBUG) return;
+	// Use info to surface in most consoles without being noisy.
+	console.info("[search]", ...args);
+};
+
 const SEARCH_INDEX_URL = "/api/search.json";
 const MAX_RESULTS = 20;
 
@@ -25,12 +36,27 @@ type SearchState = {
 	cleanup?: (() => void) | null;
 };
 
-const SEARCH_STATE: SearchState =
-	(window.__siteSearchState as SearchState | undefined) ?? {};
-window.__siteSearchState = SEARCH_STATE;
+const getGlobalSearchState = () => {
+	if (typeof window === "undefined") return undefined;
+	log("getGlobalSearchState");
+	return (window as typeof window & { __siteSearchState?: SearchState })
+		.__siteSearchState;
+};
+
+const SEARCH_STATE: SearchState = getGlobalSearchState() ?? {};
+if (typeof window !== "undefined") {
+	log("hydrating SEARCH_STATE on window");
+	(
+		window as typeof window & {
+			__siteSearchState?: SearchState;
+		}
+	).__siteSearchState = SEARCH_STATE;
+}
 
 async function fetchSearchIndex() {
-	const response = await fetch(SEARCH_INDEX_URL, { cache: "force-cache" });
+	log("fetchSearchIndex start", SEARCH_INDEX_URL);
+	// Skip caches so deploys pick up fresh search data.
+	const response = await fetch(SEARCH_INDEX_URL, { cache: "no-store" });
 	if (!response.ok) {
 		throw new Error(`Search index responded with ${response.status}`);
 	}
@@ -290,6 +316,7 @@ async function performSearch(query: string) {
 	if (trimmed === lastQuery && dataLoaded) return;
 	lastQuery = trimmed;
 	if (!trimmed) {
+		log("performSearch: empty query");
 		renderPlaceholder(container, "Type to search the entire archive.");
 		return;
 	}
@@ -301,6 +328,11 @@ async function performSearch(query: string) {
 	}
 
 	const data = await loadSearchData();
+	log("performSearch: data loaded", {
+		request: currentRequest,
+		total: data.length,
+		error: SEARCH_STATE.error,
+	});
 	if (currentRequest !== searchRequestId) {
 		return;
 	}
@@ -395,9 +427,17 @@ function setupSearch() {
 		!input ||
 		!(results instanceof HTMLElement)
 	) {
+		log("setupSearch: missing elements", {
+			trigger: Boolean(trigger),
+			overlay: Boolean(overlay),
+			closeButton: Boolean(closeButton),
+			input: Boolean(input),
+			results: Boolean(results),
+		});
 		return;
 	}
 
+	log("setupSearch: attaching listeners");
 	void loadSearchData();
 
 	let debounce: number | undefined;
@@ -419,6 +459,7 @@ function setupSearch() {
 
 		if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
 			event.preventDefault();
+			log("keyHandler: meta/ctrl+K");
 			openSearch();
 		} else if (
 			event.key === "/" &&
@@ -428,11 +469,13 @@ function setupSearch() {
 			!isInputTarget
 		) {
 			event.preventDefault();
+			log("keyHandler: slash trigger");
 			openSearch();
 		} else if (event.key === "Escape") {
 			const modalEl = document.getElementById("search-modal");
 			if (modalEl?.classList.contains("is-visible")) {
 				event.preventDefault();
+				log("keyHandler: escape close");
 				closeSearch();
 			}
 		}
@@ -456,6 +499,7 @@ function setupSearch() {
 	document.addEventListener("keydown", keyHandler);
 
 	SEARCH_STATE.cleanup = () => {
+		log("cleanup listeners");
 		trigger.removeEventListener("click", triggerHandler);
 		overlay.removeEventListener("click", overlayHandler);
 		closeButton.removeEventListener("click", closeHandler);
@@ -466,19 +510,38 @@ function setupSearch() {
 }
 
 function init() {
+	log("init run; cleanup exists?", Boolean(SEARCH_STATE.cleanup));
 	setupSearch();
 	const shortcut = document.querySelector<HTMLElement>(".nav-search__shortcut");
 	if (shortcut) {
-		const platform = navigator.userAgent.toLowerCase();
-		const isMac = platform.includes("mac");
-		shortcut.textContent = isMac ? "⌘K" : "Ctrl+K";
+		const ua = navigator.userAgent || "";
+		const platform = navigator.platform || ua;
+		const isMac = /mac|iphone|ipad|ipod/i.test(platform);
+		const isWindows = /win/i.test(platform);
+		const isLinux = /linux/i.test(platform);
+		log("shortcut detection", { ua, platform, isMac, isWindows, isLinux });
+		if (isMac) {
+			shortcut.textContent = "⌘K";
+		} else if (isWindows || isLinux) {
+			shortcut.textContent = "Ctrl+K";
+		} else {
+			shortcut.textContent = "/"; // fallback
+		}
 	}
 }
 
-if (document.readyState === "loading") {
-	document.addEventListener("DOMContentLoaded", init, { once: true });
-} else {
-	init();
-}
+const enableSearch = () => {
+	if (typeof document === "undefined") return;
+	log("enableSearch", document.readyState);
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", init, { once: true });
+	} else {
+		init();
+	}
+	document.addEventListener("astro:page-load", init);
+};
 
-document.addEventListener("astro:page-load", init);
+if (typeof window !== "undefined" && typeof document !== "undefined") {
+	log("search script executing in browser");
+	enableSearch();
+}

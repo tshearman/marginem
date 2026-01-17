@@ -18,6 +18,7 @@ src/blogupdate_runner.egg-info/
 .env
 .env.local
 .env.*.local
+deploy/config/secrets.env
 
 # logs
 npm-debug.log*

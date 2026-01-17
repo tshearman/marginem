@@ -144,7 +144,9 @@ export const GET: APIRoute = async () => {
 	return new Response(JSON.stringify(payload), {
 		headers: {
 			"Content-Type": "application/json",
-			"Cache-Control": "public, max-age=3600",
+			// Avoid serving stale search results across deploys.
+			"Cache-Control": "no-store, must-revalidate",
+			Pragma: "no-cache",
 		},
 	});
 };

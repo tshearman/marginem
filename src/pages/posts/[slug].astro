@@ -17,6 +17,6 @@ if (!post) {
 const { Content } = await post.render();
 const frontmatter = post.data;
 ---
-<PostLayout frontmatter={frontmatter} slug={slug}>
+<PostLayout frontmatter={frontmatter} slug={slug} activePage="Writing">
   <Content />
 </PostLayout>

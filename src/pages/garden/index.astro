@@ -134,4 +134,5 @@ const graphLinks = [...noteLinks, ...folderLinks, ...noteFolderLinks];
   vaultRoot={vaultRoot ?? undefined}
   graph={{ nodes: graphNodeList, links: graphLinks, labelKey: "title" }}
   emptyMessage={`Set <code>OBSIDIAN_VAULT</code> to the root of an Obsidian vault and rebuild to generate Garden pages. A sample vault lives at <code>./data/obsidian-vault-sample</code>.`}
+  activePage={MAIN_PAGES.garden.label}
 />

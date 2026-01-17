@@ -36,6 +36,7 @@ interface GardenLayoutProps {
   breadcrumbs?: Breadcrumb[];
   graph?: GraphData;
   emptyMessage?: string;
+  activePage?: string;
 }
 
 const {
@@ -49,6 +50,7 @@ const {
   breadcrumbs = [],
   graph,
   emptyMessage,
+  activePage,
 } = Astro.props as GardenLayoutProps;
 
 const showEmpty = notes.length === 0;
@@ -69,6 +71,7 @@ const gardenTooltips = notes.map((note) => ({
   description={description}
   hero="Garden"
   showHero={false}
+  activePage={activePage}
 >
   <PageIntro eyebrow={eyebrow} title={heading} description={intro}>
     {

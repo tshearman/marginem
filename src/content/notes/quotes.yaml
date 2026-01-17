@@ -1,29 +1,5 @@
-- content: "The only way to do great work is to love what you do."
-  source: "Steve Jobs"
-  author: "Steve Jobs"
-  tags: ["motivation", "work", "passion"]
-  date: 2024-01-15
-
 - content: "In the midst of chaos, there is also opportunity."
   source: "Sun Tzu"
   author: "Sun Tzu"
   tags: ["wisdom", "opportunity", "chaos"]
   date: 2024-01-20
-
-- content: "The best way to predict the future is to invent it."
-  source: "Alan Kay"
-  author: "Alan Kay"
-  tags: ["innovation", "future", "creativity"]
-  date: 2024-02-01
-
-- content: "Be the change you wish to see in the world."
-  source: "Mahatma Gandhi"
-  author: "Mahatma Gandhi"
-  tags: ["change", "inspiration", "action"]
-  date: 2024-02-10
-
-- content: "The unexamined life is not worth living."
-  source: "Socrates"
-  author: "Socrates"
-  tags: ["philosophy", "reflection", "wisdom"]
-  date: 2024-02-15

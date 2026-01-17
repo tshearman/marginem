@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.5
 # Build and run the Astro app with the Node adapter in a minimal runtime image.
 FROM node:22-bookworm-slim AS base
 WORKDIR /app
@@ -14,7 +15,14 @@ RUN npm ci
 # Build the Astro site.
 FROM deps AS build
 COPY . .
-RUN npm run build
+RUN --mount=type=secret,id=visitor_cookie_secret \
+	sh -c '\
+		VISITOR_COOKIE_SECRET=$(if [ -f /run/secrets/visitor_cookie_secret ]; then \
+			grep "^VISITOR_COOKIE_SECRET=" /run/secrets/visitor_cookie_secret | head -n1 | cut -d= -f2-; \
+		fi); \
+		export VISITOR_COOKIE_SECRET=${VISITOR_COOKIE_SECRET:-build-placeholder}; \
+		npm run build; \
+	'
 
 # Production image with only runtime bits.
 FROM base AS runner

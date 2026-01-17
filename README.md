@@ -83,6 +83,10 @@ The build stage also installs `ghc`, `sbcl`, and `python3-numpy`, so `runghc`, C
 - Deploy to a Node-capable host; the likes API uses `output: "server"` with the Node adapter.
 - Format the flake with `nix fmt` and keep `flake.lock` under version control so teammates share the same toolchain.
 
+## Blue/green deployment
+
+See `deploy/README.md` for a Docker Compose-based blue/green setup that mounts built artifacts per color, fronts them with nginx, and documents how to flip traffic after staging a healthy build.
+
 ## Dev container
 
 - Use the VS Code Dev Containers extension to reopen this repo in a container; VS Code will build `.devcontainer/Dockerfile` and install npm dependencies automatically (`npm install` runs via `postCreateCommand`).

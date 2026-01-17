@@ -27,7 +27,17 @@ export const formatDate = (
 	value: Date | string,
 	options?: Intl.DateTimeFormatOptions,
 ) => {
-	const date = typeof value === "string" ? new Date(value) : value;
+	const toDate = (input: Date | string) => {
+		if (input instanceof Date) return input;
+		const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input);
+		if (isoMatch) {
+			const [, year, month, day] = isoMatch.map(Number);
+			return new Date(year, month - 1, day);
+		}
+		return new Date(input);
+	};
+
+	const date = toDate(value);
 	if (!(date instanceof Date) || Number.isNaN(date.valueOf())) {
 		return "";
 	}
