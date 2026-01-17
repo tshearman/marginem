@@ -6,25 +6,25 @@ import { formatDate } from "../lib/date";
 import { generateNoteId } from "../lib/noteUtils";
 
 interface Props {
-  content: string;
-  source?: string;
-  author?: string;
-  tags?: string[];
-  date?: Date;
-  class?: string;
-  style?: string;
-  idOverride?: string;
+	content: string;
+	source?: string;
+	author?: string;
+	tags?: string[];
+	date?: Date;
+	class?: string;
+	style?: string;
+	idOverride?: string;
 }
 
 const {
-  content,
-  source,
-  author,
-  tags = [],
-  date,
-  class: className,
-  style,
-  idOverride,
+	content,
+	source,
+	author,
+	tags = [],
+	date,
+	class: className,
+	style,
+	idOverride,
 } = Astro.props as Props;
 const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
 ---

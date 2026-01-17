@@ -6,63 +6,63 @@ import ForceGraph from "../components/ForceGraph.astro";
 import GardenNoteCard from "../components/GardenNoteCard.astro";
 
 type GardenCard = {
-  slug: string;
-  title: string;
-  excerpt: string;
-  updatedAt: Date;
-  relativePath: string;
+	slug: string;
+	title: string;
+	excerpt: string;
+	updatedAt: Date;
+	relativePath: string;
 };
 
 type Breadcrumb = {
-  label: string;
-  href?: string;
+	label: string;
+	href?: string;
 };
 
 type GraphData = {
-  nodes: Array<{ id: string; title?: string; url?: string; group?: number }>;
-  links: Array<{ source: string; target: string }>;
-  height?: number;
-  labelKey?: string;
+	nodes: Array<{ id: string; title?: string; url?: string; group?: number }>;
+	links: Array<{ source: string; target: string }>;
+	height?: number;
+	labelKey?: string;
 };
 
 interface GardenLayoutProps {
-  pageTitle: string;
-  description: string;
-  eyebrow: string;
-  heading: string;
-  intro: string;
-  notes: GardenCard[];
-  vaultRoot?: string;
-  breadcrumbs?: Breadcrumb[];
-  graph?: GraphData;
-  emptyMessage?: string;
-  activePage?: string;
+	pageTitle: string;
+	description: string;
+	eyebrow: string;
+	heading: string;
+	intro: string;
+	notes: GardenCard[];
+	vaultRoot?: string;
+	breadcrumbs?: Breadcrumb[];
+	graph?: GraphData;
+	emptyMessage?: string;
+	activePage?: string;
 }
 
 const {
-  pageTitle,
-  description,
-  eyebrow,
-  heading,
-  intro,
-  notes,
-  vaultRoot,
-  breadcrumbs = [],
-  graph,
-  emptyMessage,
-  activePage,
+	pageTitle,
+	description,
+	eyebrow,
+	heading,
+	intro,
+	notes,
+	vaultRoot,
+	breadcrumbs = [],
+	graph,
+	emptyMessage,
+	activePage,
 } = Astro.props as GardenLayoutProps;
 
 const showEmpty = notes.length === 0;
 const showGraph = graph && graph.nodes.length;
 const gardenTooltips = notes.map((note) => ({
-  id: note.slug,
-  slug: note.slug,
-  title: note.title,
-  excerpt: note.excerpt,
-  updatedAt: note.updatedAt,
-  relativePath: note.relativePath,
-  vaultRoot,
+	id: note.slug,
+	slug: note.slug,
+	title: note.title,
+	excerpt: note.excerpt,
+	updatedAt: note.updatedAt,
+	relativePath: note.relativePath,
+	vaultRoot,
 }));
 ---
 

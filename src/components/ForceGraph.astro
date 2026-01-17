@@ -5,78 +5,78 @@ import PostPreview from "./PostPreview.astro";
 import forceGraphClient from "../scripts/force-graph.ts?url";
 
 type GraphNode = {
-  id: string;
-  title?: string;
-  group?: number;
-  url?: string;
-  tooltipId?: string;
+	id: string;
+	title?: string;
+	group?: number;
+	url?: string;
+	tooltipId?: string;
 };
 
 type GraphLink = {
-  source: string;
-  target: string;
-  value?: number;
+	source: string;
+	target: string;
+	value?: number;
 };
 
 type ForceGraphProps = {
-  nodes: GraphNode[];
-  links: GraphLink[];
-  width?: number;
-  height?: number;
-  labelKey?: string;
-  className?: string;
-  noteTooltips?: Array<{
-    id: string;
-    content: string;
-    source?: string;
-    author?: string;
-    tags?: string[];
-    date?: Date;
-  }>;
-  postTooltips?: Array<{
-    id: string;
-    title: string;
-    url: string;
-    pubDate?: string;
-    displayDate?: string;
-    description?: string;
-    abstract?: string;
-    tags?: string[];
-  }>;
-  gardenTooltips?: Array<{
-    id: string;
-    slug: string;
-    title: string;
-    excerpt: string;
-    updatedAt: Date;
-    relativePath: string;
-    vaultRoot?: string;
-  }>;
+	nodes: GraphNode[];
+	links: GraphLink[];
+	width?: number;
+	height?: number;
+	labelKey?: string;
+	className?: string;
+	noteTooltips?: Array<{
+		id: string;
+		content: string;
+		source?: string;
+		author?: string;
+		tags?: string[];
+		date?: Date;
+	}>;
+	postTooltips?: Array<{
+		id: string;
+		title: string;
+		url: string;
+		pubDate?: string;
+		displayDate?: string;
+		description?: string;
+		abstract?: string;
+		tags?: string[];
+	}>;
+	gardenTooltips?: Array<{
+		id: string;
+		slug: string;
+		title: string;
+		excerpt: string;
+		updatedAt: Date;
+		relativePath: string;
+		vaultRoot?: string;
+	}>;
 };
 
 const {
-  nodes,
-  links,
-  width = 640,
-  height = 240,
-  labelKey = "id",
-  className = "",
-  noteTooltips = [],
-  postTooltips = [],
-  gardenTooltips = [],
+	nodes,
+	links,
+	width = 640,
+	height = 240,
+	labelKey = "id",
+	className = "",
+	noteTooltips = [],
+	postTooltips = [],
+	gardenTooltips = [],
 } = Astro.props as ForceGraphProps;
 
 const clampedHeight = Math.min(Math.max(height, 240), 420);
 
 const graphId = `force-graph-${
-  globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
+	globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
 }`;
 const payloadAttr = JSON.stringify({
-  nodes,
-  links,
-  width,
-  height: clampedHeight,
-  labelKey,
+	nodes,
+	links,
+	width,
+	height: clampedHeight,
+	labelKey,
 }).replace(/</g, "\\u003c");
 ---
 

@@ -3,16 +3,16 @@ import DateStamp from "./DateStamp.astro";
 import { formatDate } from "../lib/date";
 
 interface Props {
-  slug: string;
-  title: string;
-  excerpt: string;
-  updatedAt: Date;
-  relativePath: string;
-  vaultRoot?: string;
+	slug: string;
+	title: string;
+	excerpt: string;
+	updatedAt: Date;
+	relativePath: string;
+	vaultRoot?: string;
 }
 
 const { slug, title, excerpt, updatedAt, relativePath, vaultRoot } =
-  Astro.props as Props;
+	Astro.props as Props;
 ---
 
 <a class="garden-card" href={`/garden/${slug}/`}>

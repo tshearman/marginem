@@ -63,7 +63,8 @@ export default function remarkObsidianLinks(options = {}) {
 					typeof resolution === "string"
 						? resolution
 						: resolution?.slug ?? resolution?.url;
-				const linkText = customText || parsed.alias || parsed.target || slugOrUrl;
+				const linkText =
+					customText || parsed.alias || parsed.target || slugOrUrl;
 				const isLink =
 					typeof resolution === "object" && resolution
 						? resolution.isLink ?? Boolean(slugOrUrl)
@@ -78,7 +79,9 @@ export default function remarkObsidianLinks(options = {}) {
 					continue;
 				}
 
-				const anchor = parsed.heading ? `#${slugifyHeading(parsed.heading)}` : "";
+				const anchor = parsed.heading
+					? `#${slugifyHeading(parsed.heading)}`
+					: "";
 				const url =
 					slugOrUrl.startsWith("/") || slugOrUrl.startsWith("http")
 						? `${slugOrUrl}${anchor}`

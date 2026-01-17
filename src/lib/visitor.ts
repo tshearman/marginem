@@ -22,7 +22,9 @@ if (!VISITOR_COOKIE_SECRET) {
 }
 
 const signVisitorId = (visitorId: string) =>
-	createHmac("sha256", VISITOR_COOKIE_SECRET).update(visitorId).digest("base64url");
+	createHmac("sha256", VISITOR_COOKIE_SECRET)
+		.update(visitorId)
+		.digest("base64url");
 
 const buildSignedCookieValue = (visitorId: string) =>
 	`${visitorId}.${signVisitorId(visitorId)}`;

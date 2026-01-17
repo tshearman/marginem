@@ -3,49 +3,49 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import ForceGraph from "../components/ForceGraph.astro";
 
 const nodes = [
-  { id: "Home", group: 1, url: "/" },
-  { id: "Garden", group: 1, url: "/garden/" },
-  { id: "Archive", group: 2, url: "/archive/" },
-  { id: "Commonplace", group: 2, url: "/commonplace/" },
-  { id: "Graph Test", group: 3, url: "/graph-test/" },
-  { id: "Notecard", group: 4, tooltipId: "note-1" },
-  { id: "Post", group: 4, tooltipId: "post-1", url: "/posts/first-post/" },
+	{ id: "Home", group: 1, url: "/" },
+	{ id: "Garden", group: 1, url: "/garden/" },
+	{ id: "Archive", group: 2, url: "/archive/" },
+	{ id: "Commonplace", group: 2, url: "/commonplace/" },
+	{ id: "Graph Test", group: 3, url: "/graph-test/" },
+	{ id: "Notecard", group: 4, tooltipId: "note-1" },
+	{ id: "Post", group: 4, tooltipId: "post-1", url: "/posts/first-post/" },
 ];
 
 const links = [
-  { source: "Home", target: "Garden" },
-  { source: "Home", target: "Archive" },
-  { source: "Home", target: "Commonplace" },
-  { source: "Archive", target: "Graph Test" },
-  { source: "Garden", target: "Graph Test" },
-  { source: "Commonplace", target: "Graph Test" },
-  { source: "Graph Test", target: "Home" },
-  { source: "Commonplace", target: "Notecard" },
-  { source: "Archive", target: "Post" },
+	{ source: "Home", target: "Garden" },
+	{ source: "Home", target: "Archive" },
+	{ source: "Home", target: "Commonplace" },
+	{ source: "Archive", target: "Graph Test" },
+	{ source: "Garden", target: "Graph Test" },
+	{ source: "Commonplace", target: "Graph Test" },
+	{ source: "Graph Test", target: "Home" },
+	{ source: "Commonplace", target: "Notecard" },
+	{ source: "Archive", target: "Post" },
 ];
 
 const noteTooltips = [
-  {
-    id: "note-1",
-    content: "The most useful ideas live between categories.",
-    author: "Studio log",
-    source: "Commonplace notebook",
-    date: new Date("2024-03-08"),
-    tags: ["notecard", "garden"],
-  },
+	{
+		id: "note-1",
+		content: "The most useful ideas live between categories.",
+		author: "Studio log",
+		source: "Commonplace notebook",
+		date: new Date("2024-03-08"),
+		tags: ["notecard", "garden"],
+	},
 ];
 
 const postTooltips = [
-  {
-    id: "post-1",
-    title: "First Post",
-    url: "/posts/first-post/",
-    pubDate: "2024-01-14",
-    displayDate: "Jan 14, 2024",
-    description: "A short introduction that sets the tone for the notebook.",
-    abstract: "A short introduction that sets the tone for the notebook.",
-    tags: ["intro", "notes"],
-  },
+	{
+		id: "post-1",
+		title: "First Post",
+		url: "/posts/first-post/",
+		pubDate: "2024-01-14",
+		displayDate: "Jan 14, 2024",
+		description: "A short introduction that sets the tone for the notebook.",
+		abstract: "A short introduction that sets the tone for the notebook.",
+		tags: ["intro", "notes"],
+	},
 ];
 ---
 <BaseLayout title="Force Graph Test" description="Quick D3 force graph sample.">

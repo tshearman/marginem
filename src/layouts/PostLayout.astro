@@ -6,19 +6,19 @@ import DateStamp from "../components/DateStamp.astro";
 import { formatDate } from "../lib/date";
 
 interface Props {
-  frontmatter: Record<string, any>;
-  slug: string;
-  activePage?: string;
+	frontmatter: Record<string, any>;
+	slug: string;
+	activePage?: string;
 }
 
 const { frontmatter, slug, activePage } = Astro.props as Props;
 const formattedDate = frontmatter?.pubDate
-  ? formatDate(frontmatter.pubDate, {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    })
-  : "";
+	? formatDate(frontmatter.pubDate, {
+			month: "long",
+			day: "numeric",
+			year: "numeric",
+		})
+	: "";
 const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
 ---
 

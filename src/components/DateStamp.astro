@@ -1,15 +1,15 @@
 ---
 interface Props {
-  datetime: string | Date;
-  label?: string;
-  class?: string;
+	datetime: string | Date;
+	label?: string;
+	class?: string;
 }
 
 import { formatDateLabelHtml } from "../lib/date";
 
 const { datetime, label = "", class: className } = Astro.props as Props;
 const isoDate =
-  typeof datetime === "string" ? datetime : datetime.toISOString();
+	typeof datetime === "string" ? datetime : datetime.toISOString();
 const renderedLabel = formatDateLabelHtml(label);
 ---
 

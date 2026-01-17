@@ -459,7 +459,6 @@ function setupSearch() {
 
 		if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
 			event.preventDefault();
-			log("keyHandler: meta/ctrl+K");
 			openSearch();
 		} else if (
 			event.key === "/" &&
@@ -512,22 +511,6 @@ function setupSearch() {
 function init() {
 	log("init run; cleanup exists?", Boolean(SEARCH_STATE.cleanup));
 	setupSearch();
-	const shortcut = document.querySelector<HTMLElement>(".nav-search__shortcut");
-	if (shortcut) {
-		const ua = navigator.userAgent || "";
-		const platform = navigator.platform || ua;
-		const isMac = /mac|iphone|ipad|ipod/i.test(platform);
-		const isWindows = /win/i.test(platform);
-		const isLinux = /linux/i.test(platform);
-		log("shortcut detection", { ua, platform, isMac, isWindows, isLinux });
-		if (isMac) {
-			shortcut.textContent = "⌘K";
-		} else if (isWindows || isLinux) {
-			shortcut.textContent = "Ctrl+K";
-		} else {
-			shortcut.textContent = "/"; // fallback
-		}
-	}
 }
 
 const enableSearch = () => {

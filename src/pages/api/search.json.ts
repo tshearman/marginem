@@ -118,11 +118,7 @@ const buildGardenEntries = (
 			displayDate: formatDate(note.updatedAt),
 			pubDate: note.updatedAt.toISOString(),
 			timestamp: note.updatedAt.getTime(),
-			searchText: toSearchText([
-				note.title,
-				note.relativePath,
-				note.content,
-			]),
+			searchText: toSearchText([note.title, note.relativePath, note.content]),
 		};
 	});
 

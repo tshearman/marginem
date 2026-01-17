@@ -11,19 +11,16 @@ type BlogEntry = CollectionEntry<"blog">;
 export async function getStaticPaths() {
 	const posts = await getCollection("blog", ({ data }) => !data.draft);
 
-	const tagsBySlug = posts.reduce(
-		(map, post) => {
-			for (const tag of post.data.tags ?? []) {
-				const slug = tag.toLowerCase();
-				const entry = map.get(slug) ?? { label: tag, posts: [] as BlogEntry[] };
-				entry.posts.push(post as BlogEntry);
-				entry.label = tag; // keep last-seen casing
-				map.set(slug, entry);
-			}
-			return map;
-		},
-		new Map<string, { label: string; posts: BlogEntry[] }>(),
-	);
+	const tagsBySlug = posts.reduce((map, post) => {
+		for (const tag of post.data.tags ?? []) {
+			const slug = tag.toLowerCase();
+			const entry = map.get(slug) ?? { label: tag, posts: [] as BlogEntry[] };
+			entry.posts.push(post as BlogEntry);
+			entry.label = tag; // keep last-seen casing
+			map.set(slug, entry);
+		}
+		return map;
+	}, new Map<string, { label: string; posts: BlogEntry[] }>());
 
 	return Array.from(tagsBySlug, ([slug, value]) => ({
 		params: { tag: slug },

@@ -1,9 +1,9 @@
 ---
 import GardenLayout from "../../layouts/GardenLayout.astro";
 import {
-  createGardenLinkResolver,
-  loadGardenNotes,
-  resolveVaultRoot,
+	createGardenLinkResolver,
+	loadGardenNotes,
+	resolveVaultRoot,
 } from "../../lib/garden";
 import { slugifyObsidianTarget } from "../../../plugins/remark-obsidian-links.js";
 import { MAIN_PAGES } from "../../lib/site";
@@ -12,113 +12,113 @@ const notes = await loadGardenNotes();
 const vaultRoot = resolveVaultRoot();
 
 const plainExcerpt = (content: string) => {
-  const withoutLinks = content.replace(/!?\[\[[^\]]+\]\]/g, " ");
-  const condensed = withoutLinks
-    .replace(/[`#>*]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return condensed.length > 160 ? `${condensed.slice(0, 160)}…` : condensed;
+	const withoutLinks = content.replace(/!?\[\[[^\]]+\]\]/g, " ");
+	const condensed = withoutLinks
+		.replace(/[`#>*]/g, " ")
+		.replace(/\s+/g, " ")
+		.trim();
+	return condensed.length > 160 ? `${condensed.slice(0, 160)}…` : condensed;
 };
 
 const gardenNotes = notes.map((note) => ({
-  ...note,
-  excerpt: plainExcerpt(note.content),
+	...note,
+	excerpt: plainExcerpt(note.content),
 }));
 
 const linkResolver = createGardenLinkResolver(gardenNotes);
 
 const extractTargets = (content: string) => {
-  const targets: string[] = [];
-  const pattern = /\[\[([^\]]+)\]\]/g;
-  let match = pattern.exec(content);
-  while (match) {
-    const raw = match[1]?.trim();
-    if (raw) {
-      targets.push(raw.split("|")[0]?.trim() ?? raw);
-    }
-    match = pattern.exec(content);
-  }
-  return targets;
+	const targets: string[] = [];
+	const pattern = /\[\[([^\]]+)\]\]/g;
+	let match = pattern.exec(content);
+	while (match) {
+		const raw = match[1]?.trim();
+		if (raw) {
+			targets.push(raw.split("|")[0]?.trim() ?? raw);
+		}
+		match = pattern.exec(content);
+	}
+	return targets;
 };
 
 const groupByFolder = new Map<string, number>();
 let groupIndex = 1;
 const groupFor = (relativePath: string) => {
-  const folder = relativePath.split("/").slice(0, -1).join("/") || "root";
-  const existing = groupByFolder.get(folder);
-  if (existing) return existing;
-  const next = groupIndex++;
-  groupByFolder.set(folder, next);
-  return next;
+	const folder = relativePath.split("/").slice(0, -1).join("/") || "root";
+	const existing = groupByFolder.get(folder);
+	if (existing) return existing;
+	const next = groupIndex++;
+	groupByFolder.set(folder, next);
+	return next;
 };
 
 const folderPaths = new Set<string>();
 for (const note of gardenNotes) {
-  const parts = note.relativePath.split("/");
-  parts.pop();
-  for (let index = 0; index < parts.length; index += 1) {
-    const folderPath = parts.slice(0, index + 1).join("/");
-    if (folderPath) folderPaths.add(folderPath);
-  }
+	const parts = note.relativePath.split("/");
+	parts.pop();
+	for (let index = 0; index < parts.length; index += 1) {
+		const folderPath = parts.slice(0, index + 1).join("/");
+		if (folderPath) folderPaths.add(folderPath);
+	}
 }
 
 const folderNodes = Array.from(folderPaths).map((folderPath) => {
-  const slug = slugifyObsidianTarget(folderPath);
-  const folderId = `folder:${slug}`;
-  const title = folderPath.split("/").slice(-1)[0] || folderPath;
-  return {
-    id: folderId,
-    title,
-    url: `/garden/${slug}/`,
-    group: groupFor(`${folderPath}/_folder`),
-  };
+	const slug = slugifyObsidianTarget(folderPath);
+	const folderId = `folder:${slug}`;
+	const title = folderPath.split("/").slice(-1)[0] || folderPath;
+	return {
+		id: folderId,
+		title,
+		url: `/garden/${slug}/`,
+		group: groupFor(`${folderPath}/_folder`),
+	};
 });
 
 const graphNodes = gardenNotes.map((note) => ({
-  id: note.slug,
-  title: note.title,
-  url: `/garden/${note.slug}/`,
-  group: groupFor(note.relativePath),
-  tooltipId: note.slug,
+	id: note.slug,
+	title: note.title,
+	url: `/garden/${note.slug}/`,
+	group: groupFor(note.relativePath),
+	tooltipId: note.slug,
 }));
 const graphNodeList = [...folderNodes, ...graphNodes];
 
 const linkKeys = new Set<string>();
 const noteLinks = gardenNotes.flatMap((note) => {
-  const targets = extractTargets(note.content);
-  return targets.flatMap((target) => {
-    const resolved = linkResolver({ target });
-    if (!resolved.isLink || !resolved.slug) return [];
-    const key = `${note.slug}->${resolved.slug}`;
-    if (linkKeys.has(key)) return [];
-    linkKeys.add(key);
-    return [{ source: note.slug, target: resolved.slug }];
-  });
+	const targets = extractTargets(note.content);
+	return targets.flatMap((target) => {
+		const resolved = linkResolver({ target });
+		if (!resolved.isLink || !resolved.slug) return [];
+		const key = `${note.slug}->${resolved.slug}`;
+		if (linkKeys.has(key)) return [];
+		linkKeys.add(key);
+		return [{ source: note.slug, target: resolved.slug }];
+	});
 });
 
 const folderLinks = Array.from(folderPaths).flatMap((folderPath) => {
-  const parts = folderPath.split("/");
-  if (parts.length < 2) return [];
-  const parentPath = parts.slice(0, -1).join("/");
-  const source = `folder:${slugifyObsidianTarget(folderPath)}`;
-  const target = `folder:${slugifyObsidianTarget(parentPath)}`;
-  const key = `${source}->${target}`;
-  if (linkKeys.has(key)) return [];
-  linkKeys.add(key);
-  return [{ source, target }];
+	const parts = folderPath.split("/");
+	if (parts.length < 2) return [];
+	const parentPath = parts.slice(0, -1).join("/");
+	const source = `folder:${slugifyObsidianTarget(folderPath)}`;
+	const target = `folder:${slugifyObsidianTarget(parentPath)}`;
+	const key = `${source}->${target}`;
+	if (linkKeys.has(key)) return [];
+	linkKeys.add(key);
+	return [{ source, target }];
 });
 
 const noteFolderLinks = gardenNotes.flatMap((note) => {
-  const parts = note.relativePath.split("/");
-  parts.pop();
-  if (!parts.length) return [];
-  const folderPath = parts.join("/");
-  const source = note.slug;
-  const target = `folder:${slugifyObsidianTarget(folderPath)}`;
-  const key = `${source}->${target}`;
-  if (linkKeys.has(key)) return [];
-  linkKeys.add(key);
-  return [{ source, target }];
+	const parts = note.relativePath.split("/");
+	parts.pop();
+	if (!parts.length) return [];
+	const folderPath = parts.join("/");
+	const source = note.slug;
+	const target = `folder:${slugifyObsidianTarget(folderPath)}`;
+	const key = `${source}->${target}`;
+	if (linkKeys.has(key)) return [];
+	linkKeys.add(key);
+	return [{ source, target }];
 });
 
 const graphLinks = [...noteLinks, ...folderLinks, ...noteFolderLinks];

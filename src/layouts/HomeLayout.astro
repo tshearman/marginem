@@ -11,9 +11,7 @@ interface Props {
 }
 
 const { posts = [], formatDate: customFormatDate } = Astro.props as Props;
-const format =
-	customFormatDate ??
-	((date: Date) => formatDateHelper(date));
+const format = customFormatDate ?? ((date: Date) => formatDateHelper(date));
 
 const heroImage = (post: BlogEntry | undefined) =>
 	post?.data?.heroImage ?? null;

@@ -5,7 +5,11 @@ import type { LikeRequest, LikeStatus, LikesBackend } from "./types";
 
 const dbPath =
 	process.env.LIKES_DB_PATH ||
-	join(process.cwd(), "data", import.meta.env.DEV ? "likes.dev.db" : "likes.db");
+	join(
+		process.cwd(),
+		"data",
+		import.meta.env.DEV ? "likes.dev.db" : "likes.db",
+	);
 mkdirSync(dirname(dbPath), { recursive: true });
 
 const db = new Database(dbPath);

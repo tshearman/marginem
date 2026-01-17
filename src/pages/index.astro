@@ -11,7 +11,7 @@ import { formatDate } from "../lib/date";
 type BlogEntry = CollectionEntry<"blog">;
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 ) as BlogEntry[];
 const pagePosts = posts.slice(0, WRITING_PAGE_POST_LIMIT);
 ---

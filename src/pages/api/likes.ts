@@ -97,10 +97,7 @@ export const GET: APIRoute = async ({ url, cookies }) => {
 	}
 };
 
-const handleWrite = async (
-	context: APIContext,
-	defaultAction: LikeAction,
-) => {
+const handleWrite = async (context: APIContext, defaultAction: LikeAction) => {
 	let body: unknown;
 	try {
 		body = await context.request.json();

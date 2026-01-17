@@ -4,7 +4,10 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypePrism from "rehype-prism-plus";
-import { createMarkdownProcessor, parseFrontmatter } from "@astrojs/markdown-remark";
+import {
+	createMarkdownProcessor,
+	parseFrontmatter,
+} from "@astrojs/markdown-remark";
 import { visit } from "unist-util-visit";
 import remarkObsidianLinks, {
 	slugifyHeading,
@@ -54,7 +57,10 @@ export const resolveVaultRoot = () => {
 
 	if (vaultEnv) {
 		console.warn(
-			`[garden] OBSIDIAN_VAULT path "${path.resolve(process.cwd(), vaultEnv)}" does not exist or is not a directory.`,
+			`[garden] OBSIDIAN_VAULT path "${path.resolve(
+				process.cwd(),
+				vaultEnv,
+			)}" does not exist or is not a directory.`,
 		);
 	}
 	return null;
@@ -62,7 +68,9 @@ export const resolveVaultRoot = () => {
 
 const normalizePath = (value: string) => value.split(path.sep).join("/");
 
-export const loadGardenNotes = async (options: { includeUnpublished?: boolean } = {}) => {
+export const loadGardenNotes = async (
+	options: { includeUnpublished?: boolean } = {},
+) => {
 	const vaultRoot = resolveVaultRoot();
 	if (!vaultRoot) return [] as GardenNote[];
 
