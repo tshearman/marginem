@@ -1,5 +1,5 @@
 ---
-import { GardenNoteCard } from "./preact/GardenNoteCard";
+import { GardenNoteCard as PreactGardenNoteCard } from "./preact/GardenNoteCard";
 import { formatDate } from "../lib/date";
 
 interface Props {
@@ -11,11 +11,10 @@ interface Props {
   vaultRoot?: string;
 }
 
-const { slug, title, excerpt, updatedAt, relativePath, vaultRoot } =
-  Astro.props as Props;
+const { slug, title, excerpt, updatedAt } = Astro.props as Props;
 ---
 
-<GardenNoteCard
+<PreactGardenNoteCard
   variant="card"
   href={`/garden/${slug}/`}
   title={title}

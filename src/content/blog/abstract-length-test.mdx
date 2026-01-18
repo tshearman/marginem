@@ -1,19 +1,126 @@
 ---
-title: "Abstract Length Stress Test"
-description: "A deliberately verbose abstract to verify preview truncation."
+title: "Full-Stack Blog Feature Tour"
+description: "A single post that exercises typography, math, charts, metadata, and notes."
 abstract: >
-  This is a deliberately verbose abstract written to exceed the preview length limit so that we can
-  observe how the ellipsis logic behaves under sustained pressure. The narrative touches on sensors,
-  plotting pipelines, archival workflows, and even a stray haiku or two, wandering across roughly
-  three hundred characters without ever quite stopping for air, which mirrors the sort of research
-  dump that occasionally descends from the notebook collective.
+  This post is a living checklist for the blog system: headings, lists, tables, code blocks,
+  mathematical notation, interactive charts, sidenotes, and footnotes. It is intentionally
+  eclectic so we can verify layout, spacing, and interactivity in one place.
 pubDate: 2024-07-15
 tags:
   - qa
   - typography
-heroImage: "https://images.unsplash.com/photo-1451188214936-ec16af5ca155?auto=format&fit=crop&w=1600&q=80"
+  - charts
+  - math
+  - notes
+heroImage: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1600&q=80"
 draft: false
 ---
 
-This body can stay short—the abstract is the feature under inspection. Feel free to make this post
-public later if we want to demo truncation in production.
+import PlotlyChart from "../../components/PlotlyChart.astro";
+import MarginNote from "../../components/MarginNote.astro";
+
+# Feature Tour: Style, Structure, and Signal
+
+This post is built to exercise the blog styles. It uses **bold**, _italic_,
+`inline code`, blockquotes, lists, tables, math, and a chart. It also includes a
+margin note and footnotes.[^why-not]
+
+<MarginNote title="Sidenote">
+This is a margin note component. It should float on wider screens and stack
+inline on smaller screens.
+</MarginNote>
+
+## Outline of the Styling
+
+1. Headings and subheadings for hierarchy.
+2. Lists for rhythm and spacing.
+3. Tables for data density.
+4. Code blocks for syntax highlighting.
+5. Quotes for emphasis and voice.
+
+> A blockquote should feel distinct but not overpower the body text.
+
+### Compact checklist
+
+- [x] Typography samples
+- [x] GFM tables
+- [x] Math rendering
+- [x] Interactive chart
+- [x] Notes and footnotes
+
+## Table and Code Block
+
+| Element | Purpose | Expectation |
+| --- | --- | --- |
+| Table | Dense summaries | Even spacing, readable lines |
+| Code | Technical detail | Prism highlighting |
+| Note | Context | Subtle but visible |
+
+```ts run
+type Reading = {
+  label: string;
+  value: number;
+};
+
+const samples: Reading[] = [
+  { label: "dawn", value: 12 },
+  { label: "noon", value: 27 },
+  { label: "dusk", value: 18 },
+];
+```
+
+We can also ensure that code blocks contain accurate code:
+```py run
+assert 1 == 1
+```
+
+
+## Mathematical Formula
+
+Inline math looks like $e^{i\pi} + 1 = 0$, while a displayed equation should
+stand on its own:
+
+$$
+S(t) = \int_0^t \left( \alpha x^2 + \beta x + \gamma \right) \, dx
+$$
+
+## Plotly Interactive Chart
+
+The chart below uses the Plotly component to confirm client hydration and
+responsive behavior.
+
+<PlotlyChart
+  data={[
+    {
+      x: [0, 1, 2, 3, 4, 5, 6],
+      y: [0.0, 0.84, 0.91, 0.14, -0.76, -0.96, -0.28],
+      type: "scatter",
+      mode: "lines+markers",
+      name: "signal",
+      line: { color: "#2b6cb0", width: 3 },
+    },
+    {
+      x: [0, 1, 2, 3, 4, 5, 6],
+      y: [0.2, 0.4, 0.35, 0.5, 0.3, 0.25, 0.4],
+      type: "bar",
+      name: "baseline",
+      marker: { color: "rgba(34, 197, 94, 0.45)" },
+    },
+  ]}
+  layout={{
+    title: "Notebook Signal vs. Baseline",
+    margin: { l: 40, r: 20, t: 50, b: 40 },
+    xaxis: { title: "Step" },
+    yaxis: { title: "Amplitude" },
+    legend: { orientation: "h", y: -0.2 },
+  }}
+/>
+
+## Extra Notes and Footnotes
+
+Use footnotes to test the floating panel behavior.[^footnote-panel] The goal is
+to make sure interactive footnotes render and the overlay can be dismissed with
+both click and keyboard.
+
+[^why-not]: This footnote should appear in the slide-in panel when clicked.
+[^footnote-panel]: Confirm that the panel respects focus order and escape.

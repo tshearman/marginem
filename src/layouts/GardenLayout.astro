@@ -54,7 +54,7 @@ const {
 } = Astro.props as GardenLayoutProps;
 
 const showEmpty = notes.length === 0;
-const showGraph = graph && graph.nodes.length;
+const showGraph = graph?.nodes.length;
 const gardenTooltips = notes.map((note) => ({
 	id: note.slug,
 	slug: note.slug,

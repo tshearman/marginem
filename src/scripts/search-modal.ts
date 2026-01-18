@@ -88,6 +88,9 @@ function renderPlaceholder(
 }
 
 function renderResults(container: HTMLElement, results: SearchItem[]) {
+	// Clear any placeholder content before rendering fresh results.
+	render(null, container);
+	container.innerHTML = "";
 	render(h(SearchResults, { results }), container);
 }
 

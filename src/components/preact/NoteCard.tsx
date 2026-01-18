@@ -80,7 +80,7 @@ export function NoteCard(props: Props) {
 				{tags.length ? (
 					<div class="note-tags">
 						{tags.map((tagValue) => (
-							<Tag tag={tagValue} variant="filter" size="small" />
+							<Tag key={tagValue} tag={tagValue} variant="filter" size="small" />
 						))}
 					</div>
 				) : null}

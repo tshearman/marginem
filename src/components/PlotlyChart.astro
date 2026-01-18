@@ -1,6 +1,4 @@
 ---
-import plotlyClient from "../scripts/plotly-client.ts?url";
-
 type PlotPayload = {
 	data?: unknown[];
 	layout?: Record<string, unknown>;
@@ -27,4 +25,6 @@ const payloadAttr = JSON.stringify({
   style="width: 100%; min-height: 320px;"
   data-plotly={payloadAttr}
 ></div>
-<script type="module" is:inline src={plotlyClient}></script>
+<script>
+  import "../scripts/plotly-client.ts";
+</script>

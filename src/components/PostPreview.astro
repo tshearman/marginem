@@ -1,6 +1,6 @@
 ---
 import LikeButton from "./LikeButton.astro";
-import { PostPreview } from "./preact/PostPreview";
+import { PostPreview as PreactPostPreview } from "./preact/PostPreview";
 import { ellipsizeText } from "../lib/text";
 
 interface Props {
@@ -35,7 +35,7 @@ const excerptPreview = ellipsizeText(excerptSource, EXCERPT_LIMIT, {
 });
 ---
 
-<PostPreview
+<PreactPostPreview
   id={id}
   title={title}
   url={url}
@@ -54,4 +54,4 @@ const excerptPreview = ellipsizeText(excerptSource, EXCERPT_LIMIT, {
       />
     ) : null
   }
-</PostPreview>
+</PreactPostPreview>

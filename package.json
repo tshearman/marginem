@@ -10,6 +10,9 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
+    "test:blocks": "node scripts/run-code-blocks.mjs",
+    "preview:inactive": "deploy/scripts/preview.sh",
+    "promote": "deploy/scripts/promote.sh",
     "lint:source": "biome lint src plugins astro.config.mjs",
     "lint:snippets": "node scripts/lint-snippets.mjs",
     "lint": "npm run check && npm run lint:source && npm run lint:snippets",
@@ -37,8 +40,13 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
+    "@types/d3": "^7.4.3",
+    "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.0.0",
+    "@types/nodemailer": "^6.4.17",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.17"
+    "vitest": "^4.0.17",
+    "happy-dom": "^20.3.1"
   }
 }

@@ -3,8 +3,6 @@ const defaultOptions: Intl.DateTimeFormatOptions = {
 	day: "numeric",
 	year: "numeric",
 };
-const defaultFormatter = new Intl.DateTimeFormat("en", defaultOptions);
-
 const getOrdinalSuffix = (value: number) => {
 	const remainder = value % 100;
 	if (remainder >= 11 && remainder <= 13) return "th";

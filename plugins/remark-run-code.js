@@ -8,6 +8,10 @@ import { visit } from "unist-util-visit";
 const PYTHON_COMMAND = process.env.REMARK_RUN_CODE_PYTHON ?? "python3";
 const HASKELL_COMMAND = process.env.REMARK_RUN_CODE_HASKELL ?? "runghc";
 const LISP_COMMAND = process.env.REMARK_RUN_CODE_LISP ?? "sbcl";
+const TYPESCRIPT_COMMAND =
+	process.env.REMARK_RUN_CODE_TS ??
+	process.env.REMARK_RUN_CODE_TYPESCRIPT ??
+	"tsx";
 
 const snippetToConsumers = new Map();
 const consumerToSnippets = new Map();
@@ -168,6 +172,40 @@ function executeLispSnippet(code, sourcePath, contextPath) {
 	}
 }
 
+function executeTypescriptSnippet(code, sourcePath, contextPath, language) {
+	let tempDir;
+	let targetPath = sourcePath;
+	const extension = language === "tsx" ? ".tsx" : ".ts";
+	try {
+		if (!targetPath) {
+			tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "remark-ts-"));
+			const fileName = contextPath
+				? `${path.basename(contextPath)}${extension}`
+				: `snippet${extension}`;
+			targetPath = path.join(tempDir, fileName);
+			fs.writeFileSync(targetPath, code, "utf8");
+		}
+		const result = spawnSync(TYPESCRIPT_COMMAND, [targetPath], {
+			encoding: "utf8",
+		});
+		const chunks = [];
+		if (result.stdout) chunks.push(result.stdout.trim());
+		if (result.stderr) chunks.push(result.stderr.trim());
+		if (result.error) chunks.push(String(result.error));
+		if (result.status !== 0) {
+			chunks.push(`(typescript exited with code ${result.status ?? "unknown"})`);
+		}
+		const output = chunks.filter(Boolean).join("\n") || "(no output)";
+		return { output, success: result.status === 0 };
+	} catch (error) {
+		return { output: String(error), success: false };
+	} finally {
+		if (tempDir) {
+			fs.rmSync(tempDir, { recursive: true, force: true });
+		}
+	}
+}
+
 function parseMetaOptions(meta = "") {
 	const options = {};
 	const regex = /(\w+)=("[^"]*"|'[^']*'|[^\s]+)/g;
@@ -202,6 +240,9 @@ function executeSnippet(code, filePath, language, sourcePath) {
 	if (language === "python" || language === "py") {
 		return executePythonSnippet(code);
 	}
+	if (language === "typescript" || language === "ts" || language === "tsx") {
+		return executeTypescriptSnippet(code, sourcePath, filePath, language);
+	}
 	if (language === "haskell" || language === "hs") {
 		return executeHaskellSnippet(code, sourcePath, filePath);
 	}
@@ -211,7 +252,8 @@ function executeSnippet(code, filePath, language, sourcePath) {
 	return executeJavascriptSnippet(code, filePath);
 }
 
-export default function remarkRunCode() {
+export default function remarkRunCode(options = {}) {
+	const { continueOnError = false, onResult } = options ?? {};
 	return function transformer(tree, file) {
 		const consumerPath = file?.path ? normalizePath(file.path) : undefined;
 		if (consumerPath) {
@@ -227,6 +269,9 @@ export default function remarkRunCode() {
 				![
 					"js",
 					"javascript",
+					"ts",
+					"tsx",
+					"typescript",
 					"python",
 					"py",
 					"haskell",
@@ -253,13 +298,26 @@ export default function remarkRunCode() {
 				language,
 				resolvedSourcePath,
 			);
+			if (typeof onResult === "function") {
+				onResult({
+					language,
+					filePath: file?.path,
+					line: node.position?.start?.line,
+					success,
+					output,
+				});
+			}
 			if (!success) {
 				const location = file?.path ? `${file.path}` : "MDX snippet";
-				throw new Error(
-					`Runnable ${language} snippet failed in ${location}:\n${
-						output || "(no output)"
-					}`,
-				);
+				const errorMessage = `Runnable ${language} snippet failed in ${location}:\n${
+					output || "(no output)"
+				}`;
+				if (!continueOnError) {
+					if (file?.fail) {
+						file.fail(errorMessage, node);
+					}
+					throw new Error(errorMessage);
+				}
 			}
 			const lines = (output || "(no output)")
 				.split("\n")

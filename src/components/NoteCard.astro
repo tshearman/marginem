@@ -1,6 +1,6 @@
 ---
 import LikeButton from "./LikeButton.astro";
-import { NoteCard } from "./preact/NoteCard";
+import { NoteCard as PreactNoteCard } from "./preact/NoteCard";
 import { formatDate } from "../lib/date";
 import { generateNoteId } from "../lib/noteUtils";
 
@@ -28,7 +28,7 @@ const {
 const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
 ---
 
-<NoteCard
+<PreactNoteCard
   content={content}
   source={source}
   author={author}
@@ -41,4 +41,4 @@ const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
   dataTags={JSON.stringify(tags)}
 >
   <LikeButton slug={noteId} target="note" align="right" />
-</NoteCard>
+</PreactNoteCard>

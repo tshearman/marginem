@@ -42,14 +42,14 @@ const {
 </section>
 
 <script>
-  const form = document.querySelector("[data-subscribe-form]");
+  const form = document.querySelector<HTMLFormElement>("[data-subscribe-form]");
   if (form) {
-    const statusEl = form.querySelector("[data-subscribe-status]");
-    const emailInput = form.querySelector("#subscribe-email");
-    const honeypot = form.querySelector(".subscribe__honeypot");
-    const button = form.querySelector(".subscribe__button");
+    const statusEl = form.querySelector<HTMLElement>("[data-subscribe-status]");
+    const emailInput = form.querySelector<HTMLInputElement>("#subscribe-email");
+    const honeypot = form.querySelector<HTMLInputElement>(".subscribe__honeypot");
+    const button = form.querySelector<HTMLButtonElement>(".subscribe__button");
 
-    const setStatus = (message, kind = "info") => {
+    const setStatus = (message: string, kind: "info" | "success" | "error" = "info") => {
       if (!statusEl) return;
       statusEl.textContent = message;
       statusEl.dataset.state = kind;

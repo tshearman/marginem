@@ -11,6 +11,12 @@ interface SiteNavProps {
 }
 
 const { activePage } = Astro.props as SiteNavProps;
+const ICONS = {
+	writing: IconWriting,
+	commonplace: IconCommonplace,
+	garden: IconGarden,
+	archive: IconArchive,
+};
 ---
 
 <nav class="site-nav">
@@ -20,26 +26,19 @@ const { activePage } = Astro.props as SiteNavProps;
         const isActive = activePage
           ? item.label.toLowerCase() === activePage.toLowerCase()
           : false;
-        const icon =
-          item.label === "Writing" ? (
-            <IconWriting />
-          ) : item.label === "Commonplace" ? (
-            <IconCommonplace />
-          ) : item.label === "Archive" ? (
-            <IconArchive />
-          ) : (
-            <IconGarden />
-          );
+        const Icon = ICONS[item.icon] ?? IconGarden;
         const linkClass = [
           isActive ? "is-active" : null,
-          item.label === "Archive" ? "is-compact" : null,
+          item.isCompact ? "is-compact" : null,
         ]
           .filter(Boolean)
           .join(" ");
         return (
           <a href={item.href} class={linkClass || undefined}>
             <span class="site-nav__text">{item.label}</span>
-            <span class="site-nav__icon">{icon}</span>
+            <span class="site-nav__icon">
+              <Icon />
+            </span>
           </a>
         );
       })

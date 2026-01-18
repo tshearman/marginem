@@ -5,7 +5,6 @@ import HomeLayout from "../layouts/HomeLayout.astro";
 import PageIntro from "../components/PageIntro.astro";
 import { MAIN_PAGES, WRITING_PAGE_POST_LIMIT } from "../lib/site";
 import { getCollection } from "astro:content";
-import { POSTS_PER_PAGE } from "../lib/blog";
 import { formatDate } from "../lib/date";
 
 type BlogEntry = CollectionEntry<"blog">;

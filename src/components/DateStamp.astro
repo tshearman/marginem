@@ -1,5 +1,5 @@
 ---
-import { DateStamp } from "./preact/DateStamp";
+import { DateStamp as PreactDateStamp } from "./preact/DateStamp";
 
 interface Props {
 	datetime: string | Date;
@@ -10,7 +10,7 @@ interface Props {
 const { datetime, label = "", class: className } = Astro.props as Props;
 ---
 
-<DateStamp datetime={datetime} label={label} className={className} />
+<PreactDateStamp datetime={datetime} label={label} className={className} />
 
 <style>
   .hero-feature__date {

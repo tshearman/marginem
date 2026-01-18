@@ -19,6 +19,15 @@ const LANGUAGE_CONFIG = {
         file
       ])
   },
+  typescript: {
+    label: "TypeScript",
+    extension: ".ts",
+    run: (file) =>
+      runCommand(
+        process.env.CODE_LINT_TS ?? process.env.CODE_LINT_TYPESCRIPT ?? "biome",
+        ["lint", "--error-on-warnings", file]
+      )
+  },
   python: {
     label: "Python",
     extension: ".py",
@@ -42,8 +51,9 @@ const LANGUAGE_CONFIG = {
 const LANGUAGE_ALIASES = {
   js: "javascript",
   javascript: "javascript",
-  ts: "javascript",
-  typescript: "javascript",
+  ts: "typescript",
+  tsx: "typescript",
+  typescript: "typescript",
   py: "python",
   python: "python",
   hs: "haskell",
@@ -55,7 +65,7 @@ const LANGUAGE_ALIASES = {
 
 const SNIPPET_EXTENSIONS = new Map([
   [".js", "javascript"],
-  [".ts", "javascript"],
+  [".ts", "typescript"],
   [".py", "python"],
   [".hs", "haskell"],
   [".lisp", "lisp"]

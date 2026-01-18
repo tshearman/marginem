@@ -8,7 +8,7 @@ import {
 	schemeTableau10,
 	select,
 } from "d3";
-import type { SimulationNodeDatum } from "d3";
+import type { D3DragEvent, SimulationNodeDatum } from "d3";
 
 type GraphNode = SimulationNodeDatum & {
 	id: string;
@@ -33,11 +33,10 @@ type GraphPayload = {
 
 const DEFAULT_WIDTH = 640;
 const DEFAULT_HEIGHT = 420;
-const AUTO_PAD = 56;
 
 function labelFor(node: GraphNode, labelKey?: string) {
 	if (!labelKey) return node.id;
-	const value = (node as Record<string, unknown>)[labelKey];
+	const value = (node as unknown as Record<string, unknown>)[labelKey];
 	return typeof value === "string" || typeof value === "number"
 		? String(value)
 		: node.id;
@@ -65,45 +64,6 @@ function navigateTo(node: GraphNode) {
 	window.location.assign(node.url);
 }
 
-function applyAutoBounds(
-	svg: ReturnType<typeof select>,
-	stage: HTMLElement,
-	nodes: GraphNode[],
-	fallbackWidth: number,
-	fallbackHeight: number,
-) {
-	let minX = Number.POSITIVE_INFINITY;
-	let minY = Number.POSITIVE_INFINITY;
-	let maxX = Number.NEGATIVE_INFINITY;
-	let maxY = Number.NEGATIVE_INFINITY;
-
-	for (const node of nodes) {
-		if (typeof node.x !== "number" || typeof node.y !== "number") continue;
-		minX = Math.min(minX, node.x);
-		minY = Math.min(minY, node.y);
-		maxX = Math.max(maxX, node.x);
-		maxY = Math.max(maxY, node.y);
-	}
-
-	if (!Number.isFinite(minX) || !Number.isFinite(minY)) return;
-
-	const contentWidth = maxX - minX;
-	const contentHeight = maxY - minY;
-	const paddedWidth = contentWidth + AUTO_PAD * 2;
-	const paddedHeight = contentHeight + AUTO_PAD * 2;
-	const viewWidth = Math.max(paddedWidth, fallbackWidth);
-	const viewHeight = Math.max(paddedHeight, fallbackHeight);
-	const offsetX = (viewWidth - paddedWidth) / 2;
-	const offsetY = (viewHeight - paddedHeight) / 2;
-	const viewX = minX - AUTO_PAD - offsetX;
-	const viewY = minY - AUTO_PAD - offsetY;
-
-	svg.attr("viewBox", `${viewX} ${viewY} ${viewWidth} ${viewHeight}`);
-	svg.attr("height", viewHeight);
-	stage.style.height = `${viewHeight}px`;
-	stage.style.minHeight = `${viewHeight}px`;
-}
-
 function positionTooltip(tooltip: HTMLElement, event: PointerEvent) {
 	const x = event.clientX;
 	const y = event.clientY;
@@ -126,7 +86,6 @@ function hydrateGraph(el: HTMLElement) {
 		el.innerHTML = "";
 
 		const graphId = el.id;
-		const root = el.closest<HTMLElement>(".force-graph") ?? el;
 		const tooltipLayer = document.querySelector<HTMLElement>(
 			`[data-force-tooltip-owner="${graphId}"]`,
 		);
@@ -196,38 +155,47 @@ function hydrateGraph(el: HTMLElement) {
 
 		const node = svg
 			.append("g")
-			.selectAll("g")
+			.selectAll<SVGGElement, GraphNode>("g")
 			.data(nodes)
 			.join("g")
-			.style("cursor", (d) => (d.url ? "pointer" : "default"))
-			.on("click", (_event, d) => {
+			.style("cursor", (d: GraphNode) => (d.url ? "pointer" : "default"))
+			.on("click", (_event: MouseEvent, d: GraphNode) => {
 				navigateTo(d);
 			})
-			.on("pointerenter", (event, d) => {
+			.on("pointerenter", (event: PointerEvent, d: GraphNode) => {
 				showTooltip(event, d);
 			})
-			.on("pointermove", (event, d) => {
+			.on("pointermove", (event: PointerEvent, d: GraphNode) => {
 				moveTooltip(event, d);
 			})
-			.on("pointerleave", (_event, d) => {
+			.on("pointerleave", (_event: PointerEvent, d: GraphNode) => {
 				hideTooltip(d);
 			})
 			.call(
 				drag<SVGGElement, GraphNode>()
-					.on("start", (event, d) => {
+					.on(
+						"start",
+						(event: D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) => {
 						if (!event.active) simulation.alphaTarget(0.3).restart();
 						d.fx = d.x;
 						d.fy = d.y;
-					})
-					.on("drag", (event, d) => {
+					},
+					)
+					.on(
+						"drag",
+						(event: D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) => {
 						d.fx = event.x;
 						d.fy = event.y;
-					})
-					.on("end", (event, d) => {
+					},
+					)
+					.on(
+						"end",
+						(event: D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) => {
 						if (!event.active) simulation.alphaTarget(0);
 						d.fx = null;
 						d.fy = null;
-					}),
+					},
+					),
 			);
 
 		node.append("circle").attr("r", 9).attr("fill", "#f8fafc");
@@ -235,14 +203,14 @@ function hydrateGraph(el: HTMLElement) {
 		node
 			.append("circle")
 			.attr("r", 9)
-			.attr("fill", (d) => {
+			.attr("fill", (d: GraphNode) => {
 				const stroke = color(String(d.group ?? 0));
 				if (d.id.startsWith("folder:")) {
 					return withAlpha(stroke, 1.0);
 				}
 				return "#f8fafc";
 			})
-			.attr("stroke", (d) => color(String(d.group ?? 0)))
+			.attr("stroke", (d: GraphNode) => color(String(d.group ?? 0)))
 			.attr("stroke-width", 2);
 
 		const labels = svg
@@ -255,26 +223,26 @@ function hydrateGraph(el: HTMLElement) {
 			.selectAll("text")
 			.data(nodes)
 			.join("text")
-			.style("cursor", (d) => (d.url ? "pointer" : "default"))
-			.on("click", (_event, d) => {
+			.style("cursor", (d: GraphNode) => (d.url ? "pointer" : "default"))
+			.on("click", (_event: MouseEvent, d: GraphNode) => {
 				navigateTo(d);
 			})
-			.on("pointerenter", (event, d) => {
+			.on("pointerenter", (event: PointerEvent, d: GraphNode) => {
 				showTooltip(event, d);
 			})
-			.on("pointermove", (event, d) => {
+			.on("pointermove", (event: PointerEvent, d: GraphNode) => {
 				moveTooltip(event, d);
 			})
-			.on("pointerleave", (_event, d) => {
+			.on("pointerleave", (_event: PointerEvent, d: GraphNode) => {
 				hideTooltip(d);
 			})
-			.text((d) => labelFor(d, labelKey));
+			.text((d: GraphNode) => labelFor(d, labelKey));
 
 		simulation = simulation
 			.force(
 				"link",
 				forceLink<GraphNode, GraphLink>(links)
-					.id((d) => d.id)
+					.id((d: GraphNode) => d.id)
 					.distance(75)
 					.strength(0.8),
 			)
@@ -283,14 +251,19 @@ function hydrateGraph(el: HTMLElement) {
 
 		simulation.on("tick", () => {
 			link
-				.attr("x1", (d) => (d.source as GraphNode).x ?? 0)
-				.attr("y1", (d) => (d.source as GraphNode).y ?? 0)
-				.attr("x2", (d) => (d.target as GraphNode).x ?? 0)
-				.attr("y2", (d) => (d.target as GraphNode).y ?? 0);
+				.attr("x1", (d: GraphLink) => (d.source as GraphNode).x ?? 0)
+				.attr("y1", (d: GraphLink) => (d.source as GraphNode).y ?? 0)
+				.attr("x2", (d: GraphLink) => (d.target as GraphNode).x ?? 0)
+				.attr("y2", (d: GraphLink) => (d.target as GraphNode).y ?? 0);
 
-			node.attr("transform", (d) => `translate(${d.x ?? 0}, ${d.y ?? 0})`);
+			node.attr(
+				"transform",
+				(d: GraphNode) => `translate(${d.x ?? 0}, ${d.y ?? 0})`,
+			);
 
-			labels.attr("x", (d) => (d.x ?? 0) + 12).attr("y", (d) => (d.y ?? 0) + 4);
+			labels
+				.attr("x", (d: GraphNode) => (d.x ?? 0) + 12)
+				.attr("y", (d: GraphNode) => (d.y ?? 0) + 4);
 		});
 	} catch (error) {
 		console.error("Failed to initialize force graph", error);

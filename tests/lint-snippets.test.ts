@@ -8,6 +8,8 @@ import {
 describe("normalizeLanguage", () => {
 	it("maps aliases to canonical language identifiers", () => {
 		expect(normalizeLanguage("JS")).toBe("javascript");
+		expect(normalizeLanguage("ts")).toBe("typescript");
+		expect(normalizeLanguage("TSX")).toBe("typescript");
 		expect(normalizeLanguage("py")).toBe("python");
 		expect(normalizeLanguage("Hs")).toBe("haskell");
 		expect(normalizeLanguage("unknown")).toBeNull();

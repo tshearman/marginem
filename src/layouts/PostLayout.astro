@@ -5,27 +5,51 @@ import LikeButton from "../components/LikeButton.astro";
 import DateStamp from "../components/DateStamp.astro";
 import { formatDate } from "../lib/date";
 
+interface Frontmatter {
+	title?: string;
+	description?: string;
+	abstract?: string;
+	pubDate?: string | Date;
+	tags?: string[];
+}
+
 interface Props {
-	frontmatter: Record<string, any>;
+	frontmatter: Frontmatter;
 	slug: string;
 	activePage?: string;
 }
 
-const { frontmatter, slug, activePage } = Astro.props as Props;
-const formattedDate = frontmatter?.pubDate
-	? formatDate(frontmatter.pubDate, {
+const { frontmatter: rawFrontmatter, slug, activePage } = Astro.props as Props;
+const frontmatter = rawFrontmatter ?? {};
+const pubDate =
+	typeof frontmatter.pubDate === "string" || frontmatter.pubDate instanceof Date
+		? frontmatter.pubDate
+		: undefined;
+const formattedDate = pubDate
+	? formatDate(pubDate, {
 			month: "long",
 			day: "numeric",
 			year: "numeric",
 		})
 	: "";
-const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
+const abstractText =
+	typeof frontmatter.abstract === "string"
+		? frontmatter.abstract
+		: typeof frontmatter.description === "string"
+			? frontmatter.description
+			: "";
+const tags = Array.isArray(frontmatter.tags)
+	? frontmatter.tags.filter((tag): tag is string => typeof tag === "string")
+	: [];
+const title = typeof frontmatter.title === "string" ? frontmatter.title : "Post";
+const description =
+	typeof frontmatter.description === "string" ? frontmatter.description : "";
 ---
 
 <BaseLayout
-  title={`${frontmatter.title} | Notebook`}
-  description={frontmatter.description}
-  hero={frontmatter.title}
+  title={`${title} | Notebook`}
+  description={description}
+  hero={title}
   showHero={false}
   includeFootnotes={true}
   activePage={activePage}
@@ -33,21 +57,21 @@ const abstractText = frontmatter.abstract ?? frontmatter.description ?? "";
   <section class="paper-title">
     <div class="paper-title__rule paper-title__rule--thick" aria-hidden="true">
     </div>
-    <h1 class="paper-title__heading">{frontmatter.title}</h1>
+    <h1 class="paper-title__heading">{title}</h1>
     <div class="paper-title__rule paper-title__rule--thin" aria-hidden="true">
     </div>
     <div class="paper-title__meta">
       {
-        formattedDate ? (
-          <DateStamp datetime={frontmatter.pubDate} label={formattedDate} />
+        formattedDate && pubDate ? (
+          <DateStamp datetime={pubDate} label={formattedDate} />
         ) : null
       }
     </div>
     {
-      frontmatter.tags?.length ? (
+      tags.length ? (
         <div class="paper-title__tags">
           <TagList
-            tags={frontmatter.tags}
+            tags={tags}
             align="center"
             linkToTags
             variant="default"

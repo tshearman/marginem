@@ -2,7 +2,6 @@
 import "../styles/global.css";
 import "katex/dist/katex.min.css";
 import SiteNav from "../components/SiteNav.astro";
-import footnoteScript from "../scripts/init-footnotes.js?url";
 
 interface BaseLayoutProps {
 	title?: string;
@@ -47,7 +46,9 @@ const {
       <footer class="site-footer"></footer>
     </main>
     {includeFootnotes ? (
-      <script type="module" is:inline src={footnoteScript}></script>
+      <script>
+        import "../scripts/init-footnotes.js";
+      </script>
     ) : null}
   </body>
 </html>

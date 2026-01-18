@@ -57,6 +57,9 @@ echo "Building site..."
 npm run clean:build 2>/dev/null || rm -rf dist .astro
 npm run build
 
+echo "Building container image $SITE_IMAGE..."
+docker build -t "$SITE_IMAGE" .
+
 echo "Staging dist/ to $BUILD_DEST"
 rm -rf "$BUILD_DEST"
 mkdir -p "$BUILD_DEST"

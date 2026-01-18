@@ -4,7 +4,6 @@ import NoteCard from "../../components/NoteCard.astro";
 import FilterableCount from "../../components/FilterableCount.astro";
 import PageIntro from "../../components/PageIntro.astro";
 import TagFilterPanel from "../../components/TagFilterPanel.astro";
-import filterScript from "../../scripts/filterable-content.js?url";
 import { getCollection } from "astro:content";
 import { generateNoteId } from "../../lib/noteUtils";
 import { MAIN_PAGES } from "../../lib/site";
@@ -176,4 +175,6 @@ const commonplaceFilterConfig = JSON.stringify({
   }
 </style>
 
-<script type="module" is:inline src={filterScript}></script>
+<script>
+  import "../../scripts/filterable-content.js";
+</script>

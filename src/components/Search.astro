@@ -1,6 +1,4 @@
 ---
-const searchScript = new URL("../scripts/search-modal.ts", import.meta.url)
-  .pathname;
 ---
 
 <div class="nav-search">
@@ -379,4 +377,6 @@ const searchScript = new URL("../scripts/search-modal.ts", import.meta.url)
     overflow: hidden;
   }
 </style>
-<script type="module" src={searchScript}></script>
+<script>
+  import "../scripts/search-modal.ts";
+</script>

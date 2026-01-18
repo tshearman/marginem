@@ -9,10 +9,17 @@ import {
 	parseFrontmatter,
 } from "@astrojs/markdown-remark";
 import { visit } from "unist-util-visit";
+import type { Node } from "unist";
+import type { RehypePlugin } from "@astrojs/markdown-remark";
 import remarkObsidianLinks, {
 	slugifyHeading,
 	slugifyObsidianTarget,
 } from "../../plugins/remark-obsidian-links.js";
+
+const prismPlugin: [RehypePlugin, { showLineNumbers: true }] = [
+	rehypePrism as unknown as RehypePlugin,
+	{ showLineNumbers: true },
+];
 
 export interface GardenNote {
 	slug: string;
@@ -142,9 +149,17 @@ export const createGardenLinkResolver = (notes: GardenNote[]) => {
 	};
 };
 
+type HeadingNode = Node & {
+	value?: unknown;
+	children?: HeadingNode[];
+	data?: {
+		hProperties?: Record<string, unknown>;
+	};
+};
+
 const headingIdPlugin = () => (tree: unknown) => {
-	visit(tree as any, "heading", (node: any) => {
-		const collectText = (child: any): string => {
+	visit(tree as Node, "heading", (node: Node) => {
+		const collectText = (child: HeadingNode): string => {
 			if (!child) return "";
 			if (typeof child.value === "string") return child.value;
 			if (Array.isArray(child.children)) {
@@ -153,12 +168,13 @@ const headingIdPlugin = () => (tree: unknown) => {
 			return "";
 		};
 
-		const text = collectText(node).trim();
+		const text = collectText(node as HeadingNode).trim();
 		const id = slugifyHeading(text);
 		if (!id) return;
-		node.data = node.data || {};
-		node.data.hProperties = {
-			...(node.data.hProperties || {}),
+		const typedNode = node as HeadingNode;
+		typedNode.data = typedNode.data || {};
+		typedNode.data.hProperties = {
+			...(typedNode.data.hProperties || {}),
 			id,
 		};
 	});
@@ -166,7 +182,19 @@ const headingIdPlugin = () => (tree: unknown) => {
 
 export const renderGardenMarkdown = async (
 	content: string,
-	resolveLink: (link: { target: string }) => string,
+	resolveLink: (link: {
+		target: string;
+		alias?: string;
+		heading?: string;
+		isEmbed?: boolean;
+	}) =>
+		| string
+		| {
+				text: string;
+				isLink: boolean;
+				slug?: string;
+				url?: string;
+		  },
 ) => {
 	const processor = await createMarkdownProcessor({
 		syntaxHighlight: "prism",
@@ -176,7 +204,7 @@ export const renderGardenMarkdown = async (
 			[remarkObsidianLinks, { resolveLink, linkPrefix: "/garden" }],
 			headingIdPlugin,
 		],
-		rehypePlugins: [rehypeKatex, [rehypePrism, { showLineNumbers: true }]],
+		rehypePlugins: [rehypeKatex, prismPlugin],
 	});
 
 	const { code, metadata } = await processor.render(content);

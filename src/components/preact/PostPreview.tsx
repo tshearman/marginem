@@ -48,7 +48,7 @@ export function PostPreview(props: Props) {
 				</div>
 				<div class="post-preview__meta">
 					{tags.length ? (
-						tags.map((tag) => <Tag tag={tag} />)
+						tags.map((tag) => <Tag key={tag} tag={tag} />)
 					) : (
 						<span class="post-preview__meta-empty">Research Notes</span>
 					)}

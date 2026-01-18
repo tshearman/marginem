@@ -2,7 +2,6 @@
 import GardenNoteCard from "./GardenNoteCard.astro";
 import NoteCard from "./NoteCard.astro";
 import PostPreview from "./PostPreview.astro";
-import forceGraphClient from "../scripts/force-graph.ts?url";
 
 type GraphNode = {
 	id: string;
@@ -136,7 +135,9 @@ const payloadAttr = JSON.stringify({
     ) : null
   }
 </div>
-<script type="module" is:inline src={forceGraphClient}></script>
+<script>
+  import "../scripts/force-graph.ts";
+</script>
 
 <style>
   .force-graph {

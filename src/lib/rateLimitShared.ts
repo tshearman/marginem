@@ -70,21 +70,22 @@ export const checkSharedRateLimit = (
 	}
 
 	const count = Number(row.count ?? 0);
+	const resetAt = row.reset_at ?? now + windowSeconds;
 	if (count >= maxRequests) {
 		return {
 			allowed: false,
 			remaining: 0,
-			retryAfterSeconds: Math.max(1, row.reset_at! - now),
-			resetAt: row.reset_at!,
+			retryAfterSeconds: Math.max(1, resetAt - now),
+			resetAt,
 		};
 	}
 
 	const nextCount = count + 1;
-	updateCountStmt.run(nextCount, row.reset_at, key);
+	updateCountStmt.run(nextCount, resetAt, key);
 	return {
 		allowed: true,
 		remaining: Math.max(0, maxRequests - nextCount),
-		retryAfterSeconds: Math.max(1, row.reset_at! - now),
-		resetAt: row.reset_at!,
+		retryAfterSeconds: Math.max(1, resetAt - now),
+		resetAt,
 	};
 };

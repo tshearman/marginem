@@ -1,4 +1,4 @@
-import type { ComponentProps, JSX } from "preact";
+import type { ComponentProps } from "preact";
 
 type Props = {
 	tag?: string;
@@ -34,11 +34,6 @@ export function Tag(props: Props) {
 
 	const url = href ?? getTagUrl(label);
 	const classes = baseClasses(variant, size, className);
-	const dataAttrs: JSX.HTMLAttributes<HTMLElement> = {
-		"data-tag": label,
-		"data-selected": selected ? "true" : "false",
-	};
-
 	const shouldRenderFilterButton =
 		variant === "filter" && clickable && !(asLink && clickable && url);
 
@@ -47,7 +42,8 @@ export function Tag(props: Props) {
 			<button
 				class={classes}
 				type="button"
-				{...dataAttrs}
+				data-tag={label}
+				data-selected={selected ? "true" : "false"}
 				aria-pressed={selected ? "true" : "false"}
 			>
 				#{label}
@@ -57,14 +53,19 @@ export function Tag(props: Props) {
 
 	if (clickable && url) {
 		return (
-			<a class={classes} href={url} {...dataAttrs}>
+			<a
+				class={classes}
+				href={url}
+				data-tag={label}
+				data-selected={selected ? "true" : "false"}
+			>
 				#{label}
 			</a>
 		);
 	}
 
 	return (
-		<span class={classes} {...dataAttrs}>
+		<span class={classes} data-tag={label} data-selected={selected ? "true" : "false"}>
 			#{label}
 		</span>
 	);
