@@ -1,7 +1,6 @@
 ---
-import Tag from "./Tag.astro";
 import LikeButton from "./LikeButton.astro";
-import DateStamp from "./DateStamp.astro";
+import { NoteCard } from "./preact/NoteCard";
 import { formatDate } from "../lib/date";
 import { generateNoteId } from "../lib/noteUtils";
 
@@ -29,47 +28,17 @@ const {
 const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
 ---
 
-<article
-  class={`note-card ${className || ""}`}
-  data-tags={JSON.stringify(tags)}
-  id={noteId}
+<NoteCard
+  content={content}
+  source={source}
+  author={author}
+  tags={tags}
+  dateLabel={date ? formatDate(date) : undefined}
+  dateTime={date}
+  className={className}
   style={style}
+  id={noteId}
+  dataTags={JSON.stringify(tags)}
 >
-  <a
-    class="note-card__anchor-link"
-    href={`#${noteId}`}
-    aria-label="Permalink to this note"
-  >
-    #
-  </a>
-  <div class="note-content-wrapper">
-    <div class="note-content">
-      <blockquote class="note-text">{content}</blockquote>
-      <div class="note-attribution">
-        {author ? <div class="note-author">{author}</div> : null}
-        {source ? <div class="note-source">{source}</div> : null}
-        {
-          date ? (
-            <DateStamp
-              datetime={date}
-              class="note-date"
-              label={formatDate(date)}
-            />
-          ) : null
-        }
-      </div>
-    </div>
-    {
-      tags.length ? (
-        <div class="note-tags">
-          {tags.map((tagValue) => (
-            <Tag tag={tagValue} variant="filter" size="small" />
-          ))}
-        </div>
-      ) : null
-    }
-    <div class="note-like">
-      <LikeButton slug={noteId} target="note" align="right" />
-    </div>
-  </div>
-</article>
+  <LikeButton slug={noteId} target="note" align="right" />
+</NoteCard>

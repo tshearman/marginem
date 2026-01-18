@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
+import preact from "@astrojs/preact";
 import remarkMath from "remark-math";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
@@ -48,7 +49,7 @@ export default defineConfig({
 	site: "https://example.com",
 	adapter: node({ mode: "standalone" }),
 	output: "server",
-	integrations: [mdx()],
+	integrations: [mdx(), preact()],
 	markdown: {
 		syntaxHighlight: "prism",
 		prism: {

@@ -1,5 +1,7 @@
 ---
-interface Props {
+import { Tag } from "./preact/Tag";
+
+type Props = {
 	tag?: string;
 	href?: string;
 	variant?: "default" | "filter" | "display";
@@ -7,52 +9,10 @@ interface Props {
 	selected?: boolean;
 	clickable?: boolean;
 	asLink?: boolean;
-}
-
-const {
-	tag = "",
-	href,
-	variant = "default",
-	size = "medium",
-	selected = false,
-	clickable = true,
-	asLink = false,
-} = Astro.props as Props;
-
-const label = tag?.trim() ?? "";
-const url =
-	href ??
-	(label ? `/tags/${encodeURIComponent(label.toLowerCase())}/` : undefined);
-const classes = ["tag", `tag--${variant}`, `tag--${size}`]
-	.filter(Boolean)
-	.join(" ");
-const dataAttrs = {
-	"data-tag": label || undefined,
-	"data-selected": selected ? "true" : "false",
+	className?: string;
 };
-const shouldRenderFilterButton =
-	variant === "filter" && clickable && !(asLink && clickable && url);
+
+const props = Astro.props as Props;
 ---
 
-{
-  label ? (
-    shouldRenderFilterButton ? (
-      <button
-        class={classes}
-        type="button"
-        {...dataAttrs}
-        aria-pressed={selected ? "true" : "false"}
-      >
-        #{label}
-      </button>
-    ) : clickable && url ? (
-      <a class={classes} href={url} {...dataAttrs}>
-        #{label}
-      </a>
-    ) : (
-      <span class={classes} {...dataAttrs}>
-        #{label}
-      </span>
-    )
-  ) : null
-}
+<Tag {...props} />

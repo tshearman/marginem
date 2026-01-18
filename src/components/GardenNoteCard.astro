@@ -1,34 +1,31 @@
 ---
-import DateStamp from "./DateStamp.astro";
+import { GardenNoteCard } from "./preact/GardenNoteCard";
 import { formatDate } from "../lib/date";
 
 interface Props {
-	slug: string;
-	title: string;
-	excerpt: string;
-	updatedAt: Date;
-	relativePath: string;
-	vaultRoot?: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  updatedAt: Date;
+  relativePath: string;
+  vaultRoot?: string;
 }
 
 const { slug, title, excerpt, updatedAt, relativePath, vaultRoot } =
-	Astro.props as Props;
+  Astro.props as Props;
 ---
 
-<a class="garden-card" href={`/garden/${slug}/`}>
-  <div class="garden-card__row">
-    <DateStamp
-      datetime={updatedAt}
-      class="garden-card__date"
-      label={formatDate(updatedAt)}
-    />
-    <h3>{title}</h3>
-  </div>
-  <p class="garden-card__excerpt">{excerpt}</p>
-</a>
+<GardenNoteCard
+  variant="card"
+  href={`/garden/${slug}/`}
+  title={title}
+  excerpt={excerpt}
+  updatedAt={updatedAt}
+  dateLabel={formatDate(updatedAt)}
+/>
 
 <style>
-  .garden-card {
+  :global(.garden-card) {
     display: block;
     padding: 0.8rem 0;
     border-bottom: 0px solid rgba(15, 23, 42, 0.08);
@@ -40,26 +37,26 @@ const { slug, title, excerpt, updatedAt, relativePath, vaultRoot } =
       color 0.2s ease;
   }
 
-  .garden-card__row {
+  :global(.garden-card__row) {
     display: flex;
     align-items: baseline;
     justify-content: flex-start;
     gap: 0.65rem;
   }
 
-  .garden-card h3 {
+  :global(.garden-card h3) {
     margin: 0;
     font-size: 1.05rem;
     color: rgba(15, 23, 42, 0.95);
     font-weight: 600;
   }
 
-  .garden-card__date {
+  :global(.garden-card__date) {
     font-size: 0.85rem;
     white-space: nowrap;
   }
 
-  .garden-card__excerpt {
+  :global(.garden-card__excerpt) {
     margin: 0.2rem 0 0;
     color: rgba(15, 23, 42, 0.85);
     overflow: hidden;

@@ -1,4 +1,6 @@
-import { formatDate, formatDateLabelHtml } from "../lib/date";
+import { h, render } from "preact";
+import { SearchResults } from "../components/preact/SearchResults";
+import type { SearchItem } from "./search/types";
 
 // Temporary diagnostics to trace search initialization in build/preview.
 const DEBUG =
@@ -13,21 +15,6 @@ const log = (...args: unknown[]) => {
 
 const SEARCH_INDEX_URL = "/api/search.json";
 const MAX_RESULTS = 20;
-
-type SearchItem = {
-	id: string;
-	title: string;
-	snippet: string;
-	tags?: string[];
-	pubDate?: string;
-	displayDate?: string;
-	url: string;
-	kind: "post" | "note" | "garden";
-	author?: string;
-	source?: string;
-	searchText: string;
-	timestamp: number;
-};
 
 type SearchState = {
 	data?: SearchItem[];
@@ -92,6 +79,7 @@ function renderPlaceholder(
 	message: string,
 	className = "search-modal__placeholder",
 ) {
+	render(null, container);
 	container.innerHTML = "";
 	const wrapper = document.createElement("div");
 	wrapper.className = className;
@@ -99,210 +87,8 @@ function renderPlaceholder(
 	container.appendChild(wrapper);
 }
 
-type TagVariant = "default" | "filter" | "display";
-type TagSize = "small" | "medium" | "large" | "";
-
-function createTag(
-	label: string,
-	variant: TagVariant = "default",
-	size: TagSize = "",
-) {
-	const chip = document.createElement("span");
-	const classes = ["tag"];
-	if (size && size !== "medium") {
-		classes.push(`tag--${size}`);
-	}
-	if (variant !== "default") {
-		classes.push(`tag--${variant}`);
-	}
-	chip.className = classes.filter(Boolean).join(" ");
-	chip.textContent = `#${label}`;
-	chip.setAttribute("data-tag", label);
-	return chip;
-}
-
-function renderPostResult(item: SearchItem) {
-	const article = document.createElement("article");
-	article.className = "post-preview";
-
-	const body = document.createElement("div");
-	body.className = "post-preview__body";
-
-	const title = document.createElement("h3");
-	title.className = "post-preview__title";
-	const link = document.createElement("a");
-	link.href = item.url;
-	link.className = "post-preview__link";
-	link.textContent = item.title;
-	title.appendChild(link);
-	body.appendChild(title);
-
-	const authors = document.createElement("div");
-	authors.className = "post-preview__authors";
-	if (item.displayDate || item.pubDate) {
-		const label = item.pubDate
-			? formatDate(item.pubDate)
-			: item.displayDate ?? "";
-		const time = document.createElement("time");
-		time.dateTime = item.pubDate ?? "";
-		time.className = "date-stamp";
-		time.innerHTML = formatDateLabelHtml(label);
-		authors.appendChild(time);
-	}
-	const kind = document.createElement("span");
-	kind.className = "search-kind";
-	kind.textContent = "Writing";
-	authors.appendChild(kind);
-	body.appendChild(authors);
-
-	const section = document.createElement("div");
-	section.className = "post-preview__section";
-	const excerpt = document.createElement("p");
-	excerpt.className = "post-preview__excerpt";
-	if (item.snippet) {
-		excerpt.textContent = item.snippet;
-		excerpt.hidden = false;
-	} else {
-		excerpt.hidden = true;
-	}
-	section.appendChild(excerpt);
-	body.appendChild(section);
-
-	const meta = document.createElement("div");
-	meta.className = "post-preview__meta";
-	if (item.tags?.length) {
-		for (const tag of item.tags) {
-			if (!tag) continue;
-			meta.appendChild(createTag(tag));
-		}
-	} else {
-		const placeholder = document.createElement("span");
-		placeholder.className = "post-preview__meta-empty";
-		placeholder.textContent = "Research Notes";
-		meta.appendChild(placeholder);
-	}
-	body.appendChild(meta);
-
-	article.appendChild(body);
-	return article;
-}
-
-function renderNoteResult(item: SearchItem) {
-	const link = document.createElement("a");
-	link.className = "note-card note-card--interactive";
-	link.href = item.url;
-
-	const wrapper = document.createElement("div");
-	wrapper.className = "note-content-wrapper";
-
-	const content = document.createElement("div");
-	content.className = "note-content";
-
-	const blockquote = document.createElement("blockquote");
-	blockquote.className = "note-text";
-	blockquote.textContent = item.snippet || item.title || "";
-	content.appendChild(blockquote);
-
-	const attribution = document.createElement("div");
-	attribution.className = "note-attribution";
-	if (item.author) {
-		const author = document.createElement("div");
-		author.className = "note-author";
-		author.textContent = item.author;
-		attribution.appendChild(author);
-	}
-	if (item.source) {
-		const source = document.createElement("div");
-		source.className = "note-source";
-		source.textContent = item.source;
-		attribution.appendChild(source);
-	}
-	if (item.displayDate || item.pubDate) {
-		const label = item.pubDate
-			? formatDate(item.pubDate)
-			: item.displayDate ?? "";
-		const time = document.createElement("time");
-		time.className = "date-stamp note-date";
-		time.innerHTML = formatDateLabelHtml(label);
-		if (item.pubDate) {
-			time.dateTime = item.pubDate;
-		}
-		attribution.appendChild(time);
-	}
-	const kind = document.createElement("span");
-	kind.className = "search-kind";
-	kind.textContent = "Note";
-	attribution.appendChild(kind);
-	content.appendChild(attribution);
-	wrapper.appendChild(content);
-
-	if (item.tags?.length) {
-		const tagList = document.createElement("div");
-		tagList.className = "note-tags";
-		for (const tag of item.tags) {
-			if (!tag) continue;
-			tagList.appendChild(createTag(tag, "filter", "small"));
-		}
-		wrapper.appendChild(tagList);
-	}
-
-	link.appendChild(wrapper);
-	return link;
-}
-
-function renderGardenResult(item: SearchItem) {
-	const link = document.createElement("a");
-	link.className = "garden-search";
-	link.href = item.url;
-
-	const header = document.createElement("div");
-	header.className = "garden-search__header";
-
-	const title = document.createElement("h3");
-	title.className = "garden-search__title";
-	title.textContent = item.title;
-	header.appendChild(title);
-
-	if (item.displayDate || item.pubDate) {
-		const label = item.pubDate
-			? formatDate(item.pubDate)
-			: item.displayDate ?? "";
-		const time = document.createElement("time");
-		time.className = "date-stamp garden-search__date";
-		time.dateTime = item.pubDate ?? "";
-		time.innerHTML = formatDateLabelHtml(label);
-		header.appendChild(time);
-	}
-	const kind = document.createElement("span");
-	kind.className = "search-kind";
-	kind.textContent = "Garden";
-	header.appendChild(kind);
-
-	link.appendChild(header);
-
-	if (item.snippet) {
-		const excerpt = document.createElement("p");
-		excerpt.className = "garden-search__excerpt";
-		excerpt.textContent = item.snippet;
-		link.appendChild(excerpt);
-	}
-
-	return link;
-}
-
 function renderResults(container: HTMLElement, results: SearchItem[]) {
-	container.innerHTML = "";
-	const fragment = document.createDocumentFragment();
-	for (const item of results) {
-		const node =
-			item.kind === "note"
-				? renderNoteResult(item)
-				: item.kind === "garden"
-					? renderGardenResult(item)
-					: renderPostResult(item);
-		fragment.appendChild(node);
-	}
-	container.appendChild(fragment);
+	render(h(SearchResults, { results }), container);
 }
 
 let searchRequestId = 0;

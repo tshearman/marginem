@@ -4,23 +4,23 @@ import DateStamp from "./DateStamp.astro";
 import { ellipsizeText } from "../lib/text";
 
 interface Props {
-	title: string;
-	url: string;
-	dateLabel?: string;
-	dateTime?: string | Date;
-	description?: string;
-	tags?: string[];
-	backgroundImage?: string | null;
+  title: string;
+  url: string;
+  dateLabel?: string;
+  dateTime?: string | Date;
+  description?: string;
+  tags?: string[];
+  backgroundImage?: string | null;
 }
 
 const {
-	title,
-	url,
-	dateLabel = "",
-	dateTime,
-	description = "",
-	tags = [],
-	backgroundImage = null,
+  title,
+  url,
+  dateLabel = "",
+  dateTime,
+  description = "",
+  tags = [],
+  backgroundImage = null,
 } = Astro.props as Props;
 
 const summary = ellipsizeText(description, 260);
@@ -113,6 +113,10 @@ const summary = ellipsizeText(description, 260);
   .hero-feature :global(.tag:focus-visible) {
     background: rgba(0, 0, 0, 0.65);
     border-color: rgba(255, 255, 255, 0.8);
+    color: #fff;
+  }
+
+  .hero-feature :global(.date-stamp) {
     color: #fff;
   }
 

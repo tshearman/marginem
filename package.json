@@ -18,6 +18,7 @@
     "format": "npm run format:source && npm run format:snippets"
   },
   "dependencies": {
+    "@astrojs/preact": "^4.1.2",
     "@astrojs/mdx": "^4.3.13",
     "@astrojs/node": "^9.0.0",
     "astro": "^5.16.9",
@@ -26,6 +27,7 @@
     "katex": "^0.16.9",
     "nodemailer": "^7.0.12",
     "plotly.js-dist-min": "^3.3.1",
+    "preact": "^10.27.2",
     "prismjs": "^1.29.0",
     "rehype-katex": "^7.0.0",
     "rehype-prism-plus": "^1.6.1",

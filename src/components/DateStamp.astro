@@ -1,21 +1,16 @@
 ---
+import { DateStamp } from "./preact/DateStamp";
+
 interface Props {
 	datetime: string | Date;
 	label?: string;
 	class?: string;
 }
 
-import { formatDateLabelHtml } from "../lib/date";
-
 const { datetime, label = "", class: className } = Astro.props as Props;
-const isoDate =
-	typeof datetime === "string" ? datetime : datetime.toISOString();
-const renderedLabel = formatDateLabelHtml(label);
 ---
 
-<time datetime={isoDate} class={`date-stamp ${className ?? ""}`.trim()}>
-  {label ? <span set:html={renderedLabel} /> : null}
-</time>
+<DateStamp datetime={datetime} label={label} className={className} />
 
 <style>
   .hero-feature__date {
