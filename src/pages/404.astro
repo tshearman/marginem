@@ -1,0 +1,80 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Page not found | Notebook"
+  description="The page you are looking for does not exist."
+  hero="Page not found"
+  showHero={true}
+  activePage={undefined}
+>
+  <section class="not-found">
+    <p class="not-found__eyebrow">404</p>
+    <h2 class="not-found__title">That page has wandered off.</h2>
+    <p class="not-found__body">
+      Try the homepage or browse the latest notes to get back on track.
+    </p>
+    <div class="not-found__actions">
+      <a class="not-found__link" href="/">Go home</a>
+      <a class="not-found__link not-found__link--ghost" href="/archive/">
+        Browse archive
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    margin: 2.5rem auto 4rem;
+    max-width: 44rem;
+    text-align: center;
+  }
+
+  .not-found__eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .not-found__title {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+    font-weight: 600;
+  }
+
+  .not-found__body {
+    margin: 0 0 1.5rem;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--fg);
+  }
+
+  .not-found__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .not-found__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1.15rem;
+    border-radius: 999px;
+    border: 1px solid rgba(15, 23, 42, 0.2);
+    background: var(--fg);
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+  }
+
+  .not-found__link--ghost {
+    background: transparent;
+    color: var(--fg);
+  }
+</style>
