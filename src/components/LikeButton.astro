@@ -1,6 +1,5 @@
 ---
 import FeelbackPulse from "astro-feelback/components/FeelbackPulse.astro";
-import FeelbackYesNo from "astro-feelback/components/FeelbackYesNo.astro";
 
 type LikeTargetType = "post" | "note";
 
@@ -18,11 +17,12 @@ const contentSetId = import.meta.env.PUBLIC_FEELBACK_CONTENT_SET_ID;
 const contentKey = `${target}:${slug}`;
 ---
 
-<div>
+<div class={`like-control align-${align} ${className ?? ""}`}>
 	{
 		contentSetId ? (
 			<FeelbackPulse
 				contentSetId={contentSetId}
+				key={contentKey}
 				preset="star"
 				showCount
 			/>
