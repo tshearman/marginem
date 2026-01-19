@@ -4,78 +4,104 @@ import NoteCard from "./NoteCard.astro";
 import PostPreview from "./PostPreview.astro";
 
 type GraphNode = {
-	id: string;
-	title?: string;
-	group?: number;
-	url?: string;
-	tooltipId?: string;
+  id: string;
+  title?: string;
+  group?: number;
+  url?: string;
+  tooltipId?: string;
 };
 
 type GraphLink = {
-	source: string;
-	target: string;
-	value?: number;
+  source: string;
+  target: string;
+  value?: number;
 };
 
 type ForceGraphProps = {
-	nodes: GraphNode[];
-	links: GraphLink[];
-	width?: number;
-	height?: number;
-	labelKey?: string;
-	className?: string;
-	noteTooltips?: Array<{
-		id: string;
-		content: string;
-		source?: string;
-		author?: string;
-		tags?: string[];
-		date?: Date;
-	}>;
-	postTooltips?: Array<{
-		id: string;
-		title: string;
-		url: string;
-		pubDate?: string;
-		displayDate?: string;
-		description?: string;
-		abstract?: string;
-		tags?: string[];
-	}>;
-	gardenTooltips?: Array<{
-		id: string;
-		slug: string;
-		title: string;
-		excerpt: string;
-		updatedAt: Date;
-		relativePath: string;
-		vaultRoot?: string;
-	}>;
+  nodes: GraphNode[];
+  links: GraphLink[];
+  width?: number;
+  height?: number;
+  labelKey?: string;
+  className?: string;
+  noteTooltips?: Array<{
+    id: string;
+    content: string;
+    source?: string;
+    author?: string;
+    tags?: string[];
+    date?: Date;
+  }>;
+  postTooltips?: Array<{
+    id: string;
+    title: string;
+    url: string;
+    pubDate?: string;
+    displayDate?: string;
+    description?: string;
+    abstract?: string;
+    tags?: string[];
+  }>;
+  gardenTooltips?: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    excerpt: string;
+    updatedAt: Date;
+    relativePath: string;
+    vaultRoot?: string;
+  }>;
 };
 
 const {
-	nodes,
-	links,
-	width = 640,
-	height = 240,
-	labelKey = "id",
-	className = "",
-	noteTooltips = [],
-	postTooltips = [],
-	gardenTooltips = [],
+  nodes,
+  links,
+  width = 640,
+  height = 240,
+  labelKey = "id",
+  className = "",
+  noteTooltips = [],
+  postTooltips = [],
+  gardenTooltips = [],
 } = Astro.props as ForceGraphProps;
+
+const labelForNode = (node: GraphNode) => {
+  const value = (node as Record<string, unknown>)[labelKey];
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+  return node.title || node.id;
+};
+
+const previewTooltipIds = new Set([
+  ...gardenTooltips.map((note) => note.id),
+  ...noteTooltips.map((note) => note.id),
+  ...postTooltips.map((post) => post.id),
+]);
+
+const nodesWithTooltips = nodes.map((node) => ({
+  ...node,
+  tooltipId: node.tooltipId ?? node.id,
+}));
+
+const fallbackTooltips = nodesWithTooltips
+  .filter((node) => !previewTooltipIds.has(node.tooltipId ?? node.id))
+  .map((node) => ({
+    id: node.tooltipId ?? node.id,
+    title: node.title || labelForNode(node),
+  }));
 
 const clampedHeight = Math.min(Math.max(height, 240), 420);
 
 const graphId = `force-graph-${
-	globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
+  globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
 }`;
 const payloadAttr = JSON.stringify({
-	nodes,
-	links,
-	width,
-	height: clampedHeight,
-	labelKey,
+  nodes: nodesWithTooltips,
+  links,
+  width,
+  height: clampedHeight,
+  labelKey,
 }).replace(/</g, "\\u003c");
 ---
 
@@ -87,7 +113,10 @@ const payloadAttr = JSON.stringify({
   <div id={graphId} class="force-graph__stage" data-force-graph={payloadAttr}>
   </div>
   {
-    noteTooltips.length || postTooltips.length || gardenTooltips.length ? (
+    noteTooltips.length ||
+    postTooltips.length ||
+    gardenTooltips.length ||
+    fallbackTooltips.length ? (
       <div
         class="force-graph__tooltip-layer"
         data-force-tooltip-owner={graphId}
@@ -129,6 +158,13 @@ const payloadAttr = JSON.stringify({
               abstract={post.abstract}
               tags={post.tags}
             />
+          </div>
+        ))}
+        {fallbackTooltips.map((node) => (
+          <div class="force-graph__tooltip" data-force-tooltip-id={node.id}>
+            <div class="force-graph__title-card">
+              <h3 class="force-graph__title-card-heading">{node.title}</h3>
+            </div>
           </div>
         ))}
       </div>
@@ -197,6 +233,17 @@ const payloadAttr = JSON.stringify({
 
   .force-graph__tooltip :global(.note-like) {
     display: none;
+  }
+
+  .force-graph__title-card {
+    /* min-width: min(260px, 75vw); */
+  }
+
+  .force-graph__title-card-heading {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--fg);
   }
 
   @media (max-width: 720px) {

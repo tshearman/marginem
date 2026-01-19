@@ -261,10 +261,6 @@ figcaption {
   margin: -0.8rem 0 1rem;
 }
 
-.post-preview__like-button .like-button {
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.04);
-}
-
 .post-preview__meta-empty {
   font-size: 0.85rem;
   letter-spacing: 0.08em;

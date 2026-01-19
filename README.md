@@ -46,16 +46,11 @@ A minimalist, technical blog starter built with [Astro](https://astro.build/) an
    ```
 4. Create new posts inside `src/content/blog`. Use frontmatter that matches `src/content/config.ts`.
 
-## Likes API (posts + notes)
+## Likes (Feelback)
 
-- On first request a `visitor_id` cookie is issued (httpOnly, same-site). Likes are stored in `data/likes.db` (SQLite via `better-sqlite3`) keyed by `visitor_id`, `type` (`post` | `note`), and `slug`.
-- `GET /api/likes?type=post&slug=my-post` → `{ count, liked }`
-- `POST /api/likes` with JSON `{ type, slug, action?: "like" | "unlike" | "toggle" }` → `{ count, liked }` (also available as `DELETE /api/likes` to unlike).
-- The storage layer is isolated in `src/lib/likes/store.ts` so it can be swapped for a remote database later.
-- Likes are only accepted for slugs that exist at build time (blog posts + generated note IDs).
-- Visitor cookies are HMAC-signed; set `VISITOR_COOKIE_SECRET` to a strong, private value (deployment will fail if absent). The issued cookie remains httpOnly, same-site, secure in prod, and lasts one year.
-- Rate limiting defaults to 60 requests per minute per visitor/IP combination; override with `RATE_LIMIT_MAX_REQUESTS` and `RATE_LIMIT_WINDOW_MS` if needed.
-- Use `LIKES_DB_PATH=/absolute/or/relative/path/to/db` to point at a different database file (dev defaults to `data/likes.dev.db`, prod to `data/likes.db`).
+- Likes are powered by the Feelback hosted API via `astro-feelback` components.
+- Set `PUBLIC_FEELBACK_CONTENT_SET_ID` in your environment (from the Feelback panel) to enable the like button.
+- `src/components/LikeButton.astro` is a thin wrapper around `FeelbackPulse` that generates stable keys for posts and notes.
 
 ## MDX helpers
 
@@ -72,7 +67,7 @@ docker build -t blogupdate .
 docker run -p 4321:4321 --env PORT=4321 blogupdate
 ```
 
-The container uses the Astro Node adapter in standalone mode (`node dist/server/entry.mjs`) and listens on `PORT` (default `4321`) with `HOST=0.0.0.0`. The image includes SQLite runtime support for the likes API; swap in your own database later by pointing `LIKES_DB_PATH` at a different location.
+The container uses the Astro Node adapter in standalone mode (`node dist/server/entry.mjs`) and listens on `PORT` (default `4321`) with `HOST=0.0.0.0`.
 
 The build stage also installs `ghc`, `sbcl`, and `python3-numpy`, so `runghc`, Common Lisp, and Python+NumPy MDX snippets (e.g. `src/content/blog/haskell-runner-demo.mdx`, `common-lisp-runner-demo.mdx`, and `python-runner-demo.mdx`) can execute during `astro build`.
 
