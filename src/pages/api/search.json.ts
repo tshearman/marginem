@@ -6,6 +6,8 @@ import { generateNoteId } from "../../lib/noteUtils";
 import { ellipsizeText, normalizeWhitespace } from "../../lib/text";
 import { formatDate } from "../../lib/date";
 
+export const prerender = true;
+
 type SearchEntry = {
 	id: string;
 	kind: "post" | "note" | "garden";
