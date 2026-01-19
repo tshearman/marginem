@@ -12,7 +12,9 @@ const layoutHeight =
 		: undefined;
 const chartStyle = [
 	"width: 100%",
-	layoutHeight !== undefined ? `height: ${layoutHeight}px` : "min-height: 320px",
+	layoutHeight !== undefined
+		? `height: ${layoutHeight}px`
+		: "min-height: 320px",
 ].join(" ");
 const chartId = `plotly-${
 	globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)

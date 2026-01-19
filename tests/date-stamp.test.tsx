@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { afterEach, describe, expect, it } from "vitest";
-import { h, render } from "preact";
+import { render } from "preact";
 import { DateStamp } from "../src/components/preact/DateStamp";
 
 describe("DateStamp component", () => {

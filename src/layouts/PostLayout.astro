@@ -41,7 +41,8 @@ const abstractText =
 const tags = Array.isArray(frontmatter.tags)
 	? frontmatter.tags.filter((tag): tag is string => typeof tag === "string")
 	: [];
-const title = typeof frontmatter.title === "string" ? frontmatter.title : "Post";
+const title =
+	typeof frontmatter.title === "string" ? frontmatter.title : "Post";
 const description =
 	typeof frontmatter.description === "string" ? frontmatter.description : "";
 ---

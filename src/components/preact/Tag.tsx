@@ -14,8 +14,14 @@ type Props = {
 const getTagUrl = (label: string) =>
 	label ? `/tags/${encodeURIComponent(label.toLowerCase())}/` : undefined;
 
-const baseClasses = (variant: Props["variant"], size: Props["size"], className?: string) =>
-	["tag", `tag--${variant}`, `tag--${size}`, className].filter(Boolean).join(" ");
+const baseClasses = (
+	variant: Props["variant"],
+	size: Props["size"],
+	className?: string,
+) =>
+	["tag", `tag--${variant}`, `tag--${size}`, className]
+		.filter(Boolean)
+		.join(" ");
 
 export function Tag(props: Props) {
 	const {
@@ -65,7 +71,11 @@ export function Tag(props: Props) {
 	}
 
 	return (
-		<span class={classes} data-tag={label} data-selected={selected ? "true" : "false"}>
+		<span
+			class={classes}
+			data-tag={label}
+			data-selected={selected ? "true" : "false"}
+		>
 			#{label}
 		</span>
 	);

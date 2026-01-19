@@ -193,7 +193,9 @@ function executeTypescriptSnippet(code, sourcePath, contextPath, language) {
 		if (result.stderr) chunks.push(result.stderr.trim());
 		if (result.error) chunks.push(String(result.error));
 		if (result.status !== 0) {
-			chunks.push(`(typescript exited with code ${result.status ?? "unknown"})`);
+			chunks.push(
+				`(typescript exited with code ${result.status ?? "unknown"})`,
+			);
 		}
 		const output = chunks.filter(Boolean).join("\n") || "(no output)";
 		return { output, success: result.status === 0 };

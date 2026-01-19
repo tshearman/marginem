@@ -19,6 +19,16 @@ const FORMATTERS = {
         file
       ])
   },
+  typescript: {
+    label: "TypeScript",
+    extension: ".ts",
+    run: (file) =>
+      runCommand(process.env.CODE_FORMAT_TS ?? "biome", [
+        "format",
+        "--write",
+        file
+      ])
+  },
   python: {
     label: "Python",
     extension: ".py",
@@ -53,8 +63,8 @@ const FORMATTERS = {
 const LANGUAGE_ALIASES = {
   js: "javascript",
   javascript: "javascript",
-  ts: "javascript",
-  typescript: "javascript",
+  ts: "typescript",
+  typescript: "typescript",
   py: "python",
   python: "python",
   hs: "haskell",
@@ -66,7 +76,7 @@ const LANGUAGE_ALIASES = {
 
 const SNIPPET_EXTENSIONS = new Map([
   [".js", "javascript"],
-  [".ts", "javascript"],
+  [".ts", "typescript"],
   [".py", "python"],
   [".hs", "haskell"],
   [".lisp", "lisp"]

@@ -3,12 +3,12 @@ import { GardenNoteCard as PreactGardenNoteCard } from "./preact/GardenNoteCard"
 import { formatDate } from "../lib/date";
 
 interface Props {
-  slug: string;
-  title: string;
-  excerpt: string;
-  updatedAt: Date;
-  relativePath: string;
-  vaultRoot?: string;
+	slug: string;
+	title: string;
+	excerpt: string;
+	updatedAt: Date;
+	relativePath: string;
+	vaultRoot?: string;
 }
 
 const { slug, title, excerpt, updatedAt } = Astro.props as Props;

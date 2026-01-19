@@ -156,7 +156,7 @@ function hydrateGraph(el: HTMLElement) {
 			.data(links)
 			.join("line");
 
-		let simulation = forceSimulation(nodes);
+		const simulation = forceSimulation(nodes);
 
 		let activeTooltip: HTMLElement | null = null;
 
@@ -210,26 +210,35 @@ function hydrateGraph(el: HTMLElement) {
 				drag<SVGGElement, GraphNode>()
 					.on(
 						"start",
-						(event: D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) => {
-						if (!event.active) simulation.alphaTarget(0.3).restart();
-						d.fx = d.x;
-						d.fy = d.y;
-					},
+						(
+							event: D3DragEvent<SVGGElement, GraphNode, GraphNode>,
+							d: GraphNode,
+						) => {
+							if (!event.active) simulation.alphaTarget(0.3).restart();
+							d.fx = d.x;
+							d.fy = d.y;
+						},
 					)
 					.on(
 						"drag",
-						(event: D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) => {
-						d.fx = event.x;
-						d.fy = event.y;
-					},
+						(
+							event: D3DragEvent<SVGGElement, GraphNode, GraphNode>,
+							d: GraphNode,
+						) => {
+							d.fx = event.x;
+							d.fy = event.y;
+						},
 					)
 					.on(
 						"end",
-						(event: D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) => {
-						if (!event.active) simulation.alphaTarget(0);
-						d.fx = null;
-						d.fy = null;
-					},
+						(
+							event: D3DragEvent<SVGGElement, GraphNode, GraphNode>,
+							d: GraphNode,
+						) => {
+							if (!event.active) simulation.alphaTarget(0);
+							d.fx = null;
+							d.fy = null;
+						},
 					),
 			);
 

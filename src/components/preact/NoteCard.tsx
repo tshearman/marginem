@@ -46,9 +46,7 @@ export function NoteCard(props: Props) {
 
 	const Wrapper = variant === "search" ? "a" : "article";
 	const wrapperProps =
-		variant === "search"
-			? { href }
-			: { id, style, "data-tags": dataTags };
+		variant === "search" ? { href } : { id, style, "data-tags": dataTags };
 
 	return (
 		<Wrapper class={wrapperClass} {...wrapperProps}>
@@ -80,7 +78,12 @@ export function NoteCard(props: Props) {
 				{tags.length ? (
 					<div class="note-tags">
 						{tags.map((tagValue) => (
-							<Tag key={tagValue} tag={tagValue} variant="filter" size="small" />
+							<Tag
+								key={tagValue}
+								tag={tagValue}
+								variant="filter"
+								size="small"
+							/>
 						))}
 					</div>
 				) : null}
