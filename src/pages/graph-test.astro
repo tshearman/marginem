@@ -10,6 +10,10 @@ const nodes = [
 	{ id: "Graph Test", group: 3, url: "/graph-test/" },
 	{ id: "Notecard", group: 4, tooltipId: "note-1" },
 	{ id: "Post", group: 4, tooltipId: "post-1", url: "/posts/first-post/" },
+	...Array.from({ length: 50 }, (_value, index) => ({
+		id: `Node ${index + 1}`,
+		group: 5,
+	})),
 ];
 
 const links = [
@@ -22,6 +26,10 @@ const links = [
 	{ source: "Graph Test", target: "Home" },
 	{ source: "Commonplace", target: "Notecard" },
 	{ source: "Archive", target: "Post" },
+	...Array.from({ length: 50 }, (_value, index) => ({
+		source: `Node ${index + 1}`,
+		target: "Graph Test",
+	})),
 ];
 
 const noteTooltips = [
@@ -57,6 +65,7 @@ const postTooltips = [
         This sample uses a reusable D3 component with draggable nodes and
         labeled nodes.
       </p>
+      <p class="node-count">{nodes.length} nodes loaded</p>
     </header>
     <ForceGraph
       nodes={nodes}
@@ -95,5 +104,11 @@ const postTooltips = [
   .lede {
     margin: 0;
     color: rgba(15, 23, 42, 0.75);
+  }
+
+  .node-count {
+    margin: 0.5rem 0 0;
+    font-size: 0.95rem;
+    color: rgba(15, 23, 42, 0.65);
   }
 </style>

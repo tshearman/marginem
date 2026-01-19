@@ -6,6 +6,14 @@ type PlotPayload = {
 };
 
 const { data = [], layout = {}, config = {} } = Astro.props as PlotPayload;
+const layoutHeight =
+	typeof layout.height === "number" && Number.isFinite(layout.height)
+		? layout.height
+		: undefined;
+const chartStyle = [
+	"width: 100%",
+	layoutHeight !== undefined ? `height: ${layoutHeight}px` : "min-height: 320px",
+].join(" ");
 const chartId = `plotly-${
 	globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
 }`;
@@ -20,11 +28,29 @@ const payloadAttr = JSON.stringify({
 	config: combinedConfig,
 }).replace(/</g, "\\u003c");
 ---
-<div
-  id={chartId}
-  style="width: 100%; min-height: 320px;"
-  data-plotly={payloadAttr}
-></div>
+<div class="plotly-shell">
+  <div
+    id={chartId}
+    class="plotly-chart"
+    style={chartStyle}
+    data-plotly={payloadAttr}
+  ></div>
+</div>
 <script>
   import "../scripts/plotly-client.ts";
 </script>
+
+<style>
+  .plotly-shell {
+    width: 100%;
+    border: 3px dashed #ef4444;
+    padding: 6px;
+    background: rgba(239, 68, 68, 0.06);
+  }
+
+  .plotly-chart {
+    display: block;
+    max-width: 100%;
+    background: #fff;
+  }
+</style>

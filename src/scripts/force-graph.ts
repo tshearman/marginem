@@ -4,6 +4,8 @@ import {
 	forceLink,
 	forceManyBody,
 	forceSimulation,
+	forceX,
+	forceY,
 	scaleOrdinal,
 	schemeTableau10,
 	select,
@@ -33,6 +35,37 @@ type GraphPayload = {
 
 const DEFAULT_WIDTH = 640;
 const DEFAULT_HEIGHT = 420;
+const BOUNDS_PADDING = 18;
+
+function clamp(value: number, min: number, max: number) {
+	return Math.min(Math.max(value, min), max);
+}
+
+function keepNodesInBounds(nodes: GraphNode[], width: number, height: number) {
+	const minX = BOUNDS_PADDING;
+	const maxX = Math.max(BOUNDS_PADDING, width - BOUNDS_PADDING);
+	const minY = BOUNDS_PADDING;
+	const maxY = Math.max(BOUNDS_PADDING, height - BOUNDS_PADDING);
+
+	for (const node of nodes) {
+		if (typeof node.x === "number") {
+			const clampedX = clamp(node.x, minX, maxX);
+			if (clampedX !== node.x) {
+				node.x = clampedX;
+				const vx = typeof node.vx === "number" ? node.vx : 0;
+				node.vx = clampedX <= minX ? Math.abs(vx) * 0.5 : -Math.abs(vx) * 0.5;
+			}
+		}
+		if (typeof node.y === "number") {
+			const clampedY = clamp(node.y, minY, maxY);
+			if (clampedY !== node.y) {
+				node.y = clampedY;
+				const vy = typeof node.vy === "number" ? node.vy : 0;
+				node.vy = clampedY <= minY ? Math.abs(vy) * 0.5 : -Math.abs(vy) * 0.5;
+			}
+		}
+	}
+}
 
 function labelFor(node: GraphNode, labelKey?: string) {
 	if (!labelKey) return node.id;
@@ -78,8 +111,10 @@ function hydrateGraph(el: HTMLElement) {
 		const payload = JSON.parse(raw) as GraphPayload;
 		const nodes = payload.nodes ?? [];
 		const links = payload.links ?? [];
-		const width = payload.width ?? DEFAULT_WIDTH;
-		const height = payload.height ?? DEFAULT_HEIGHT;
+		const fallbackWidth = payload.width ?? DEFAULT_WIDTH;
+		const fallbackHeight = payload.height ?? DEFAULT_HEIGHT;
+		let width = el.clientWidth || fallbackWidth;
+		let height = el.clientHeight || fallbackHeight;
 		const labelKey = payload.labelKey ?? "id";
 
 		el.removeAttribute("data-force-graph");
@@ -213,43 +248,54 @@ function hydrateGraph(el: HTMLElement) {
 			.attr("stroke", (d: GraphNode) => color(String(d.group ?? 0)))
 			.attr("stroke-width", 2);
 
-		const labels = svg
-			.append("g")
-			.attr("font-size", "12px")
-			.attr("fill", "rgba(15, 23, 42, 0.8)")
-			.attr("paint-order", "stroke")
-			.attr("stroke", "rgba(255, 255, 255, 0.95)")
-			.attr("stroke-width", 3)
-			.selectAll("text")
-			.data(nodes)
-			.join("text")
-			.style("cursor", (d: GraphNode) => (d.url ? "pointer" : "default"))
-			.on("click", (_event: MouseEvent, d: GraphNode) => {
-				navigateTo(d);
-			})
-			.on("pointerenter", (event: PointerEvent, d: GraphNode) => {
-				showTooltip(event, d);
-			})
-			.on("pointermove", (event: PointerEvent, d: GraphNode) => {
-				moveTooltip(event, d);
-			})
-			.on("pointerleave", (_event: PointerEvent, d: GraphNode) => {
-				hideTooltip(d);
-			})
-			.text((d: GraphNode) => labelFor(d, labelKey));
+		const showLabels = nodes.length <= 25;
+		const labels = showLabels
+			? svg
+					.append("g")
+					.attr("font-size", "12px")
+					.attr("fill", "rgba(15, 23, 42, 0.8)")
+					.attr("paint-order", "stroke")
+					.attr("stroke", "rgba(255, 255, 255, 0.95)")
+					.attr("stroke-width", 3)
+					.selectAll("text")
+					.data(nodes)
+					.join("text")
+					.style("cursor", (d: GraphNode) => (d.url ? "pointer" : "default"))
+					.on("click", (_event: MouseEvent, d: GraphNode) => {
+						navigateTo(d);
+					})
+					.on("pointerenter", (event: PointerEvent, d: GraphNode) => {
+						showTooltip(event, d);
+					})
+					.on("pointermove", (event: PointerEvent, d: GraphNode) => {
+						moveTooltip(event, d);
+					})
+					.on("pointerleave", (_event: MouseEvent, d: GraphNode) => {
+						hideTooltip(d);
+					})
+					.text((d: GraphNode) => labelFor(d, labelKey))
+			: null;
 
-		simulation = simulation
-			.force(
-				"link",
-				forceLink<GraphNode, GraphLink>(links)
-					.id((d: GraphNode) => d.id)
-					.distance(75)
-					.strength(0.8),
-			)
-			.force("charge", forceManyBody().strength(-220))
-			.force("center", forceCenter(width / 2, height / 2));
+		const updateForces = () => {
+			simulation
+				.force(
+					"link",
+					forceLink<GraphNode, GraphLink>(links)
+						.id((d: GraphNode) => d.id)
+						.distance(75)
+						.strength(0.8),
+				)
+				.force("charge", forceManyBody().strength(-220))
+				.force("center", forceCenter(width / 2, height / 2))
+				.force("x", forceX(width / 2).strength(0.08))
+				.force("y", forceY(height / 2).strength(0.08));
+		};
+
+		updateForces();
 
 		simulation.on("tick", () => {
+			keepNodesInBounds(nodes, width, height);
+
 			link
 				.attr("x1", (d: GraphLink) => (d.source as GraphNode).x ?? 0)
 				.attr("y1", (d: GraphLink) => (d.source as GraphNode).y ?? 0)
@@ -261,10 +307,28 @@ function hydrateGraph(el: HTMLElement) {
 				(d: GraphNode) => `translate(${d.x ?? 0}, ${d.y ?? 0})`,
 			);
 
-			labels
-				.attr("x", (d: GraphNode) => (d.x ?? 0) + 12)
-				.attr("y", (d: GraphNode) => (d.y ?? 0) + 4);
+			if (labels) {
+				labels
+					.attr("x", (d: GraphNode) => (d.x ?? 0) + 12)
+					.attr("y", (d: GraphNode) => (d.y ?? 0) + 4);
+			}
 		});
+
+		if ("ResizeObserver" in window) {
+			const observer = new ResizeObserver((entries) => {
+				for (const entry of entries) {
+					const nextWidth = Math.round(entry.contentRect.width);
+					const nextHeight = Math.round(entry.contentRect.height);
+					if (!nextWidth || !nextHeight) continue;
+					width = nextWidth;
+					height = nextHeight;
+					svg.attr("viewBox", `0 0 ${width} ${height}`);
+					updateForces();
+					simulation.alpha(0.6).restart();
+				}
+			});
+			observer.observe(el);
+		}
 	} catch (error) {
 		console.error("Failed to initialize force graph", error);
 	}
