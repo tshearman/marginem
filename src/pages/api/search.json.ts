@@ -5,6 +5,7 @@ import { loadGardenNotes } from "../../lib/garden";
 import { generateNoteId } from "../../lib/noteUtils";
 import { ellipsizeText, normalizeWhitespace } from "../../lib/text";
 import { formatDate } from "../../lib/date";
+import { loadCommonplaceNotes } from "../../lib/commonplace";
 
 export const prerender = true;
 
@@ -38,8 +39,6 @@ const toSearchText = (segments: Array<string | undefined>) =>
 		.join(" ");
 
 type BlogEntry = CollectionEntry<"blog">;
-type NotesFile = CollectionEntry<"notes">;
-type NoteEntry = NotesFile["data"][number];
 
 const plainExcerpt = (value = "") =>
 	stripFormatting(value.replace(/!?\[\[[^\]]+\]\]/g, " "));
@@ -72,38 +71,44 @@ const buildPostEntries = (posts: BlogEntry[]) =>
 		};
 	});
 
-const buildNoteEntries = (notesCollection: NotesFile[]) =>
-	notesCollection.flatMap((file) =>
-		file.data.map((entry: NoteEntry) => {
-			const noteDate = entry.date ? new Date(entry.date) : undefined;
-			const tags = entry.tags ?? [];
-			const id = generateNoteId({
-				content: entry.content,
-				author: entry.author,
-				tags,
-				date: noteDate,
-			});
-			return {
-				id,
-				kind: "note" as const,
-				title: entry.author ?? "Commonplace note",
-				url: `/commonplace/#${id}`,
-				snippet: ellipsizeText(entry.content, 220, { alwaysAppend: true }),
-				tags,
-				displayDate: noteDate ? formatDate(noteDate) : "",
-				pubDate: noteDate ? noteDate.toISOString() : "",
-				timestamp: noteDate ? noteDate.getTime() : 0,
-				author: entry.author,
-				source: entry.source,
-				searchText: toSearchText([
-					entry.content,
-					entry.author,
-					entry.source,
-					tags.join(" "),
-				]),
-			};
-		}),
-	);
+const buildNoteEntries = (
+	notes: Array<{
+		content: string;
+		author?: string;
+		source?: string;
+		tags?: string[];
+		date?: Date;
+	}>,
+) =>
+	notes.map((entry) => {
+		const noteDate = entry.date;
+		const tags = entry.tags ?? [];
+		const id = generateNoteId({
+			content: entry.content,
+			author: entry.author,
+			tags,
+			date: noteDate,
+		});
+		return {
+			id,
+			kind: "note" as const,
+			title: entry.author ?? "Commonplace note",
+			url: `/commonplace/#${id}`,
+			snippet: ellipsizeText(entry.content, 220, { alwaysAppend: true }),
+			tags,
+			displayDate: noteDate ? formatDate(noteDate) : "",
+			pubDate: noteDate ? noteDate.toISOString() : "",
+			timestamp: noteDate ? noteDate.getTime() : 0,
+			author: entry.author,
+			source: entry.source,
+			searchText: toSearchText([
+				entry.content,
+				entry.author,
+				entry.source,
+				tags.join(" "),
+			]),
+		};
+	});
 
 const buildGardenEntries = (
 	gardenNotes: Awaited<ReturnType<typeof loadGardenNotes>>,
@@ -125,13 +130,23 @@ const buildGardenEntries = (
 	});
 
 export const GET: APIRoute = async () => {
-	const [posts, notes, gardenNotes] = await Promise.all([
+	const [posts, vaultNotes, gardenNotes] = await Promise.all([
 		getCollection("blog", ({ data }) => !data.draft),
-		getCollection("notes"),
+		loadCommonplaceNotes(),
 		loadGardenNotes(),
 	]);
 	const postEntries = buildPostEntries(posts);
-	const noteEntries = buildNoteEntries(notes);
+	const fallbackNotes =
+		vaultNotes.length === 0
+			? (await getCollection("notes")).flatMap((file) =>
+					file.data.map((entry) => ({
+						...entry,
+						tags: entry.tags ?? [],
+						date: entry.date ? new Date(entry.date) : undefined,
+					})),
+				)
+			: vaultNotes;
+	const noteEntries = buildNoteEntries(fallbackNotes);
 	const gardenEntries = buildGardenEntries(gardenNotes);
 	const payload: SearchEntry[] = [
 		...postEntries,

@@ -7,25 +7,24 @@ import TagFilterPanel from "../../components/TagFilterPanel.astro";
 import { getCollection } from "astro:content";
 import { generateNoteId } from "../../lib/noteUtils";
 import { MAIN_PAGES } from "../../lib/site";
+import { loadCommonplaceNotes } from "../../lib/commonplace";
 
-const notesCollection = await getCollection("notes");
+const vaultNotes = await loadCommonplaceNotes();
 const allNotes: Array<{
 	content: string;
 	source?: string;
 	author?: string;
 	tags: string[];
 	date?: Date;
-}> = [];
-
-for (const file of notesCollection) {
-	allNotes.push(
-		...file.data.map((entry) => ({
-			...entry,
-			tags: entry.tags ?? [],
-			date: entry.date ? new Date(entry.date) : undefined,
-		})),
-	);
-}
+}> = vaultNotes.length
+	? vaultNotes
+	: (await getCollection("notes")).flatMap((file) =>
+			file.data.map((entry) => ({
+				...entry,
+				tags: entry.tags ?? [],
+				date: entry.date ? new Date(entry.date) : undefined,
+			})),
+		);
 
 const sortedNotes = allNotes.sort((a, b) => {
 	if (!a.date && !b.date) return 0;

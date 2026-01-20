@@ -27,7 +27,7 @@ export const MAIN_PAGES = {
 		pageTitle: `Garden | ${SITE_NAME}`,
 		eyebrow: "Linked vault notes",
 		description:
-			"Notes are imported from the OBSIDIAN_VAULT path at build time, keeping Obsidian and the site in sync.",
+			"Notes are imported from the configured Obsidian vault path at build time, keeping Obsidian and the site in sync.",
 	},
 	archive: {
 		label: "Archive",

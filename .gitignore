@@ -32,3 +32,5 @@ pnpm-debug.log*
 
 # Dev data files
 data/
+!data/obsidian-vault-sample/
+!data/obsidian-vault-sample/**

@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "sync:obsidian": "node scripts/sync-obsidian.mjs",
+    "deploy": "node scripts/deploy.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",

@@ -15,6 +15,13 @@ import remarkObsidianLinks, {
 	slugifyHeading,
 	slugifyObsidianTarget,
 } from "../../plugins/remark-obsidian-links.js";
+import {
+	loadObsidianConfig,
+	normalizeVaultPath,
+	resolveGardenRoot,
+} from "./obsidianConfig";
+
+export { resolveGardenRoot as resolveVaultRoot };
 
 const prismPlugin: [RehypePlugin, { showLineNumbers: true }] = [
 	rehypePrism as unknown as RehypePlugin,
@@ -44,42 +51,22 @@ const extractTitle = (content: string, fallback: string) => {
 	return fallback.replace(/\.md$/i, "");
 };
 
-const getSampleVaultPath = () =>
-	path.resolve(process.cwd(), "data/obsidian-vault-sample");
-
-export const resolveVaultRoot = () => {
-	const vaultEnv = process.env.OBSIDIAN_VAULT;
-	const candidates = [];
-	if (vaultEnv) {
-		candidates.push(path.resolve(process.cwd(), vaultEnv));
-	}
-	// Fallback to the bundled sample vault so the Garden page always works locally.
-	candidates.push(getSampleVaultPath());
-
-	for (const candidate of candidates) {
-		if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
-			return candidate;
-		}
-	}
-
-	if (vaultEnv) {
-		console.warn(
-			`[garden] OBSIDIAN_VAULT path "${path.resolve(
-				process.cwd(),
-				vaultEnv,
-			)}" does not exist or is not a directory.`,
-		);
-	}
-	return null;
-};
-
 const normalizePath = (value: string) => value.split(path.sep).join("/");
 
 export const loadGardenNotes = async (
 	options: { includeUnpublished?: boolean } = {},
 ) => {
-	const vaultRoot = resolveVaultRoot();
+	const vaultRoot = resolveGardenRoot();
 	if (!vaultRoot) return [] as GardenNote[];
+	const config = loadObsidianConfig();
+	const ignoredRoots = [config.commonplacePath]
+		.filter(Boolean)
+		.map((entry) => normalizeVaultPath(entry));
+	const isIgnoredPath = (relativePath: string) =>
+		ignoredRoots.some(
+			(root) =>
+				relativePath === root || relativePath.startsWith(`${root}/`),
+		);
 
 	const notes: GardenNote[] = [];
 	const visitDir = (dir: string) => {
@@ -98,6 +85,7 @@ export const loadGardenNotes = async (
 				frontmatter: "remove",
 			});
 			const relativePath = normalizePath(path.relative(vaultRoot, fullPath));
+			if (isIgnoredPath(relativePath)) continue;
 			const slug = slugifyObsidianTarget(relativePath);
 			const stats = fs.statSync(fullPath);
 			const published = frontmatter?.published === true;
