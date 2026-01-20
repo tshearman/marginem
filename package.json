@@ -19,7 +19,8 @@
     "lint": "npm run check && npm run lint:source && npm run lint:snippets",
     "format:source": "biome format --write src plugins astro.config.mjs",
     "format:snippets": "node scripts/format-snippets.mjs",
-    "format": "npm run format:source && npm run format:snippets"
+    "format": "npm run format:source && npm run format:snippets",
+    "postinstall": "node scripts/patch-katex.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
