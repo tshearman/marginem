@@ -1,4 +1,4 @@
-# Notebook
+# Marginem
 
 A minimalist, technical blog starter built with [Astro](https://astro.build/) and MDX. It prioritizes excellent typography, runnable code snippets, math typesetting, tags, pagination, and lightweight interactive plots.
 
@@ -63,8 +63,8 @@ A minimalist, technical blog starter built with [Astro](https://astro.build/) an
 Build a production image and run it locally:
 
 ```bash
-docker build -t blogupdate .
-docker run -p 4321:4321 --env PORT=4321 blogupdate
+docker build -t marginem .
+docker run -p 4321:4321 --env PORT=4321 marginem
 ```
 
 The container uses the Astro Node adapter in standalone mode (`node dist/server/entry.mjs`) and listens on `PORT` (default `4321`) with `HOST=0.0.0.0`.

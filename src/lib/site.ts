@@ -1,4 +1,4 @@
-export const SITE_NAME = "Notebook";
+export const SITE_NAME = "Ad Marginem";
 
 export const MAIN_PAGES = {
 	writing: {
@@ -6,7 +6,7 @@ export const MAIN_PAGES = {
 		href: "/",
 		icon: "writing",
 		isCompact: false,
-		pageTitle: "Writing",
+		pageTitle: `Writing | ${SITE_NAME}`,
 		eyebrow: "Essays and field notes",
 		description: "Essays, research notes, and experiments.",
 	},
@@ -17,7 +17,7 @@ export const MAIN_PAGES = {
 		isCompact: false,
 		pageTitle: `Commonplace | ${SITE_NAME}`,
 		eyebrow: "Collected fragments",
-		description: "Collected passages, marginalia, and fragments.",
+		description: "Collected passages, adversaria, and fragments.",
 	},
 	garden: {
 		label: "Garden",

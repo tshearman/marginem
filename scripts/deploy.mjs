@@ -1,8 +1,6 @@
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 
-const REPO_ROOT = process.cwd();
-
 const run = (command, args, options = {}) => {
 	const result = execFileSync(command, args, {
 		encoding: "utf8",

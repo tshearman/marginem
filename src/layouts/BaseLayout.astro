@@ -3,23 +3,25 @@ import "../styles/global.css";
 import "katex/dist/katex.min.css";
 import "astro-feelback/styles/feelback.css";
 import SiteNav from "../components/SiteNav.astro";
+import { SITE_NAME } from "../lib/site";
+import favicon from "../assets/favicon.png";
 
 interface BaseLayoutProps {
-	title?: string;
-	description?: string;
-	hero?: string;
-	showHero?: boolean;
-	includeFootnotes?: boolean;
-	activePage?: string;
+  title?: string;
+  description?: string;
+  hero?: string;
+  showHero?: boolean;
+  includeFootnotes?: boolean;
+  activePage?: string;
 }
 
 const {
-	title = "Notebook",
-	description = "Explorations in math, code, and visualization",
-	hero = "Notebook",
-	showHero = true,
-	includeFootnotes = false,
-	activePage,
+  title = SITE_NAME,
+  description = "Explorations in math, code, and visualization",
+  hero = SITE_NAME,
+  showHero = true,
+  includeFootnotes = false,
+  activePage,
 } = Astro.props as BaseLayoutProps;
 ---
 
@@ -30,7 +32,7 @@ const {
     <meta name="viewport" content="width=device-width" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" href={favicon.src} type="image/png" />
   </head>
   <body>
     <SiteNav activePage={activePage} />
@@ -46,11 +48,11 @@ const {
       <slot />
       <footer class="site-footer"></footer>
     </main>
-    {includeFootnotes ? (
-      <script>
-        import "../scripts/init-footnotes.js";
-      </script>
-    ) : null}
+    {
+      includeFootnotes ? (
+        <script>import "../scripts/init-footnotes.js";</script>
+      ) : null
+    }
   </body>
 </html>
 

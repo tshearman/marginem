@@ -1,0 +1,113 @@
+---
+author: Toby Shearman
+title: "Concentration of Volume in High Dimensional Spheres: A Dice Thrower's Interpretation"
+tags:
+  - math/PR
+description: A review and proof of the mathematics of concentration of volume to near the surface in high-dimensional spheres. In particular, an intuitive probabilistic perspective based on collections of dice.
+abstract: A review and proof of the mathematics of concentration of volume to near the surface in high-dimensional spheres. In particular, an intuitive probabilistic perspective based on collections of dice.
+featured: false
+pubDate: "2024-12-01"
+draft: false
+---
+
+## Table of contents
+
+## Introduction
+
+## The Dice Thrower's Perspective
+
+Let's explore this concept from a dice thrower's perspective, the probabilistic interpretation of rolling pools of dice and examining the highest result: roll $n$ six-sided dice $n\textrm{d}6$ and consider the roll a success if any die shows the high possible value: a six. We intuitively know that rolling more dice, increasing $n$. Mathematically we write this as:
+
+$$
+p(\textrm{success}; n) = 1 - \left(\frac{5}{6}\right)^n.
+$$
+
+### Extension to $n$ dice with $k$ sides
+
+More generally roll $n$ $k$-sided dice and consider the roll a success if at least one die shows a $k$.
+
+$$
+p(\textrm{success}; n) = 1 - \left(\frac{k - 1}{k}\right)^n,
+$$
+
+which can be envisioned as an $n$-dimensional cube of side length $k$. Highlight the shell of the cube: where $x_i=k$, for some $i\in\{1, ..., n\}$. With two parameters we can consider multiple limits:
+
+- $n$ fixed and $k \to \infty$,
+- $k$ fixed and $n \to \infty$,
+- the multi-scale limit of $k := k(m)$ and $n:=n(m)$ while $m\to\infty$.
+
+For fixed $k$ as $n\to\infty$:
+
+$$
+\left(\frac{k - 1}{k}\right)^n \to 0.
+$$
+
+For fixed $n$ as $k\to\infty$:
+
+$$
+\left(\frac{k - 1}{k}\right)^n \to 1.
+$$
+
+Next, we can learn a lot about our system by considering the multi-scale limit: $k = k(m)$ and $n = n(m)$ as $m\to\infty$. By continuity of the exponential, let's first transform the problem:
+
+$$
+\begin{align*}
+\lim_{m\to\infty} \left(\frac{k(m) - 1}{k(m)}\right)^{n(m)} =& \lim_{m\to\infty} \exp\left(\log\left(\frac{k(m) - 1}{k(m)} \right)^{n(m)} \right) \\
+=& \exp\lim_{m\to\infty} n(m) \cdot \log\left(\frac{k(m) - 1}{k(m)} \right),
+\end{align*}
+$$
+
+and we'll focus on the limit:
+
+$$
+\lim_{m\to\infty}{\mathcal L}(k, n; m) = \lim_{m\to\infty} n(m) \cdot \log\left(\frac{k(m) - 1}{k(m)} \right).
+$$
+
+The previously considered limits: constant $k$ and constant $n$ are special cases of this limit and provides an interesting nugget of intuition. For constant $k(m) := k^*$ and $n(m) := m$, $\lim_{m\to\infty}{\mathcal{L}(k^*, m; m)} = \infty$, but we don't learn how quickly this limit diverges. Of course, a quick look at the definition of ${\mathcal L}(k, n; m)$ shows that it diverges linearly. To show this rigorously, one considers not $\lim_{m\to\infty}{\mathcal L}$, but instead:
+
+$$
+\lim_{m\to\infty}\frac{\mathcal L(k^*, m; m)}{m} = \log\frac{k^* - 1}{k*} = C \textrm{ (a constant)}.
+$$
+
+Similarly for the constant $n$ case: $n(m) = n^*$ and $k(m) = m$, $\lim_{m\to\infty}{\mathcal{L}(m, n^*; m)} = 0$, the philosophical counterpart to $\infty$; again, hiding the convergence rate in the sinkhole of information that is $0$ (or $\infty$):
+
+$$
+\lim_{m\to\infty} m \cdot {\mathcal L(n^*, m; m)} = n^* \lim_{m\to\infty} m \log\left(\frac{m - 1}{m}\right) = -n^* = C'.
+$$
+
+This all guides us to selecting a multi-scale limit procedure for $k$ and $n$ simultaneously, and if we choose the correct relative scaling. Let $k(m) = m$ and $n(m) = m$. Let's temporarily detour returning directly to the dice-rolling setting with a numerical experiment. For
+
+- a single ($n=1$) six-sided die ($k=6$), the probability of success is $\frac{1}{6}$.
+- $n=2$, $k=6$ dice, the probability of a success is $\approx 0.3$
+- ... $\to 1$
+
+However, how many sides to the dice would give us approximately the same rate of success? We can answer this by solving
+
+$$
+1 - \left(\frac{k - 1}{k}\right)^2 \approx \frac{1}{6}.
+$$
+
+This may not have an integer solution, so we will take the integer valued $k$ which gives _at least_ $\frac{1}{6}$ rate of success. This gives us
+
+$$
+\begin{split}
+& \sqrt{\frac{5}{6}} = \frac{k - 1}{k} \\
+&\implies 1 = \left(1 - \left(\frac{5}{6}\right)^{\frac{1}{2}}\right) k \\
+&\implies k = \frac{1}{1 - \left(\frac{5}{6}\right)^{\frac{1}{2}}} \approx 11.48 \\
+&\implies k^* = \left\lfloor{\frac{1}{1 - \left(\frac{5}{6}\right)^{\frac{1}{2}}} }\right\rfloor = 11.
+\end{split}
+$$
+
+Generally, we have
+
+$$
+k^* = \left\lfloor \frac{1}{1 - \left(\frac{5}{6}\right)^{1/n}} \right\rfloor
+$$
+
+## Rigor
+
+If this is the correct relative scaling, $\lim_{m\to\infty}{\mathcal L}(m, m) = C$ with $0 < |C| < \infty$
+
+$$
+\lim_{m\to\infty} {\mathcal L}(m , m) = \lim_{m\to\infty} m \cdot \log\frac{m - 1}{m}  = -1
+$$

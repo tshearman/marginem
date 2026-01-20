@@ -4,6 +4,7 @@ import TagList from "../components/TagList.astro";
 import LikeButton from "../components/LikeButton.astro";
 import DateStamp from "../components/DateStamp.astro";
 import { formatDate } from "../lib/date";
+import { SITE_NAME } from "../lib/site";
 
 interface Frontmatter {
 	title?: string;
@@ -48,7 +49,7 @@ const description =
 ---
 
 <BaseLayout
-  title={`${title} | Notebook`}
+  title={`${title} | ${SITE_NAME}`}
   description={description}
   hero={title}
   showHero={false}

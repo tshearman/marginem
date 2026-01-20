@@ -1,0 +1,191 @@
+---
+title: "Understanding oscillations through Young measures. Pt 1. Motivation and Regularization"
+description: "We review oscillations and an introduction to Young measures as a means of encoding this behavior. Moreover, we explore simple examples which highlight the need for such an encoding, their role in real-world applications and in the solutions of interesting physical problems."
+abstract: "We review oscillations and an introduction to Young measures as a means of encoding this behavior. Moreover, we explore simple examples which highlight the need for such an encoding, their role in real-world applications and in the solutions of interesting physical problems."
+pubDate: "2017-02-19"
+tags:
+  - mathematics
+  - analysis
+  - calculus-of-variations
+draft: false
+---
+
+import { Image } from "astro:assets";
+import thermoImage from "../imgs/thermo.png";
+import phasesImage from "../imgs/phases.png";
+
+## Motivation
+
+Variational principles provide insight into many physical phenomena: mechanics blossomed with the description of an action functional, such that motion is described by a principle of least action. Many fields including materials science, optics, control theory, image analysis and machine learning have benefited from recasting questions in terms of an appropriate "energy functional," and exploring its optimizers or equilibrium states.
+
+In general limits of sequences, and as a direct result minimizers of optimization problems, may not exist. This has been a common theme in mathematics since the time of the Babylonian mathematicians Pythagoras and rational or continued fractions approximations to $\sqrt{2}$. For a fun discussion of continued fractions see [^cadlag-continuedfractions]. Unfortunately our sequence "runs out of the space." Or similarly, consider the sequence of smooth functions
+
+$$
+f_{n}(x) = \frac{n}{\sqrt{\pi}} e^{-\left(\frac{x}{n}\right)^2}.
+$$
+
+The "limit" is well known to be the "$\delta$-function," properly interpreted as a distribution on the set of smooth functions or alternatively as a measure. Similarly, minima of variational principles may introduce irregularities, the study of which can be a delicate subject [^darkside].
+
+Throughout the discussion, we will be considering very general problems of the form:
+
+$$
+\textrm{Find } u\in{\mathcal A} \textrm{ such that } I_0[u] = \inf\left\{ I_0[v] : v\in{\mathcal A} \right\}
+$$
+
+## The Direct Method
+
+Hilbert introduced a set of criterion under which minimizers to the problem above are guaranteed: *The Direct Method.*
+
+Let $(u_n)$ be a minimizing sequence, *i.e.*
+
+$$
+\lim_{n \to \infty} I_0[u_n] = \inf\left\{ I_0[v] : v\in{\mathcal A} \right\}.
+$$
+
+Then the direct method can be described simply as selecting an appropriate topology $\tau$ satisfying the balance
+
+1. $\tau$ is sufficiently coarse to ensure $(u_n)$ is compact,
+2. $\tau$ is sufficiently fine to ensure $I_0$ is lower semi-continuous.
+
+Under these conditions, proof of existence of a minimizer becomes relatively simple. Let $\left( u_n \right)$ be a minimizing sequence. In the topology $\tau$ this sequence is (sequentially) compact. Perhaps after selecting an appropriate subsequence, let $u_n \to u$.
+
+Then, by lower semicontinuity of $I_0$:
+
+$$
+I_0(u) \leq \liminf_{n\to\infty} I_0(u_n) = \inf_{\mathcal A} I_0,
+$$
+
+and $u$ is a minimizer of $I_0$. Uniqueness is clearly not guaranteed.
+
+Now suppose that our minimization problem has more structure. That it can be represented as an integral:
+
+$$
+I_0[u] = \int f(u(x)) dx.
+$$
+
+The following theorem tells us that *convexity* is really the key to applying the direct method, and the lack of convexity will result in potential difficulties finding solutions [^fonseca-modern-methods].
+
+### Theorem
+
+Let $f:{\mathbb R}^m \to (-\infty, \infty]$ be lower semicontinuous, and $\inf \left\{\int f(v(x))dx : v\in L^p\right\} < \infty$. Then the mapping
+
+$$
+v\mapsto \int f(v(x))dx
+$$
+
+is weakly sequentially lower semicontinuous if and only if $f$ is convex.
+
+## Nonconvexity and oscillations
+
+### Example (Bolza, Young)
+
+Consider the famous Bolza-Young problem:
+
+$$
+\min_{u \in \mathcal A} I[u] = \min_{u \in \mathcal A} \int \left(\partial_x u ^2 - 1\right)^2 + u^2 dx,
+$$
+
+over the collection of admissable functions
+
+$$
+{\mathcal A} = \left\{ u \in W^{1,2} : u(0)=u(1)=0 \right\}.
+$$
+
+Let $m = \inf_{u \in \mathcal A} I[u]$. Clearly $m \geq 0$. In fact, it isn't too tricky to see that $m = 0$. Consider
+
+$$
+f(x) =
+\begin{cases}
+x, & 0 < x < \frac{1}{2} \\
+1 - x, & \frac{1}{2} < x < 1
+\end{cases}
+$$
+
+periodically extended to ${\mathbb R}$. Let $f_n(x) = \frac{1}{n} f\left(n x\right)$. This sawtooth function, with increasingly many teeth of decreasing height satisfying $\partial_{x} f_n(x) \in \left\{-1, 1\right\}$ and point-wise $f_n(x) \to 0$ for all $x$. However, clearly $u(x) \equiv 0$ is not a minimizer.
+
+This fine-scale, oscillatory behavior is a direct consequence of the nonconvexity of the energy. The two "low energy states": $u'(x)=1$ and $u'(x)=-1$ allow for mixing of the two states and lowering the overall energy as a result. Not only is this mathematically interesting, but physically nonconvex problems are important. My first experience with these ideas, and ultimately what hooked me, were examples from thermodynamics.
+
+### Example (Phase mixtures)
+
+Consider the free energy of two different material phases, as a function of mole fraction:
+
+<figure>
+  <Image
+    src={thermoImage}
+    alt="Schematic of the Gibbs energy for two different phases as a function of mole-fraction."
+  />
+  <figcaption>
+    Schematic of the Gibbs energy for two different phases as a function of
+    mole-fraction.
+  </figcaption>
+</figure>
+
+Suppose you have constrained the mole-fraction to be 0.5. Then a pure phase, in either case, will have higher energy than the mixing of two phases (with fractions given by the common tangent line). Mixing to lower the energy can be seen as a "regularization" process in which the observed energy is the convexification of the two energies.
+
+In the absence of surface energy, oscillations would equally well be a minimizer of the Gibbs energy for a mixture, provided that the overall mole-fraction constraint is satisfied.
+
+### Example (Phase mixtures, distributions)
+
+Consider the free energy of two different material phases, as a function of mole fraction:
+
+<figure>
+  <Image
+    src={phasesImage}
+    alt="Three equivalent distributions of phase in the lack of surface energy case."
+  />
+  <figcaption>
+    Three equivalent distributions of phase in the lack of surface energy case.
+  </figcaption>
+</figure>
+
+Nonconvex energies exist and oscillations inevitably occur. Young measures represent a concise tool for organizing the information about the oscillatory behavior of minimizing sequences.
+
+## Relaxation
+
+Suppose that we're faced with an optimization problem for which the direct method, or any other method we have tried, which guarantees the existence of a minimizer fails. One thing we can do is *relax* the problem, *i.e.*, consider an alternative problem for which existence can be shown. However, if this alternative, relaxed problem is too different from the true problem, the solution to the relaxed problem will not tell us anything about our original problem.
+
+I like to think of the process of relaxation as two distinct steps:
+
+1. Enlarge the admissable set, ${\mathcal A} \subset \tilde{{\mathcal A}}$
+2. Reformulate the energy $I_0 \to \tilde{I_0}$
+
+We can enlarge the admissable set, but not by too much! To this end, it's often appropriate to ensure that ${\mathcal A}$ is dense in $\tilde{{\mathcal A}}$. Similarly if we adjust the energy too much, then certainly solutions may exist, but the new problem may not provide us with any insight into our true goal, $I_0$. The new energy must be less than the original, but not substantially so. All of this is very vague; I apologize.
+
+Pedregal describes an general approach to relaxation [^pedregalopt] which should be familiar to most readers.
+
+Choose a collection of functionals, $\{ I \}$.
+
+1. Enlarge the space of admissable objects by completion with respect to this set of functionals.
+
+By this, I mean consider sequences $\{u_i\}, \{v_i\} \in {\mathcal A}$. These two sequences are equivalent if and only if $\lim I(u_i) = \lim I(v_i)$ for all $I$. This is much like completing the rational numbers and arriving at ${\mathbb R}$ or completing a metric space via Cauchy sequences.
+
+2. Extend each of the functions $I$ to $\tilde I$ by continuity
+
+$$
+\tilde{I}(\tilde u) = \lim_{i \to \infty} I(u_i)
+$$
+
+where $\{u_i\}$ is any representative of $\tilde{u}$.
+
+3. Define the topology on $\tilde{\mathcal A}$ as the weak-topology relative to the collection $\{I\}$:
+
+$$
+\tilde{u}_j \to \tilde{u} \iff \lim_{i\to\infty} \tilde{I}(\tilde{u_i}) = \tilde{I}(\tilde{u})
+$$
+
+Within this framework, we can define the relaxed problem:
+
+$$
+\text{Find } \tilde{u}\in\tilde{\mathcal A} \text{ such that } \tilde{I_0}(\tilde u) = \inf_{\tilde{\mathcal A}} \tilde{I_0}.
+$$
+
+Within this framework for relaxation we are guaranteed that we haven't enlarged the admissable set too much. Density is free. Moreover by continuously extending our functions, the relaxed function approximates our original problem nicely. Moreover, a solution exists. We simply added it as a object, *i.e.* a limit of a minimizing sequence.
+
+So, if this framework always provides us with a relaxed problem that isn't relaxed too much, and guarantees the existence of as solution, how is that all of our problems aren't solved? Well, we need to find a perspective or representation that allows us to handle the limit objects. In many cases, for instance integral optimization, Young measures can be a useful representation. Herein lies the power to this very abstract concept and its application to real-world problems.
+
+## References
+
+[^cadlag-continuedfractions]: Erik Davis, [An introduction to continued fractions](http://cadlag.org/posts/an-introduction-to-continued-fractions.html).
+[^darkside]: Giuseppe Mingione, [Regularity of minima: an invitation to the dark side of the calculus of variations](http://link.springer.com/article/10.1007/s10778-006-0110-3), (2006).
+[^fonseca-modern-methods]: Fonseca and Leoni, [Modern methods in the calculus of variations](http://www.springer.com/us/book/9780387357843), Springer (2007).
+[^pedregalopt]: Pedregal, [Optimization, relaxation and Young measures](http://www.ams.org/journals/bull/1999-36-01/S0273-0979-99-00774-0/), AMS, (1999).

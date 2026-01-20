@@ -16,6 +16,10 @@ import remarkObsidianLinks from "./plugins/remark-obsidian-links.js";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const snippetsDir = path.join(rootDir, "src/content/snippets");
+const isCloudflarePages = Boolean(process.env.CF_PAGES);
+const runCodeEnabled =
+	process.env.RUN_CODE_SNIPPETS === "true" ||
+	(!isCloudflarePages && process.env.RUN_CODE_SNIPPETS !== "false");
 
 const watchSnippets = () => ({
 	name: "watch-snippets",
@@ -45,7 +49,7 @@ const watchSnippets = () => ({
 });
 
 export default defineConfig({
-	site: "https://example.com",
+	site: "https://marginem.io",
 	output: "static",
 	integrations: [mdx(), preact()],
 	markdown: {
@@ -53,7 +57,12 @@ export default defineConfig({
 		prism: {
 			theme: "prism-solarizedlight",
 		},
-		remarkPlugins: [remarkMath, remarkGfm, remarkRunCode, remarkObsidianLinks],
+		remarkPlugins: [
+			remarkMath,
+			remarkGfm,
+			...(runCodeEnabled ? [remarkRunCode] : []),
+			remarkObsidianLinks,
+		],
 		rehypePlugins: [rehypeKatex, [rehypePrism, { showLineNumbers: true }]],
 	},
 	vite: {

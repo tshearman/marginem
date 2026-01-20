@@ -1,9 +1,10 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { SITE_NAME } from "../lib/site";
 ---
 
 <BaseLayout
-  title="Page not found | Notebook"
+  title={`Page not found | ${SITE_NAME}`}
   description="The page you are looking for does not exist."
   hero="Page not found"
   showHero={true}
