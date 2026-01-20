@@ -4,36 +4,75 @@ import DateStamp from "./DateStamp.astro";
 import { ellipsizeText } from "../lib/text";
 
 interface Props {
-	title: string;
-	url: string;
-	dateLabel?: string;
-	dateTime?: string | Date;
-	description?: string;
-	tags?: string[];
-	backgroundImage?: string | null;
+  title: string;
+  url: string;
+  dateLabel?: string;
+  dateTime?: string | Date;
+  description?: string;
+  tags?: string[];
+  backgroundImage?: string | null;
 }
 
 const {
-	title,
-	url,
-	dateLabel = "",
-	dateTime,
-	description = "",
-	tags = [],
-	backgroundImage = null,
+  title,
+  url,
+  dateLabel = "",
+  dateTime,
+  description = "",
+  tags = [],
+  backgroundImage = null,
 } = Astro.props as Props;
 
 const summary = ellipsizeText(description, 260);
+const hasHeroImage = Boolean(backgroundImage);
+const blobPalettes = [
+  ["#0ea5e9", "#22d3ee"],
+  ["#22d3ee", "#10b981"],
+  ["#10b981", "#84cc16"],
+  ["#38bdf8", "#0ea5e9"],
+];
+const blobs = hasHeroImage
+  ? []
+  : Array.from({ length: Math.floor(Math.random() * 3) + 3 }, () => {
+      const size = Math.floor(160 + Math.random() * 260);
+      const primary = Math.floor(Math.random() * 110) - 10;
+      const secondary = Math.floor(Math.random() * 110) - 10;
+      const left = Math.min(primary, secondary);
+      const top = Math.max(primary, secondary);
+      const palette =
+        blobPalettes[Math.floor(Math.random() * blobPalettes.length)];
+      const angle = Math.floor(Math.random() * 160) - 80;
+      const opacity = (0.75 + Math.random() * 0.2).toFixed(2);
+
+      return {
+        size,
+        top,
+        left,
+        palette,
+        angle,
+        opacity,
+      };
+    });
 ---
 
 <article
-  class={`hero-feature ${backgroundImage ? "" : "hero-feature--fallback"}`}
-  style={backgroundImage ? `background-image: ${backgroundImage};` : undefined}
+  class={`hero-feature ${hasHeroImage ? "" : "hero-feature--fallback"}`}
+  style={`background-image: ${hasHeroImage ? backgroundImage : "none"};`}
 >
+  {
+    !hasHeroImage ? (
+      <div class="hero-feature__blobs" aria-hidden="true">
+        {blobs.map(({ size, top, left, palette, angle, opacity }) => (
+          <span
+            class="hero-feature__blob"
+            style={`width:${size}px;height:${size}px;top:${top}%;left:${left}%;background:linear-gradient(${angle}deg, ${palette[0]}, ${palette[1]});opacity:${opacity};`}
+          />
+        ))}
+      </div>
+    ) : null
+  }
   <div
-    class={`hero-feature__body ${
-      backgroundImage ? "hero-feature__body--image" : ""
-    }`}
+    class={`hero-feature__body ${hasHeroImage ? "hero-feature__body--image" : ""}`}
   >
     {
       dateLabel && dateTime ? (
@@ -60,14 +99,17 @@ const summary = ellipsizeText(description, 260);
     background-size: cover;
     background-position: center;
     border: 1px solid rgba(0, 0, 0, 0.15);
+    position: relative;
     display: flex;
     flex-direction: column;
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
     min-height: 450px;
   }
 
   .hero-feature__body {
+    position: relative;
+    z-index: 1;
     text-shadow: none;
   }
 
@@ -121,12 +163,18 @@ const summary = ellipsizeText(description, 260);
   }
 
   .hero-feature--fallback {
-    color: #101828;
-    background-image: linear-gradient(35deg, #f3f4f6, #ffffff);
+    color: #0f172a;
+    background: #f8fafc;
   }
 
   .hero-feature--fallback .hero-feature__summary {
     color: #4b5563;
+  }
+
+  .hero-feature--fallback .hero-feature__title,
+  .hero-feature--fallback .hero-feature__summary,
+  .hero-feature--fallback :global(.date-stamp) {
+    text-shadow: 0 0 2px rgba(255, 255, 255, 1);
   }
 
   .hero-feature--fallback :global(.tag) {
@@ -145,5 +193,19 @@ const summary = ellipsizeText(description, 260);
 
   .hero-feature--fallback :global(.date-stamp) {
     color: var(--fg);
+  }
+
+  .hero-feature__blobs {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .hero-feature__blob {
+    position: absolute;
+    border-radius: 999px;
+    filter: saturate(1.15);
   }
 </style>
