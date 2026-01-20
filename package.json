@@ -9,6 +9,7 @@
     "sync:obsidian": "node scripts/sync-obsidian.mjs",
     "deploy": "node scripts/deploy.mjs",
     "build": "astro build",
+    "build:static": "RUN_CODE_SNIPPETS=false astro build",
     "preview": "astro preview",
     "check": "astro check",
     "test:blocks": "node scripts/run-code-blocks.mjs",
