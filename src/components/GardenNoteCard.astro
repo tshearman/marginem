@@ -36,6 +36,16 @@ const { slug, title, excerpt, updatedAt } = Astro.props as Props;
       color 0.2s ease;
   }
 
+  :global(.garden-card:hover),
+  :global(.garden-card:focus-visible) {
+    text-decoration: none;
+  }
+
+  :global(.garden-card:hover h3),
+  :global(.garden-card:focus-visible h3) {
+    text-decoration: underline;
+  }
+
   :global(.garden-card__row) {
     display: flex;
     align-items: baseline;

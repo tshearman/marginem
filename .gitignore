@@ -12,6 +12,7 @@ build/
 .uv-cache/
 .npm/
 .cache/
+.ruff_cache/
 src/blogupdate_runner.egg-info/
 
 # env files

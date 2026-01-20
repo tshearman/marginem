@@ -41,15 +41,6 @@
           shellHook = ''
             export NODE_OPTIONS="--enable-source-maps --trace-warnings"
             export PATH="$PWD/node_modules/.bin:$PATH"
-            if [ -z "$VISITOR_COOKIE_SECRET" ]; then
-              export VISITOR_COOKIE_SECRET="$(
-                python - <<'PY'
-import secrets
-print(secrets.token_urlsafe(32))
-PY
-              )"
-              echo "VISITOR_COOKIE_SECRET was not set; generated a temporary value for this shell." >&2
-            fi
 
             if [ -f package-lock.json ]; then
               if [ ! -d node_modules ] || [ package-lock.json -nt node_modules ]; then

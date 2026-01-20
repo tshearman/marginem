@@ -23,7 +23,7 @@ const contentKey = `${target}:${slug}`;
 			<FeelbackPulse
 				contentSetId={contentSetId}
 				key={contentKey}
-				preset="star"
+				preset="heart"
 				showCount
 			/>
 		) : null
@@ -35,13 +35,58 @@ const contentKey = `${target}:${slug}`;
 		display: inline-flex;
 		align-items: center;
 		color: var(--fg);
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		transition:
+			transform 160ms ease,
+			box-shadow 160ms ease;
 	}
 
 	.like-control.align-right {
 		justify-content: flex-end;
 	}
 
+	.like-control:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12);
+	}
+
 	:global(.feelback-container.feelback-pulse) {
 		--highlight-opacity: 0;
+	}
+
+	.like-control :global(.feelback-btn.active > .feelback-icon.active) {
+		color: var(--feelback-like, #ec5a8d);
+	}
+
+	.like-control :global(.feelback-btn.active > .feelback-icon) {
+		transform: none;
+	}
+
+	.like-control :global(.feelback-btn.active > .feelback-icon.active svg) {
+		overflow: visible;
+		display: block;
+		paint-order: fill stroke;
+	}
+
+	.like-control
+		:global(.feelback-btn.active > .feelback-icon.active svg path) {
+		stroke: var(--fg);
+		stroke-width: 48;
+		stroke-linejoin: round;
+	}
+
+	.like-control :global(.feelback-count) {
+		font-family: inherit;
+		font-weight: 400;
+	}
+
+	.like-control :global(.feelback-btn:hover:not(.disabled)) {
+		background-color: transparent;
+	}
+
+	.like-control :global(.feelback-btn:hover:not(.disabled) > .feelback-icon) {
+		transform: none;
+		transition: none;
 	}
 </style>
