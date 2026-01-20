@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
 import preact from "@astrojs/preact";
+import cloudflare from "@astrojs/cloudflare";
 import remarkMath from "remark-math";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
@@ -50,7 +51,8 @@ const watchSnippets = () => ({
 
 export default defineConfig({
 	site: "https://marginem.io",
-	output: "static",
+	output: "server",
+	adapter: cloudflare(),
 	integrations: [mdx(), preact()],
 	markdown: {
 		syntaxHighlight: "prism",
