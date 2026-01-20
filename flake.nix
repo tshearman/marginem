@@ -3,12 +3,14 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs = {
     self,
     nixpkgs,
+    nixpkgs-unstable,
     flake-utils,
   }:
     flake-utils.lib.eachDefaultSystem (
@@ -19,6 +21,7 @@
             allowUnfree = true;
           };
         };
+        pkgsUnstable = import nixpkgs-unstable { inherit system; };
       in {
         devShells.default = pkgs.mkShell {
           name = "blogupdate";
@@ -30,7 +33,7 @@
             nil
             alejandra
             python312
-            uv
+            pkgsUnstable.uv
             ghc
             sbcl
             ormolu
@@ -49,26 +52,27 @@
               fi
             fi
 
-            if command -v uv >/dev/null 2>&1 && [ -f pyproject.toml ]; then
+            PYTHON_PROJECT_DIR="$PWD/tools/python"
+            if command -v uv >/dev/null 2>&1 && [ -f "$PYTHON_PROJECT_DIR/pyproject.toml" ]; then
               export UV_CACHE_DIR="''${UV_CACHE_DIR:-$PWD/.uv-cache}"
               mkdir -p "$UV_CACHE_DIR"
 
-              if [ ! -f uv.lock ]; then
+              if [ ! -f "$PYTHON_PROJECT_DIR/uv.lock" ]; then
                 echo "uv.lock missing; generating with 'uv lock'..." >&2
-                uv lock || echo "uv lock failed; rerun manually to inspect the error." >&2
+                (cd "$PYTHON_PROJECT_DIR" && uv lock) || echo "uv lock failed; rerun manually to inspect the error." >&2
               fi
 
-              if [ ! -d .venv ] || [ uv.lock -nt .venv ]; then
+              if [ ! -d "$PYTHON_PROJECT_DIR/.venv" ] || [ "$PYTHON_PROJECT_DIR/uv.lock" -nt "$PYTHON_PROJECT_DIR/.venv" ]; then
                 echo "Syncing Python environment via uv..." >&2
-                if [ -f uv.lock ]; then
-                  uv sync || echo "uv sync failed; rerun manually to inspect the error." >&2
+                if [ -f "$PYTHON_PROJECT_DIR/uv.lock" ]; then
+                  (cd "$PYTHON_PROJECT_DIR" && uv sync) || echo "uv sync failed; rerun manually to inspect the error." >&2
                 fi
               fi
 
-              if [ -d .venv ]; then
-                export PATH="$PWD/.venv/bin:$PATH"
+              if [ -d "$PYTHON_PROJECT_DIR/.venv" ]; then
+                export PATH="$PYTHON_PROJECT_DIR/.venv/bin:$PATH"
                 if [ -z "$REMARK_RUN_CODE_PYTHON" ]; then
-                  export REMARK_RUN_CODE_PYTHON="$PWD/.venv/bin/python"
+                  export REMARK_RUN_CODE_PYTHON="$PYTHON_PROJECT_DIR/.venv/bin/python"
                 fi
               fi
             fi
