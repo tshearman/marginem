@@ -1,4 +1,5 @@
 import type { ComponentProps } from "preact";
+import { slugifyTag } from "../../lib/tags";
 
 type Props = {
 	tag?: string;
@@ -11,8 +12,10 @@ type Props = {
 	className?: string;
 };
 
-const getTagUrl = (label: string) =>
-	label ? `/tags/${encodeURIComponent(label.toLowerCase())}/` : undefined;
+const getTagUrl = (label: string) => {
+	const slug = slugifyTag(label);
+	return slug ? `/tags/${slug}/` : undefined;
+};
 
 const baseClasses = (
 	variant: Props["variant"],

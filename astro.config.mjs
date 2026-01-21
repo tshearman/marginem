@@ -65,6 +65,10 @@ export default defineConfig({
 		],
 		rehypePlugins: [rehypeKatex, [rehypePrism, { showLineNumbers: true }]],
 	},
+	prefetch: {
+		defaultStrategy: 'viewport',
+		prefetchAll: true
+	},
 	vite: {
 		plugins: [watchSnippets()],
 	},
