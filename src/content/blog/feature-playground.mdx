@@ -1,0 +1,206 @@
+---
+title: "Feature Playground: runnable code, math, notes, and media"
+description: "A placeholder post that exercises runnable snippets, math, margin notes, responsive figures, and an embedded Plotly chart."
+abstract: "Demonstrates every blog affordance in one place: multi-language run blocks, KaTeX, margin notes/footnotes, images, and Plotly."
+pubDate: "2024-12-15"
+heroImage: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1600&q=80"
+tags:
+  - demo
+  - playground
+  - testing
+draft: false
+featured: false
+---
+
+import PlotlyChart from "../../components/PlotlyChart.astro";
+import MarginNote from "../../components/MarginNote.astro";
+import ImageFigure from "../../components/ImageFigure.astro";
+import thermoImage from "../imgs/thermo.png";
+import phasesImage from "../imgs/phases.png";
+
+## Why this exists
+
+This placeholder gathers every blog feature in one spot so you can sanity-check rendering, runnable code, and layout[^why-now]. It pairs inline math like $e^{i\pi} + 1 = 0$ with margin notes, images, and an interactive Plotly chart for quick visual QA.
+
+<MarginNote title="Quick check">
+  Viewing on desktop floats this note into the margin; on mobile it stacks inline.
+</MarginNote>
+
+## Runnable snippets across languages
+
+Code blocks are run at build time to verify their accuracy, allowing for tests and checks. Results are rendered into the page as well. Code that doesn't compile, run, or pass tests will cause the build of the site to fail.
+
+JavaScript runs in a sandbox during the build, so you can surface small reproducible examples without shipping extra scripts.
+
+```js run
+const readings = [3, 4, 6, 8];
+const average = readings.reduce((sum, n) => sum + n, 0) / readings.length;
+console.log("mean reading", average.toFixed(2));
+```
+
+Python is supported too.
+
+```python run
+from statistics import mean, median
+
+samples = [1, 3, 5, 7, 9]
+print(f"mean={mean(samples):.1f}, median={median(samples)}")
+assert 1 == 1
+```
+
+Haskell snippets compile and run during the build. Keep them self-contained:
+
+```haskell run
+fib :: Int -> Int
+fib n
+  | n <= 1 = n
+  | otherwise = fib (n - 1) + fib (n - 2)
+
+main :: IO ()
+main = putStrLn $ "fib 8 = " ++ show (fib 8)
+```
+
+Common Lisp works, too—use SBCL-compatible scripts:
+
+```lisp run
+(defun rolling-sum (xs)
+  (let ((sum 0))
+    (mapcar (lambda (x)
+              (incf sum x)
+              sum)
+            xs)))
+
+(format t "Rolling sums: ~{~a~^, ~}~%" (rolling-sum '(1 2 3 4 5)))
+```
+
+## Footnotes
+
+Footnotes are rendered automatically at the end of the article.[^foot-placement] Reusing the same footnote is allowed for concise references.[^foot-placement] You can mix margin notes and footnotes without conflicts.
+
+You can call out detours with footnotes[^footnote-demo] while keeping the main narrative clean.
+
+## Math
+
+Block math renders via KaTeX:
+
+$$
+\int_{0}^{\infty} e^{-x^2} \, dx = \frac{\sqrt{\pi}}{2}.
+$$
+
+
+## Images (local + remote)
+
+<ImageFigure
+  src={phasesImage.src}
+  alt="Three equivalent distributions of phases."
+  caption="Local figure to test sizing and captions."
+/>
+
+<ImageFigure
+  src="https://images.unsplash.com/photo-1522199710521-72d69614c702?auto=format&fit=crop&w=1400&q=80"
+  alt="Abstract shapes and gradients."
+  caption="Remote image to validate external fetching."
+/>
+
+## Plotly sample chart
+
+Below is a minimal Plotly chart rendered via the helper component. Resize the window to confirm responsiveness.
+
+<PlotlyChart
+  data={[
+    {
+      x: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      y: [120, 140, 135, 180, 210, 190, 160],
+      type: "bar",
+      name: "Visits",
+      marker: { color: "#0ea5e9", line: { color: "#0284c7", width: 1 } },
+      opacity: 0.85,
+    },
+    {
+      x: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      y: [95, 110, 115, 140, 170, 165, 140],
+      type: "scatter",
+      mode: "lines+markers",
+      name: "Unique users",
+      marker: { color: "#4f008b", size: 8 },
+      line: { shape: "spline", width: 3 },
+      fill: "tozeroy",
+      fillcolor: "rgba(136, 64, 229, 0.15)",
+    },
+    {
+      x: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      y: [0.32, 0.34, 0.33, 0.35, 0.39, 0.36, 0.34],
+      type: "scatter",
+      mode: "lines",
+      name: "Conversion rate",
+      yaxis: "y2",
+      line: { color: "#009f82", dash: "dash", width: 3 },
+    },
+  ]}
+  layout={{
+    title: "Weekly traffic with uniques and conversion",
+    height: 420,
+    margin: { t: 60, l: 48, r: 48, b: 60 },
+    bargap: 0.2,
+    yaxis: { title: "Count", zeroline: false, gridcolor: "rgba(0,0,0,0.08)" },
+    yaxis2: {
+      title: "Conversion",
+      overlaying: "y",
+      side: "right",
+      tickformat: ",.0%",
+      rangemode: "tozero",
+    },
+    legend: { orientation: "h", y: -0.2 },
+  }}
+/>
+
+## Markdown preview (rendered samples)
+
+### Headings, emphasis, links
+
+**Bold**, _italics_, and `inline code` all work as expected. Link styles: [Marginem home](/).
+
+### Lists
+
+- Unordered list item one
+- Item two with a nested list:
+  - Nested child A
+  - Nested child B
+- Item three
+
+1. Ordered step
+2. Another step
+3. Final step
+
+- [x] Checklist item done
+- [ ] Checklist item todo
+
+### Blockquote
+
+> “Simplicity is prerequisite for reliability.” — Edsger Dijkstra[^quote]
+
+### Code fence (static)
+
+```bash
+git status --short
+```
+
+### Table
+
+| Term   | Definition                       |
+| ------ | -------------------------------- |
+| Alpha  | First letter of the Greek alphabet |
+| Beta   | Second letter of the Greek alphabet |
+| Gamma  | Third letter of the Greek alphabet |
+
+### Horizontal rule
+
+---
+
+Use this section as a live visual check for Markdown rendering alongside the runnable snippets and components above.
+
+
+[^why-now]: This post exists solely as a visual and functional checklist.
+[^footnote-demo]: Footnotes stay inline in the Markdown source but render at the bottom automatically.
+[^quote]: Quoted for style verification only.
+[^foot-placement]: This demonstrates a dedicated footnote section and repeated references.

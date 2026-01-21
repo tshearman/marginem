@@ -1,5 +1,7 @@
 ---
 import FeelbackPulse from "astro-feelback/components/FeelbackPulse.astro";
+import iconHeart from "@feelback/js/icons/icon-heart.svg?raw";
+import iconHeartActive from "@feelback/js/icons/icon-heart-active.svg?raw";
 
 type LikeTargetType = "post" | "note";
 
@@ -15,6 +17,10 @@ const { slug, target, align = "left", class: className } = Astro.props as Props;
 
 const contentSetId = import.meta.env.PUBLIC_FEELBACK_CONTENT_SET_ID;
 const contentKey = `${target}:${slug}`;
+const likePreset = {
+	icon: [iconHeart, iconHeartActive] as const,
+	title: "Like",
+};
 ---
 
 <div class={`like-control align-${align} ${className ?? ""}`}>
@@ -23,7 +29,7 @@ const contentKey = `${target}:${slug}`;
 			<FeelbackPulse
 				contentSetId={contentSetId}
 				key={contentKey}
-				preset="heart"
+				preset={likePreset}
 				showCount
 			/>
 		) : null
@@ -35,7 +41,7 @@ const contentKey = `${target}:${slug}`;
 		display: inline-flex;
 		align-items: center;
 		color: var(--fg);
-		border: 1px solid var(--border);
+		border: 0px solid var(--border);
 		border-radius: 999px;
 		transition:
 			transform 160ms ease,

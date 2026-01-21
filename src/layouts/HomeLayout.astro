@@ -40,6 +40,7 @@ const hybridListPosts = posts.slice(1);
         <div class="home-layout__lead-row">
           <div class="home-layout__hero">
             <HeroFeature
+              id={mostRecentPost.slug}
               title={mostRecentPost.data.title}
               url={getUrl(mostRecentPost)}
               dateLabel={format(mostRecentPost.data.pubDate)}

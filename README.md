@@ -46,6 +46,11 @@ A minimalist, technical blog starter built with [Astro](https://astro.build/) an
    ```
 4. Create new posts inside `src/content/blog`. Use frontmatter that matches `src/content/config.ts`.
 
+## First-time setup
+
+- Hooks: `npm install` runs `npm run hooks:install` via `postinstall` to enable `pre-commit` lint/test hooks for this clone.
+- Verify hooks: `git config --get core.hooksPath` should return `.githooks`.
+
 ## Likes (Feelback)
 
 - Likes are powered by the Feelback hosted API via `astro-feelback` components.

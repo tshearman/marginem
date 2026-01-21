@@ -27,7 +27,6 @@ for (const target of targets) {
   }
 
   if (!changed) {
-    console.warn(`[patch-katex] No match found in ${filePath}`);
     continue;
   }
   fs.writeFileSync(filePath, updated, "utf8");

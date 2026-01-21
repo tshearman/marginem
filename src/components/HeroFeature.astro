@@ -2,8 +2,10 @@
 import TagList from "./TagList.astro";
 import DateStamp from "./DateStamp.astro";
 import { ellipsizeText } from "../lib/text";
+import LikeButton from "./LikeButton.astro";
 
 interface Props {
+  id?: string;
   title: string;
   url: string;
   dateLabel?: string;
@@ -14,6 +16,7 @@ interface Props {
 }
 
 const {
+  id,
   title,
   url,
   dateLabel = "",
@@ -88,6 +91,15 @@ const blobs = hasHeroImage
     </h2>
     {summary ? <p class="hero-feature__summary">{summary}</p> : null}
     <TagList tags={tags} />
+    {
+      id ? (
+        <div
+          class={`hero-feature__likes ${hasHeroImage ? "hero-feature__likes--image" : ""}`}
+        >
+          <LikeButton slug={id} target="post" />
+        </div>
+      ) : null
+    }
   </div>
 </article>
 
@@ -111,6 +123,12 @@ const blobs = hasHeroImage
     position: relative;
     z-index: 1;
     text-shadow: none;
+    background: rgba(255, 221, 212, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.1);
+    border-radius: 25px;
+    padding: 2.25rem;
   }
 
   .hero-feature__body--image {
@@ -137,6 +155,28 @@ const blobs = hasHeroImage
   .hero-feature__summary {
     margin: 0 0 1rem;
     color: rgba(255, 255, 255, 0.95);
+  }
+
+  .hero-feature__likes {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .hero-feature__likes--image :global(.feelback-icon),
+  .hero-feature__likes--image :global(.feelback-icon svg) {
+    color: #fff;
+    fill: #fff;
+  }
+
+  .hero-feature__likes--image :global(.feelback-count) {
+    color: #fff;
+  }
+
+  .hero-feature__likes--image
+    :global(.feelback-btn.active > .feelback-icon.active svg path) {
+    fill: #ec5a8d;
+    stroke: #fff;
   }
 
   .hero-feature :global(.tag) {
@@ -168,13 +208,13 @@ const blobs = hasHeroImage
   }
 
   .hero-feature--fallback .hero-feature__summary {
-    color: #4b5563;
+    color: #000;
   }
 
   .hero-feature--fallback .hero-feature__title,
   .hero-feature--fallback .hero-feature__summary,
   .hero-feature--fallback :global(.date-stamp) {
-    text-shadow: 0 0 2px rgba(255, 255, 255, 1);
+    text-shadow: 2px 2px 2px rgba(255, 255, 255, 0.5);
   }
 
   .hero-feature--fallback :global(.tag) {
