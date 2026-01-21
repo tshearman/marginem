@@ -43,6 +43,8 @@
 			itemSelector: ".filterable-item",
 			itemTagSelector: ".tag--display",
 			countLabel: "items",
+			groupSelector: null,
+			groupItemSelector: null,
 		};
 		try {
 			const data = node.dataset.filterConfig
@@ -62,6 +64,9 @@
 		const filterButtons = node.querySelectorAll(config.filterSelector);
 		const itemTagButtons = node.querySelectorAll(config.itemTagSelector);
 		const items = node.querySelectorAll(config.itemSelector);
+		const groups = config.groupSelector
+			? node.querySelectorAll(config.groupSelector)
+			: [];
 		const tagCache = new WeakMap();
 
 		if (!items.length) {
@@ -99,6 +104,17 @@
 					visible += 1;
 				} else {
 					item.classList.add("hidden");
+				}
+			}
+
+			if (groups.length) {
+				const groupItemSelector = config.groupItemSelector || config.itemSelector;
+				for (const group of groups) {
+					const groupItems = group.querySelectorAll(groupItemSelector);
+					const hasVisible = [...groupItems].some(
+						(item) => !item.classList.contains("hidden"),
+					);
+					group.hidden = !hasVisible;
 				}
 			}
 
