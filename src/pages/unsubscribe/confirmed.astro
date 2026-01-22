@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import { SITE_NAME } from "../../lib/site";
+
+export const prerender = true;
+---
+
+<BaseLayout
+  title={`Unsubscribed | ${SITE_NAME}`}
+  description="You have been removed from the list."
+  hero="You're unsubscribed"
+  showHero={false}
+>
+  <PageIntro
+    eyebrow="Confirmed"
+    title="You're unsubscribed"
+    description="You're no longer on the list. If this was a mistake, you can subscribe again anytime."
+  />
+</BaseLayout>

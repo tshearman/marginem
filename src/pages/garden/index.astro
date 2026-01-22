@@ -8,6 +8,8 @@ import {
 import { slugifyObsidianTarget } from "../../../plugins/remark-obsidian-links.js";
 import { MAIN_PAGES } from "../../lib/site";
 
+export const prerender = true;
+
 const notes = await loadGardenNotes();
 const vaultRoot = resolveVaultRoot();
 

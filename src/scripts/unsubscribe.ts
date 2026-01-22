@@ -62,8 +62,7 @@ if (form instanceof HTMLFormElement) {
 			if (!response.ok) {
 				throw new Error(result?.error || "Unsubscribe request failed");
 			}
-			setStatus(result?.message || "Check your inbox to confirm.", "success");
-			form.reset();
+			window.location.href = "/unsubscribe/pending";
 		} catch (error) {
 			const message =
 				error instanceof Error

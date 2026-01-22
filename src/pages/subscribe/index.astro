@@ -1,0 +1,22 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import SubscribeForm from "../../components/SubscribeForm.astro";
+import { SITE_NAME } from "../../lib/site";
+
+export const prerender = true;
+---
+
+<BaseLayout
+  title={`Subscribe | ${SITE_NAME}`}
+  description="Email updates when new posts land."
+  hero="Subscribe"
+  showHero={false}
+>
+  <PageIntro
+    eyebrow="Newsletter"
+    title="Subscribe"
+    description="Get new essays and notes in your inbox. Add your name if you want the greeting to feel more personal."
+  />
+  <SubscribeForm />
+</BaseLayout>

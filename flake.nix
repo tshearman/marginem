@@ -45,6 +45,12 @@
             export NODE_OPTIONS="--enable-source-maps --trace-warnings"
             export PATH="$PWD/node_modules/.bin:$PATH"
 
+            if [ -f .dev.vars ]; then
+              set -a
+              . ./.dev.vars
+              set +a
+            fi
+
             if [ -f package-lock.json ]; then
               if [ ! -d node_modules ] || [ package-lock.json -nt node_modules ]; then
                 echo "Installing npm dependencies..." >&2

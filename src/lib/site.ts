@@ -38,6 +38,15 @@ export const MAIN_PAGES = {
 		eyebrow: "Full writing index",
 		description: "Browse every note and essay, organized by year.",
 	},
+	newsletter: {
+		label: "Newsletter",
+		href: "/newsletter/",
+		icon: "newsletter",
+		isCompact: true,
+		pageTitle: `Newsletter | ${SITE_NAME}`,
+		eyebrow: "Email updates",
+		description: "Newsletter issues and subscription.",
+	},
 } as const;
 
 export const WRITING_PAGE_POST_LIMIT = 5;
@@ -47,4 +56,5 @@ export const MAIN_NAV = [
 	MAIN_PAGES.commonplace,
 	MAIN_PAGES.garden,
 	MAIN_PAGES.archive,
+	MAIN_PAGES.newsletter,
 ];

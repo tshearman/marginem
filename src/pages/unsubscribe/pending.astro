@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import { SITE_NAME } from "../../lib/site";
+
+export const prerender = true;
+---
+
+<BaseLayout
+  title={`Confirm your unsubscribe request | ${SITE_NAME}`}
+  description="Check your inbox for a confirmation email."
+  hero="Check your inbox"
+  showHero={false}
+>
+  <PageIntro
+    eyebrow="One more step"
+    title="Confirm your unsubscribe request"
+    description="If everything went through, you will receive an email to confirm your unsubscribe request. If it does not show up, check your spam folder or try again in a few minutes."
+  />
+</BaseLayout>

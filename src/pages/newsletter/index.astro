@@ -1,0 +1,73 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import ArchiveEntry from "../../components/ArchiveEntry.astro";
+import SubscribeForm from "../../components/SubscribeForm.astro";
+import { SITE_NAME } from "../../lib/site";
+import { getCollection } from "astro:content";
+
+const title = `Newsletter | ${SITE_NAME}`;
+const newsletters = (
+  await getCollection("newsletter", ({ data }) => !data.draft)
+).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout
+  title={title}
+  description="Newsletter archive"
+  hero="Newsletter"
+  showHero={false}
+  activePage="Newsletter"
+>
+  <PageIntro
+    eyebrow="Newsletter"
+    title="Newsletter archive"
+    description="Every issue, with MDX formatting, available to browse at any time."
+  />
+  <section class="newsletter-archive">
+    <div class="newsletter-archive__list">
+      {
+        newsletters.length ? (
+          newsletters.map((entry) => (
+            <ArchiveEntry
+              title={`Issue ${entry.data.issueNumber}: ${entry.data.title}`}
+              url={`/newsletter/${entry.slug}/`}
+              date={entry.data.pubDate}
+              description={entry.data.description}
+              tags={entry.data.tags}
+            />
+          ))
+        ) : (
+          <p class="newsletter-archive__empty">
+            No newsletters yet. Subscribe to get the first issue.
+          </p>
+        )
+      }
+    </div>
+    <div class="newsletter-archive__subscribe">
+      <h2>Stay in the loop</h2>
+      <SubscribeForm variant="compact" redirectUrl="/subscribe/confirmed" />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .newsletter-archive {
+    display: grid;
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .newsletter-archive__subscribe h2 {
+    margin: 0 0 1rem;
+  }
+
+  .newsletter-archive__list {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .newsletter-archive__empty {
+    color: rgba(15, 23, 42, 0.7);
+  }
+</style>

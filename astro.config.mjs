@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
+import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import preact from "@astrojs/preact";
 import remarkMath from "remark-math";
@@ -51,8 +52,17 @@ const watchSnippets = () => ({
 
 export default defineConfig({
 	site: "https://marginem.io",
-	output: "static",
+	output: "server",
+	adapter: cloudflare({
+		platform: "pages",
+		imageService: "compile",
+	}),
 	integrations: [mdx(), preact()],
+	image: {
+		service: {
+			entrypoint: "astro/assets/services/compile",
+		},
+	},
 	markdown: {
 		syntaxHighlight: "prism",
 		prism: {
@@ -71,6 +81,9 @@ export default defineConfig({
 		prefetchAll: true
 	},
 	vite: {
+		ssr: {
+			external: ["node:fs", "node:path"],
+		},
 		plugins: [
 			watchSnippets(),
 			visualizer({

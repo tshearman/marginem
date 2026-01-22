@@ -1,0 +1,117 @@
+:root {
+  color-scheme: light;
+  --bg: #fff;
+  --fg: #1a1a1a;
+  --accent: #1b1b1d;
+  --muted: #6a6a6a;
+  --border: rgba(0, 0, 0, 0.15);
+  --code-bg: #efeee9;
+  --code-fg: #1b1b1b;
+  --site-max-width: 760px;
+}
+
+html {
+  font-size: 14.3px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  background: var(--bg);
+  color: var(--fg);
+  text-rendering: optimizeLegibility;
+  line-height: 1.65;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+article img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+article figure img {
+  border: 0;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+pre {
+  padding: 1rem;
+  overflow-x: auto;
+  background: var(--code-bg);
+  color: var(--code-fg);
+}
+
+.katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.katex-display > .katex {
+  display: inline-block;
+}
+
+code {
+  font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+}
+
+code:not(pre code) {
+  background: rgba(0, 0, 0, 0.02);
+  padding: 0.15rem 0.35rem;
+  font-size: 0.9em;
+}
+
+blockquote {
+  position: relative;
+  margin: 1rem 0;
+  padding: 0 2rem 0 3.4rem;
+  font-style: italic;
+  border-radius: 0.75rem;
+}
+
+blockquote::before {
+  content: "";
+  position: absolute;
+  top: 0.0rem;
+  bottom: -0.25rem;
+  left: 1.65rem;
+  width: 0.35rem;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 761px) {
+  blockquote {
+    margin-left: 3rem;
+    margin-right: 3rem;
+  }
+}
+
+figure {
+  margin: 2rem 0;
+}
+
+figcaption {
+  text-align: center;
+  color: var(--muted);
+  margin-top: 0.5rem;
+}

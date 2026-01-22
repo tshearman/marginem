@@ -2,6 +2,8 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ForceGraph from "../components/ForceGraph.astro";
 
+export const prerender = true;
+
 const nodes = [
 	{ id: "Home", group: 1, url: "/" },
 	{ id: "Garden", group: 1, url: "/garden/" },

@@ -1,0 +1,124 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import { SITE_NAME } from "../../lib/site";
+
+export const prerender = true;
+---
+
+<BaseLayout
+  title={`Unsubscribe | ${SITE_NAME}`}
+  description="Request to unsubscribe from email updates."
+  hero="Unsubscribe"
+  showHero={false}
+>
+  <PageIntro
+    eyebrow="Email updates"
+    title="Unsubscribe"
+    description="Enter your email to request an unsubscribe confirmation link."
+  />
+  <form class="unsubscribe-form" data-action="/api/unsubscribe-request">
+    <div class="unsubscribe-form__field">
+      <label for="unsubscribe-email">Email</label>
+      <input
+        id="unsubscribe-email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        inputmode="email"
+        required
+        placeholder="you@example.com"
+      />
+    </div>
+    <button type="submit">Send confirmation link</button>
+    <p class="unsubscribe-form__status" role="status"></p>
+  </form>
+  <script>import "../../scripts/unsubscribe";</script>
+</BaseLayout>
+
+<style>
+  .unsubscribe-form {
+    display: grid;
+    gap: 1.25rem;
+    padding: 1.75rem;
+    border: 1px solid var(--border);
+    border-radius: 1.25rem;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  }
+
+  .unsubscribe-form__field {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .unsubscribe-form label {
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .unsubscribe-form input {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--fg);
+    background: #fafafa;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .unsubscribe-form input:focus {
+    outline: none;
+    border-color: rgba(15, 23, 42, 0.6);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+  }
+
+  .unsubscribe-form button {
+    justify-self: start;
+    padding: 0.7rem 1.4rem;
+    border-radius: 999px;
+    border: 1px solid rgba(15, 23, 42, 0.35);
+    background: var(--fg);
+    color: #fff;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .unsubscribe-form button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
+  }
+
+  .unsubscribe-form button:focus-visible {
+    outline: 2px solid rgba(15, 23, 42, 0.6);
+    outline-offset: 3px;
+  }
+
+  .unsubscribe-form__status {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .unsubscribe-form__status[data-state="error"] {
+    color: #b91c1c;
+  }
+
+  .unsubscribe-form__status[data-state="success"] {
+    color: #0f5132;
+  }
+</style>

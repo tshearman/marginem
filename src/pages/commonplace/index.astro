@@ -8,6 +8,8 @@ import { generateNoteId } from "../../lib/noteUtils";
 import { MAIN_PAGES } from "../../lib/site";
 import { loadCommonplaceNotes } from "../../lib/commonplace";
 
+export const prerender = true;
+
 // const allNotes = await loadCommonplaceNotes();
 const allNotes: Array<{
   content: string;

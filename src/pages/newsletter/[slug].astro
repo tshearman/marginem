@@ -1,0 +1,30 @@
+---
+import { getCollection, getEntry } from "astro:content";
+import NewsletterLayout from "../../layouts/NewsletterLayout.astro";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+	const entries = await getCollection("newsletter", ({ data }) => !data.draft);
+	return entries.map((entry) => ({
+		params: { slug: entry.slug },
+	}));
+}
+
+const slug = Astro.params.slug;
+if (!slug) {
+	throw new Error("Missing newsletter slug");
+}
+
+const entry = await getEntry("newsletter", slug);
+if (!entry) {
+	return Astro.redirect("/404");
+}
+
+const { Content } = await entry.render();
+const frontmatter = entry.data;
+---
+
+<NewsletterLayout frontmatter={frontmatter} slug={slug} activePage="Newsletter">
+  <Content />
+</NewsletterLayout>

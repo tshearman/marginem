@@ -6,11 +6,14 @@ import PageIntro from "../components/PageIntro.astro";
 import { MAIN_PAGES, WRITING_PAGE_POST_LIMIT } from "../lib/site";
 import { getCollection } from "astro:content";
 import { formatDate } from "../lib/date";
+import SubscribeForm from "src/components/SubscribeForm.astro";
 
 type BlogEntry = CollectionEntry<"blog">;
 
+export const prerender = true;
+
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 ) as BlogEntry[];
 const pagePosts = posts.slice(0, WRITING_PAGE_POST_LIMIT);
 ---
@@ -28,9 +31,11 @@ const pagePosts = posts.slice(0, WRITING_PAGE_POST_LIMIT);
     description={MAIN_PAGES.writing.description}
   />
   <HomeLayout posts={pagePosts} formatDate={formatDate} />
-  <nav class="notes-older" aria-label="Archive link">
-    <a href="/archive/">Archive →</a>
-  </nav>
+  <hr class="subscription-divider" />
+  <h2>Stay connected</h2>
+  <div>
+    <SubscribeForm variant="compact" redirectUrl="/subscribe/confirmed" />
+  </div>
 </BaseLayout>
 
 <style>
@@ -43,5 +48,11 @@ const pagePosts = posts.slice(0, WRITING_PAGE_POST_LIMIT);
 
   .notes-older a {
     font-size: 0.95rem;
+  }
+
+  .subscription-divider {
+    border: 0;
+    border-top: 1px solid rgba(15, 23, 42, 0.12);
+    margin: 5rem 0 5rem;
   }
 </style>
