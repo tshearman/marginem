@@ -136,17 +136,7 @@ export const GET: APIRoute = async () => {
 		loadGardenNotes(),
 	]);
 	const postEntries = buildPostEntries(posts);
-	const fallbackNotes =
-		vaultNotes.length === 0
-			? (await getCollection("notes")).flatMap((file) =>
-					file.data.map((entry) => ({
-						...entry,
-						tags: entry.tags ?? [],
-						date: entry.date ? new Date(entry.date) : undefined,
-					})),
-				)
-			: vaultNotes;
-	const noteEntries = buildNoteEntries(fallbackNotes);
+	const noteEntries = buildNoteEntries(vaultNotes);
 	const gardenEntries = buildGardenEntries(gardenNotes);
 	const payload: SearchEntry[] = [
 		...postEntries,

@@ -16,8 +16,16 @@ function asNumber(value: unknown): number | undefined {
 
 let plotlyPromise: Promise<PlotlyType> | null = null;
 
+function ensureGlobalShim() {
+	const g = globalThis as typeof globalThis & { global?: typeof globalThis };
+	if (!g.global) {
+		g.global = g;
+	}
+}
+
 function loadPlotly(): Promise<PlotlyType> {
 	if (!plotlyPromise) {
+		ensureGlobalShim();
 		plotlyPromise = import("./plotly-bundle.ts").then(
 			(module) => module.default as PlotlyType,
 		);
