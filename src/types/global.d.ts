@@ -16,10 +16,6 @@ declare module "plotly.js/lib/scatter" {
 	export default scatter;
 }
 
-declare global {
-	interface Window {
-		__siteSearchState?: Record<string, unknown>;
-	}
+interface Window {
+	__siteSearchState?: Record<string, unknown>;
 }
-
-export type {};
