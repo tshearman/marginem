@@ -13,6 +13,7 @@ import rehypePrism from "rehype-prism-plus";
 import "prismjs/components/prism-haskell.js";
 import "prismjs/components/prism-lisp.js";
 import remarkObsidianLinks from "./plugins/remark-obsidian-links.js";
+import { visualizer } from "rollup-plugin-visualizer";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const snippetsDir = path.join(rootDir, "src/content/snippets");
@@ -70,6 +71,15 @@ export default defineConfig({
 		prefetchAll: true
 	},
 	vite: {
-		plugins: [watchSnippets()],
+		plugins: [
+			watchSnippets(),
+			visualizer({
+				filename: "dist/stats.html",
+				open: false,
+			}),
+		],
+		build: {
+			chunkSizeWarningLimit: 1500,
+		},
 	},
 });

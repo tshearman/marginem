@@ -1,4 +1,6 @@
-import Plotly from "plotly.js-dist-min";
+type PlotlyType = {
+	newPlot: (...args: unknown[]) => unknown;
+};
 
 type Payload = {
 	data?: unknown[];
@@ -12,7 +14,18 @@ function asNumber(value: unknown): number | undefined {
 		: undefined;
 }
 
-function hydrateChart(el: HTMLElement) {
+let plotlyPromise: Promise<PlotlyType> | null = null;
+
+function loadPlotly(): Promise<PlotlyType> {
+	if (!plotlyPromise) {
+		plotlyPromise = import("./plotly-bundle.ts").then(
+			(module) => module.default as PlotlyType,
+		);
+	}
+	return plotlyPromise;
+}
+
+async function hydrateChart(el: HTMLElement) {
 	const raw = el.getAttribute("data-plotly");
 	if (!raw) return;
 	try {
@@ -21,6 +34,7 @@ function hydrateChart(el: HTMLElement) {
 		const data = payload.data ?? [];
 		const layout = { ...(payload.layout ?? {}) };
 		const config = payload.config ?? {};
+		const Plotly = await loadPlotly();
 		const layoutHeight = asNumber(layout.height);
 		const rect = el.getBoundingClientRect();
 		const measuredHeight = Math.round(rect.height);
@@ -41,7 +55,7 @@ function hydrateChart(el: HTMLElement) {
 function init() {
 	const nodes = document.querySelectorAll<HTMLElement>("[data-plotly]");
 	for (const el of nodes) {
-		hydrateChart(el);
+		void hydrateChart(el);
 	}
 }
 
