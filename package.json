@@ -12,7 +12,7 @@
     "build": "PAGES_FUNCTIONS=true astro build",
     "build:static": "PAGES_FUNCTIONS=true RUN_CODE_SNIPPETS=false astro build",
     "preview": "PAGES_FUNCTIONS=true npx wrangler pages dev ../dist --port 4321 --compatibility-date=2024-10-01 --cwd src --env-file ../.dev.vars",
-    "clean": "rm -rf dist .astro .wrangler",
+    "clean": "rm -rf dist .astro .wrangler src/.wrangler node_modules",
     "check": "astro check",
     "test:blocks": "node scripts/run-code-blocks.mjs",
     "test": "vitest run && npm run test:blocks",
