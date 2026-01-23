@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BRANCH="${CF_PAGES_BRANCH:-}"
+# Resolve branch (Cloudflare sets CF_PAGES_BRANCH / CF_PAGES_COMMIT_BRANCH; fall back to CI vars or git)
+BRANCH="${CF_PAGES_BRANCH:-${CF_PAGES_COMMIT_BRANCH:-${BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')}}}"
 
 if [[ -z "$BRANCH" ]]; then
-	echo "CF_PAGES_BRANCH is not set; skipping deploy."
-	exit 0
+	echo "Branch is unknown; defaulting to main for deploy."
+	BRANCH="main"
 fi
 
 case "$BRANCH" in
