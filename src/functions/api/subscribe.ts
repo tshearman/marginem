@@ -37,7 +37,18 @@ export const onRequestPost = async ({ request, env }: FunctionContext) => {
 	const hmacSecret = getEnvValue(env, "SUBSCRIBE_HMAC_SECRET");
 
 	if (!apiKey || !audienceId || !fromEmail || !siteUrl || !hmacSecret) {
-		return new Response("Missing Resend configuration.", { status: 500 });
+		const configStatus = {
+			RESEND_API_KEY: apiKey ? "set" : "missing (secret)",
+			SUBSCRIBE_HMAC_SECRET: hmacSecret ? "set" : "missing (secret)",
+			RESEND_AUDIENCE_ID: audienceId || "missing",
+			RESEND_FROM_EMAIL: fromEmail || "missing",
+			RESEND_FROM_NAME: fromName || "missing",
+			NEWSLETTER_SITE_URL: siteUrl || "missing",
+		};
+		return new Response(
+			`Missing Resend configuration.\n${JSON.stringify(configStatus, null, 2)}`,
+			{ status: 500, headers: { "Content-Type": "text/plain" } },
+		);
 	}
 
 	const { email, name } = await getPayload(request);
