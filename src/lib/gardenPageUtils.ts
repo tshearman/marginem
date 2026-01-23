@@ -15,8 +15,12 @@ type GraphLink = {
 };
 
 export const plainExcerpt = (content: string) => {
-	const withoutLinks = content.replace(/!?\[\[[^\]]+\]\]/g, " ");
-	const condensed = withoutLinks
+	const withoutObsidianLinks = content.replace(/!?\[\[[^\]]+\]\]/g, " ");
+	const withoutMarkdownLinks = withoutObsidianLinks.replace(
+		/\[([^\]]+)\]\([^)]+\)/g,
+		"$1",
+	);
+	const condensed = withoutMarkdownLinks
 		.replace(/[`#>*]/g, " ")
 		.replace(/\s+/g, " ")
 		.trim();
@@ -25,15 +29,39 @@ export const plainExcerpt = (content: string) => {
 
 export const extractTargets = (content: string) => {
 	const targets: string[] = [];
-	const pattern = /\[\[([^\]]+)\]\]/g;
-	let match = pattern.exec(content);
+
+	const obsidianPattern = /\[\[([^\]]+)\]\]/g;
+	let match = obsidianPattern.exec(content);
 	while (match) {
 		const raw = match[1]?.trim();
 		if (raw) {
 			targets.push(raw.split("|")[0]?.trim() ?? raw);
 		}
-		match = pattern.exec(content);
+		match = obsidianPattern.exec(content);
 	}
+
+	const markdownPattern = /\[([^\]]+)\]\(([^)]+)\)/g;
+	let mdMatch = markdownPattern.exec(content);
+	while (mdMatch) {
+		const rawTarget = mdMatch[2]?.trim();
+		if (rawTarget) {
+			if (
+				rawTarget.startsWith("#") ||
+				rawTarget.startsWith("/") ||
+				rawTarget.startsWith("http://") ||
+				rawTarget.startsWith("https://") ||
+				rawTarget.startsWith("mailto:") ||
+				rawTarget.startsWith("tel:")
+			) {
+				mdMatch = markdownPattern.exec(content);
+				continue;
+			}
+			const normalized = rawTarget.replace(/\.md$/i, "");
+			targets.push(normalized || rawTarget);
+		}
+		mdMatch = markdownPattern.exec(content);
+	}
+
 	return targets;
 };
 

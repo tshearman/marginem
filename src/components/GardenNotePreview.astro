@@ -1,0 +1,28 @@
+---
+import GardenNoteCard from "./GardenNoteCard.astro";
+
+interface GardenNotePreviewData {
+	slug: string;
+	title: string;
+	excerpt: string;
+	updatedAt: Date;
+	relativePath: string;
+	vaultRoot?: string;
+}
+
+interface Props {
+	note: GardenNotePreviewData;
+	vaultRoot?: string;
+}
+
+const { note, vaultRoot } = Astro.props as Props;
+---
+
+<GardenNoteCard
+  slug={note.slug}
+  title={note.title}
+  excerpt={note.excerpt}
+  updatedAt={note.updatedAt}
+  relativePath={note.relativePath}
+  vaultRoot={note.vaultRoot ?? vaultRoot}
+/>

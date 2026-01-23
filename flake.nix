@@ -52,6 +52,12 @@
               set +a
             fi
 
+            if [ -f .env ]; then
+              set -a
+              . ./.env
+              set +a
+            fi
+
             if [ -f package-lock.json ]; then
               if [ ! -d node_modules ] || [ package-lock.json -nt node_modules ]; then
                 echo "Installing npm dependencies..." >&2

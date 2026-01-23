@@ -3,7 +3,7 @@ import BaseLayout from "./BaseLayout.astro";
 import PageIntro from "../components/PageIntro.astro";
 import FilterableCount from "../components/FilterableCount.astro";
 import ForceGraph from "../components/ForceGraph.astro";
-import GardenNoteCard from "../components/GardenNoteCard.astro";
+import GardenNotePreview from "../components/GardenNotePreview.astro";
 
 type GardenCard = {
 	slug: string;
@@ -119,14 +119,7 @@ const gardenTooltips = notes.map((note) => ({
         />
         <div class="garden-grid">
           {notes.map((note) => (
-            <GardenNoteCard
-              slug={note.slug}
-              title={note.title}
-              excerpt={note.excerpt}
-              updatedAt={note.updatedAt}
-              relativePath={note.relativePath}
-              vaultRoot={vaultRoot}
-            />
+            <GardenNotePreview note={note} vaultRoot={vaultRoot} />
           ))}
         </div>
       </section>

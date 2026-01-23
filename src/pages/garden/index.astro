@@ -6,6 +6,7 @@ import {
 	resolveVaultRoot,
 } from "../../lib/garden";
 import { slugifyObsidianTarget } from "../../../plugins/remark-obsidian-links.js";
+import { extractTargets, plainExcerpt } from "../../lib/gardenPageUtils";
 import { MAIN_PAGES } from "../../lib/site";
 
 export const prerender = true;
@@ -13,35 +14,12 @@ export const prerender = true;
 const notes = await loadGardenNotes();
 const vaultRoot = resolveVaultRoot();
 
-const plainExcerpt = (content: string) => {
-	const withoutLinks = content.replace(/!?\[\[[^\]]+\]\]/g, " ");
-	const condensed = withoutLinks
-		.replace(/[`#>*]/g, " ")
-		.replace(/\s+/g, " ")
-		.trim();
-	return condensed.length > 160 ? `${condensed.slice(0, 160)}…` : condensed;
-};
-
 const gardenNotes = notes.map((note) => ({
 	...note,
 	excerpt: plainExcerpt(note.content),
 }));
 
 const linkResolver = createGardenLinkResolver(gardenNotes);
-
-const extractTargets = (content: string) => {
-	const targets: string[] = [];
-	const pattern = /\[\[([^\]]+)\]\]/g;
-	let match = pattern.exec(content);
-	while (match) {
-		const raw = match[1]?.trim();
-		if (raw) {
-			targets.push(raw.split("|")[0]?.trim() ?? raw);
-		}
-		match = pattern.exec(content);
-	}
-	return targets;
-};
 
 const groupByFolder = new Map<string, number>();
 let groupIndex = 1;

@@ -16,6 +16,11 @@ import remarkObsidianLinks, {
 	slugifyObsidianTarget,
 } from "../../plugins/remark-obsidian-links.js";
 import {
+	isGardenPublished,
+	isIgnoredDirName,
+	isIgnoredFileName,
+} from "./obsidian-utils.js";
+import {
 	loadObsidianConfig,
 	normalizeVaultPath,
 	resolveGardenRoot,
@@ -40,16 +45,8 @@ export interface GardenNote {
 
 const isMarkdownFile = (fileName: string) => /\.md$/i.test(fileName);
 
-const shouldSkipDir = (dirName: string) =>
-	dirName.startsWith(".") || dirName === "node_modules";
-
-const extractTitle = (content: string, fallback: string) => {
-	const headingMatch = content.match(/^#\s+(.+?)\s*$/m);
-	if (headingMatch?.[1]) {
-		return headingMatch[1].trim();
-	}
-	return fallback.replace(/\.md$/i, "");
-};
+const extractTitle = (_content: string, fallback: string) =>
+	fallback.replace(/\.md$/i, "");
 
 const normalizePath = (value: string) => value.split(path.sep).join("/");
 
@@ -73,21 +70,33 @@ export const loadGardenNotes = async (
 		for (const entry of entries) {
 			const fullPath = path.join(dir, entry.name);
 			if (entry.isDirectory()) {
-				if (!shouldSkipDir(entry.name)) {
+				if (!isIgnoredDirName(entry.name)) {
 					visitDir(fullPath);
 				}
 				continue;
 			}
 			if (!entry.isFile() || !isMarkdownFile(entry.name)) continue;
+			if (isIgnoredFileName(entry.name)) {
+				continue;
+			}
 			const rawContent = fs.readFileSync(fullPath, "utf8");
-			const { frontmatter, content } = parseFrontmatter(rawContent, {
-				frontmatter: "remove",
-			});
+			let frontmatter: Record<string, unknown> = {};
+			let content = rawContent;
+			try {
+				const parsed = parseFrontmatter(rawContent, { frontmatter: "remove" });
+				frontmatter = (parsed.frontmatter ?? {}) as Record<string, unknown>;
+				content = parsed.content ?? rawContent;
+			} catch (error) {
+				console.warn(
+					`[obsidian] Skipping note with invalid frontmatter at ${fullPath}: ${error instanceof Error ? error.message : String(error)}`,
+				);
+				continue;
+			}
 			const relativePath = normalizePath(path.relative(vaultRoot, fullPath));
 			if (isIgnoredPath(relativePath)) continue;
 			const slug = slugifyObsidianTarget(relativePath);
 			const stats = fs.statSync(fullPath);
-			const published = frontmatter?.published === true;
+			const published = isGardenPublished(frontmatter);
 			notes.push({
 				slug,
 				title:
@@ -177,11 +186,11 @@ export const renderGardenMarkdown = async (
 	}) =>
 		| string
 		| {
-				text: string;
-				isLink: boolean;
-				slug?: string;
-				url?: string;
-		  },
+			text: string;
+			isLink: boolean;
+			slug?: string;
+			url?: string;
+		},
 ) => {
 	const processor = await createMarkdownProcessor({
 		syntaxHighlight: "prism",

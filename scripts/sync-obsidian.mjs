@@ -1,6 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseFrontmatter } from "@astrojs/markdown-remark";
+import {
+	isGardenPublished,
+	isIgnoredDirName,
+	isIgnoredFileName,
+} from "../src/lib/obsidian-utils.js";
 
 const REPO_ROOT = process.cwd();
 
@@ -99,15 +104,19 @@ if (!args.has("--no-clean")) {
 	fs.mkdirSync(targetCommonplaceRoot, { recursive: true });
 }
 
-const shouldSkipDir = (dirName) =>
-	dirName.startsWith(".") || dirName === "node_modules";
-
 const isMarkdownFile = (fileName) => /\.md$/i.test(fileName);
 
 const readFrontmatter = (filePath) => {
 	const raw = fs.readFileSync(filePath, "utf8");
-	const { frontmatter } = parseFrontmatter(raw, { frontmatter: "remove" });
-	return frontmatter ?? {};
+	try {
+		const { frontmatter } = parseFrontmatter(raw, { frontmatter: "remove" });
+		return frontmatter ?? {};
+	} catch (error) {
+		console.warn(
+			`[obsidian] Skipping frontmatter parse for ${filePath}: ${error?.message ?? error}`,
+		);
+		return {};
+	}
 };
 
 const ensureDirForFile = (filePath) => {
@@ -124,12 +133,13 @@ const walk = (dir, onFile, shouldSkipPath) => {
 	for (const entry of entries) {
 		const fullPath = path.join(dir, entry.name);
 		if (entry.isDirectory()) {
-			if (shouldSkipDir(entry.name)) continue;
+			if (isIgnoredDirName(entry.name)) continue;
 			if (shouldSkipPath && shouldSkipPath(fullPath)) continue;
 			walk(fullPath, onFile, shouldSkipPath);
 			continue;
 		}
 		if (!entry.isFile()) continue;
+		if (isIgnoredFileName(entry.name)) continue;
 		onFile(fullPath);
 	}
 };
@@ -165,7 +175,7 @@ walk(
 		const relativePath = path.relative(vaultRoot, filePath);
 		if (isWithinSubpath(filePath, config.commonplacePath)) return;
 		const frontmatter = readFrontmatter(filePath);
-		if (frontmatter?.published !== true) return;
+		if (!isGardenPublished(frontmatter)) return;
 		const targetPath = path.join(targetGardenRoot, relativePath);
 		copyFile(filePath, targetPath);
 		gardenCopied += 1;

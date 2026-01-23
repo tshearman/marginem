@@ -1,5 +1,5 @@
 ---
-import GardenNoteCard from "./GardenNoteCard.astro";
+import GardenNotePreview from "./GardenNotePreview.astro";
 import NoteCard from "./NoteCard.astro";
 import PostPreview from "./PostPreview.astro";
 
@@ -124,14 +124,7 @@ const payloadAttr = JSON.stringify({
       >
         {gardenTooltips.map((note) => (
           <div class="force-graph__tooltip" data-force-tooltip-id={note.id}>
-            <GardenNoteCard
-              slug={note.slug}
-              title={note.title}
-              excerpt={note.excerpt}
-              updatedAt={note.updatedAt}
-              relativePath={note.relativePath}
-              vaultRoot={note.vaultRoot}
-            />
+            <GardenNotePreview note={note} />
           </div>
         ))}
         {noteTooltips.map((note) => (
