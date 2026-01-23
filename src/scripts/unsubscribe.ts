@@ -65,9 +65,7 @@ if (form instanceof HTMLFormElement) {
 			window.location.href = "/unsubscribe/pending";
 		} catch (error) {
 			const message =
-				error instanceof Error
-					? error.message
-					: "Unsubscribe request failed.";
+				error instanceof Error ? error.message : "Unsubscribe request failed.";
 			setStatus(message, "error");
 		}
 	});

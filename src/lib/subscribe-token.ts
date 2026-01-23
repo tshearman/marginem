@@ -85,7 +85,8 @@ export const verifySubscribeToken = async (
 	if (signature !== expectedSignature) return null;
 	const payloadBytes = fromBase64Url(payloadPart);
 	const payload = JSON.parse(decoder.decode(payloadBytes)) as TokenPayload;
-	if (!payload?.email || !payload.exp || payload.purpose !== purpose) return null;
+	if (!payload?.email || !payload.exp || payload.purpose !== purpose)
+		return null;
 	if (Date.now() > payload.exp) return null;
 	return payload;
 };

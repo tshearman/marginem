@@ -63,14 +63,12 @@ main = putStrLn $ "fib 8 = " ++ show (fib 8)
 Common Lisp works, too—use SBCL-compatible scripts:
 
 ```lisp run
-(defun rolling-sum (xs)
-  (let ((sum 0))
-    (mapcar (lambda (x)
-              (incf sum x)
-              sum)
-            xs)))
 
-(format t "Rolling sums: ~{~a~^, ~}~%" (rolling-sum '(1 2 3 4 5)))
+(DEFUN ROLLING-SUM (XS)
+  (LET ((SUM 0))
+    (MAPCAR (LAMBDA (X) (INCF SUM X) SUM) XS)))
+
+(FORMAT T "Rolling sums: ~{~a~^, ~}~%" (ROLLING-SUM '(1 2 3 4 5)))
 ```
 
 ## Footnotes

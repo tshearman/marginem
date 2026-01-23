@@ -12,47 +12,47 @@ export const prerender = true;
 
 // const allNotes = await loadCommonplaceNotes();
 const allNotes: Array<{
-  content: string;
-  source?: string;
-  author?: string;
-  tags: string[];
-  date?: Date;
+	content: string;
+	source?: string;
+	author?: string;
+	tags: string[];
+	date?: Date;
 }> = await loadCommonplaceNotes();
 
 const sortedNotes = allNotes.sort((a, b) => {
-  if (!a.date && !b.date) return 0;
-  if (!a.date) return 1;
-  if (!b.date) return -1;
-  return b.date.getTime() - a.date.getTime();
+	if (!a.date && !b.date) return 0;
+	if (!a.date) return 1;
+	if (!b.date) return -1;
+	return b.date.getTime() - a.date.getTime();
 });
 
 const annotateColumnSpan = (contentLength: number) => {
-  if (contentLength > 460) return 3;
-  if (contentLength > 180) return 2;
-  return 1;
+	if (contentLength > 460) return 3;
+	if (contentLength > 180) return 2;
+	return 1;
 };
 
 const notesWithGrid = sortedNotes.map((note) => ({
-  ...note,
-  columnSpan: annotateColumnSpan(note.content.length),
-  noteId: generateNoteId({
-    content: note.content,
-    author: note.author,
-    tags: note.tags,
-    date: note.date,
-  }),
+	...note,
+	columnSpan: annotateColumnSpan(note.content.length),
+	noteId: generateNoteId({
+		content: note.content,
+		author: note.author,
+		tags: note.tags,
+		date: note.date,
+	}),
 }));
 const allTags = [
-  ...new Set(sortedNotes.flatMap((note) => note.tags || [])),
+	...new Set(sortedNotes.flatMap((note) => note.tags || [])),
 ].sort((a, b) => a.localeCompare(b));
 const commonplaceFilterConfig = JSON.stringify({
-  filterSelector: ".tag-filter-container .tag--filter",
-  countId: "notesCount",
-  hintId: "notesClearHint",
-  itemSelector: ".note-section",
-  itemTagSelector: ".note-card .tag--filter",
-  stateKey: "commonplace-notes",
-  countLabel: "notes",
+	filterSelector: ".tag-filter-container .tag--filter",
+	countId: "notesCount",
+	hintId: "notesClearHint",
+	itemSelector: ".note-section",
+	itemTagSelector: ".note-card .tag--filter",
+	stateKey: "commonplace-notes",
+	countLabel: "notes",
 });
 ---
 

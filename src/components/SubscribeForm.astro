@@ -1,16 +1,16 @@
 ---
 interface Props {
-  action?: string;
-  method?: "get" | "post";
-  idBase?: string;
-  variant?: "default" | "compact";
-  redirectUrl?: string;
+	action?: string;
+	method?: "get" | "post";
+	idBase?: string;
+	variant?: "default" | "compact";
+	redirectUrl?: string;
 }
 
 const {
-  action = "/api/subscribe",
-  method = "post",
-  idBase = "subscribe",
+	action = "/api/subscribe",
+	method = "post",
+	idBase = "subscribe",
 } = Astro.props as Props;
 
 const emailId = `${idBase}-email`;

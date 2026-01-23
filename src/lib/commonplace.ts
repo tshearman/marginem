@@ -49,7 +49,10 @@ export const loadCommonplaceNotes = async () => {
 		"data/obsidian-vault-sample/commonplace",
 	);
 	const commonplaceRoot = localVault
-		? resolveVaultSubpath(localVault, normalizeVaultPath(config.commonplacePath))
+		? resolveVaultSubpath(
+				localVault,
+				normalizeVaultPath(config.commonplacePath),
+			)
 		: fs.existsSync(syncedCommonplaceRoot)
 			? syncedCommonplaceRoot
 			: sampleCommonplaceRoot;
@@ -69,8 +72,14 @@ export const loadCommonplaceNotes = async () => {
 			: path.relative(syncedCommonplaceRoot, fullPath);
 		notes.push({
 			content: content.trim(),
-			source: typeof frontmatter?.source === "string" ? frontmatter.source : undefined,
-			author: typeof frontmatter?.author === "string" ? frontmatter.author : undefined,
+			source:
+				typeof frontmatter?.source === "string"
+					? frontmatter.source
+					: undefined,
+			author:
+				typeof frontmatter?.author === "string"
+					? frontmatter.author
+					: undefined,
 			tags: normalizeTags(frontmatter?.tags),
 			date: parseDate(frontmatter?.date),
 			sourcePath: fullPath,

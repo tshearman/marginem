@@ -64,8 +64,7 @@ export const loadGardenNotes = async (
 		.map((entry) => normalizeVaultPath(entry));
 	const isIgnoredPath = (relativePath: string) =>
 		ignoredRoots.some(
-			(root) =>
-				relativePath === root || relativePath.startsWith(`${root}/`),
+			(root) => relativePath === root || relativePath.startsWith(`${root}/`),
 		);
 
 	const notes: GardenNote[] = [];

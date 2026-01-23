@@ -7,40 +7,40 @@ import { SITE_NAME } from "../lib/site";
 import SubscribeForm from "src/components/SubscribeForm.astro";
 
 interface Frontmatter {
-  title?: string;
-  description?: string;
-  pubDate?: string | Date;
-  issueNumber?: number;
-  tags?: string[];
+	title?: string;
+	description?: string;
+	pubDate?: string | Date;
+	issueNumber?: number;
+	tags?: string[];
 }
 
 interface Props {
-  frontmatter: Frontmatter;
-  slug: string;
-  activePage?: string;
+	frontmatter: Frontmatter;
+	slug: string;
+	activePage?: string;
 }
 
 const { frontmatter: rawFrontmatter, activePage } = Astro.props as Props;
 const frontmatter = rawFrontmatter ?? {};
 const title =
-  typeof frontmatter.title === "string" ? frontmatter.title : "Newsletter";
+	typeof frontmatter.title === "string" ? frontmatter.title : "Newsletter";
 const description =
-  typeof frontmatter.description === "string" ? frontmatter.description : "";
+	typeof frontmatter.description === "string" ? frontmatter.description : "";
 const pubDate =
-  typeof frontmatter.pubDate === "string" || frontmatter.pubDate instanceof Date
-    ? frontmatter.pubDate
-    : undefined;
+	typeof frontmatter.pubDate === "string" || frontmatter.pubDate instanceof Date
+		? frontmatter.pubDate
+		: undefined;
 const formattedDate = pubDate
-  ? formatDate(pubDate, {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    })
-  : "";
+	? formatDate(pubDate, {
+			month: "long",
+			day: "numeric",
+			year: "numeric",
+		})
+	: "";
 const issueNumber =
-  typeof frontmatter.issueNumber === "number" ? frontmatter.issueNumber : null;
+	typeof frontmatter.issueNumber === "number" ? frontmatter.issueNumber : null;
 const issueLabel =
-  issueNumber !== null ? `Issue ${issueNumber}: ${title}` : title;
+	issueNumber !== null ? `Issue ${issueNumber}: ${title}` : title;
 const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : [];
 ---
 

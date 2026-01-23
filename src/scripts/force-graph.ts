@@ -81,9 +81,9 @@ function withAlpha(colorValue: string, alpha: number) {
 	const normalized =
 		hex.length === 3
 			? hex
-				.split("")
-				.map((c) => c + c)
-				.join("")
+					.split("")
+					.map((c) => c + c)
+					.join("")
 			: hex;
 	if (normalized.length !== 6) return colorValue;
 	const r = Number.parseInt(normalized.slice(0, 2), 16);
@@ -260,29 +260,29 @@ function hydrateGraph(el: HTMLElement) {
 		const showLabels = nodes.length <= 25;
 		const labels = showLabels
 			? svg
-				.append("g")
-				.attr("font-size", "12px")
-				.attr("fill", "rgba(15, 23, 42, 0.8)")
-				.attr("paint-order", "stroke")
-				.attr("stroke", "rgba(255, 255, 255, 0.95)")
-				.attr("stroke-width", 3)
-				.selectAll("text")
-				.data(nodes)
-				.join("text")
-				.style("cursor", (d: GraphNode) => (d.url ? "pointer" : "default"))
-				.on("click", (_event: MouseEvent, d: GraphNode) => {
-					navigateTo(d);
-				})
-				.on("pointerenter", (event: PointerEvent, d: GraphNode) => {
-					showTooltip(event, d);
-				})
-				.on("pointermove", (event: PointerEvent, d: GraphNode) => {
-					moveTooltip(event, d);
-				})
-				.on("pointerleave", (_event: MouseEvent, d: GraphNode) => {
-					hideTooltip(d);
-				})
-				.text((d: GraphNode) => labelFor(d, labelKey))
+					.append("g")
+					.attr("font-size", "12px")
+					.attr("fill", "rgba(15, 23, 42, 0.8)")
+					.attr("paint-order", "stroke")
+					.attr("stroke", "rgba(255, 255, 255, 0.95)")
+					.attr("stroke-width", 3)
+					.selectAll("text")
+					.data(nodes)
+					.join("text")
+					.style("cursor", (d: GraphNode) => (d.url ? "pointer" : "default"))
+					.on("click", (_event: MouseEvent, d: GraphNode) => {
+						navigateTo(d);
+					})
+					.on("pointerenter", (event: PointerEvent, d: GraphNode) => {
+						showTooltip(event, d);
+					})
+					.on("pointermove", (event: PointerEvent, d: GraphNode) => {
+						moveTooltip(event, d);
+					})
+					.on("pointerleave", (_event: MouseEvent, d: GraphNode) => {
+						hideTooltip(d);
+					})
+					.text((d: GraphNode) => labelFor(d, labelKey))
 			: null;
 
 		const updateForces = () => {

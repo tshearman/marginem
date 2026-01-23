@@ -73,4 +73,4 @@ if (document.readyState === "loading") {
 	init();
 }
 
-export type { };
+export type {};

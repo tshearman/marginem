@@ -1,14 +1,14 @@
 ---
 interface Props {
-  src: string;
-  alt?: string;
-  caption?: string;
-  height?: string | number;
+	src: string;
+	alt?: string;
+	caption?: string;
+	height?: string | number;
 }
 
 const { src, alt = "", caption, height } = Astro.props as Props;
 const heightValue =
-  typeof height === "number" ? `${height}px` : height ?? undefined;
+	typeof height === "number" ? `${height}px` : height ?? undefined;
 ---
 <figure>
   <img src={src} alt={alt} loading="lazy" style={heightValue ? `height: ${heightValue};` : undefined} />

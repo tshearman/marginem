@@ -108,7 +108,8 @@
 			}
 
 			if (groups.length) {
-				const groupItemSelector = config.groupItemSelector || config.itemSelector;
+				const groupItemSelector =
+					config.groupItemSelector || config.itemSelector;
 				for (const group of groups) {
 					const groupItems = group.querySelectorAll(groupItemSelector);
 					const hasVisible = [...groupItems].some(

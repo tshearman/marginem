@@ -21,11 +21,13 @@ const getContactId = async (
 			error: `Resend lookup failed (${response.status}).`,
 		};
 	}
-	const data = (await response.json()) as {
-		data?: Array<{ id: string; email?: string }>;
-	} | {
-		data?: { data?: Array<{ id: string; email?: string }> };
-	};
+	const data = (await response.json()) as
+		| {
+				data?: Array<{ id: string; email?: string }>;
+		  }
+		| {
+				data?: { data?: Array<{ id: string; email?: string }> };
+		  };
 	const candidates = Array.isArray(data?.data)
 		? data.data
 		: Array.isArray(data?.data?.data)

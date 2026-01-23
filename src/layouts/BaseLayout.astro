@@ -7,21 +7,21 @@ import { SITE_NAME } from "../lib/site";
 import favicon from "../assets/favicon.png";
 
 interface BaseLayoutProps {
-  title?: string;
-  description?: string;
-  hero?: string;
-  showHero?: boolean;
-  includeFootnotes?: boolean;
-  activePage?: string;
+	title?: string;
+	description?: string;
+	hero?: string;
+	showHero?: boolean;
+	includeFootnotes?: boolean;
+	activePage?: string;
 }
 
 const {
-  title = SITE_NAME,
-  description = "Explorations in math, code, and visualization",
-  hero = SITE_NAME,
-  showHero = true,
-  includeFootnotes = false,
-  activePage,
+	title = SITE_NAME,
+	description = "Explorations in math, code, and visualization",
+	hero = SITE_NAME,
+	showHero = true,
+	includeFootnotes = false,
+	activePage,
 } = Astro.props as BaseLayoutProps;
 ---
 
