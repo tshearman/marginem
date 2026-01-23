@@ -15,15 +15,14 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import CleanCSS from "clean-css";
 
-const REQUIRED_ENV = [
+const BASE_REQUIRED_ENV = [
 	"RESEND_API_KEY",
-	"RESEND_AUDIENCE_ID",
 	"RESEND_FROM_EMAIL",
 ];
 
 const usage = () => {
 	console.log(
-		"Usage: node scripts/send-newsletter.mjs [--slug=issue-0|--file=path] [--publish] [--confirm] [--force]",
+		"Usage: node scripts/send-newsletter.mjs [--slug=issue-0|--file=path] [--publish] [--confirm] [--force] [--prod]",
 	);
 };
 
@@ -34,6 +33,7 @@ const parseArgs = (argv) => {
 		publish: false,
 		confirm: false,
 		force: false,
+		prod: false,
 	};
 	for (const arg of args) {
 		if (arg === "--publish") {
@@ -46,6 +46,10 @@ const parseArgs = (argv) => {
 		}
 		if (arg === "--force") {
 			options.force = true;
+			continue;
+		}
+		if (arg === "--prod") {
+			options.prod = true;
 			continue;
 		}
 		if (arg.startsWith("--slug=")) {
@@ -63,8 +67,17 @@ const parseArgs = (argv) => {
 	return options;
 };
 
-const ensureEnv = () => {
-	const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
+const getAudienceId = (isProd) =>
+	isProd ? process.env.RESEND_AUDIENCE_ID_PROD : process.env.RESEND_AUDIENCE_ID;
+
+const ensureEnv = (isProd) => {
+	const missing = BASE_REQUIRED_ENV.filter((key) => !process.env[key]);
+	const audienceEnvKey = isProd
+		? "RESEND_AUDIENCE_ID_PROD"
+		: "RESEND_AUDIENCE_ID";
+	if (!getAudienceId(isProd)) {
+		missing.push(audienceEnvKey);
+	}
 	if (missing.length) {
 		throw new Error(`Missing env vars: ${missing.join(", ")}`);
 	}
@@ -369,7 +382,7 @@ const formatEmailDate = (value) => {
 	}).format(date);
 };
 
-const sendBroadcast = async ({ name, subject, html, text }) => {
+const sendBroadcast = async ({ name, subject, html, text, audienceId }) => {
 	const response = await fetch("https://api.resend.com/broadcasts", {
 		method: "POST",
 		headers: {
@@ -377,7 +390,7 @@ const sendBroadcast = async ({ name, subject, html, text }) => {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
-			audience_id: process.env.RESEND_AUDIENCE_ID,
+			audience_id: audienceId,
 			from: process.env.RESEND_FROM_NAME
 				? `${process.env.RESEND_FROM_NAME} <${process.env.RESEND_FROM_EMAIL}>`
 				: process.env.RESEND_FROM_EMAIL,
@@ -468,13 +481,14 @@ const confirmPublish = async () => {
 };
 
 const main = async () => {
-	const { input, publish, confirm, force } = parseArgs(process.argv);
+	const { input, publish, confirm, force, prod } = parseArgs(process.argv);
 	if (!input) {
 		usage();
 		process.exit(1);
 	}
 
-	ensureEnv();
+	ensureEnv(prod);
+	const audienceId = getAudienceId(prod);
 
 	const filePath = resolveNewsletterPath(input);
 	const contents = await readFile(filePath, "utf8");
@@ -563,7 +577,7 @@ const main = async () => {
 		return;
 	}
 
-	const result = await sendBroadcast({ name, subject, html, text });
+	const result = await sendBroadcast({ name, subject, html, text, audienceId });
 	console.log(`Sent broadcast ${result?.id ?? ""}`.trim());
 
 	const updated = updateFrontmatter(contents, {
