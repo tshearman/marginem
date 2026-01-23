@@ -12,6 +12,13 @@ fi
 case "$BRANCH" in
 	main|dev)
 		echo "Building branch: $BRANCH"
+		echo "Config status (secrets show set/missing only):"
+		printf '  RESEND_API_KEY: %s\n' "${RESEND_API_KEY:+set}"
+		printf '  SUBSCRIBE_HMAC_SECRET: %s\n' "${SUBSCRIBE_HMAC_SECRET:+set}"
+		printf '  RESEND_AUDIENCE_ID: %s\n' "${RESEND_AUDIENCE_ID:-missing}"
+		printf '  RESEND_FROM_EMAIL: %s\n' "${RESEND_FROM_EMAIL:-missing}"
+		printf '  RESEND_FROM_NAME: %s\n' "${RESEND_FROM_NAME:-missing}"
+		printf '  NEWSLETTER_SITE_URL: %s\n' "${NEWSLETTER_SITE_URL:-missing}"
 		PAGES_FUNCTIONS=true RUN_CODE_SNIPPETS=false astro build
 		;;
 	*)
