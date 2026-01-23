@@ -4,7 +4,7 @@ pages_build_output_dir = "dist"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-RESEND_FROM_EMAIL = "toby@marginem.io"
+RESEND_FROM_EMAIL = "toby@news.marginem.io"
 RESEND_FROM_NAME = "Toby - Ad Marginem"
 RESEND_AUDIENCE_ID = "17d269cb-57fb-4429-b1f2-1250cab344f5"
 NEWSLETTER_SITE_URL = "https://news.marginem.io"
