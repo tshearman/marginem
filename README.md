@@ -82,3 +82,10 @@ The build stage also installs `ghc`, `sbcl`, and `python3-numpy`, so `runghc`, C
 - Style or extend `src/styles/global.css` to match your brand.
 - Deploy to a Node-capable host; the likes API uses `output: "server"` with the Node adapter.
 - Format the flake with `nix fmt` and keep `flake.lock` under version control so teammates share the same toolchain.
+
+## Environment variables
+
+- Local secrets (Resend keys, HMAC secrets, audience IDs): use `.dev.vars` at the repo root. `npm run preview` already passes it to Wrangler via `--env-file ../.dev.vars`. Source it or export values in your shell for other scripts.
+- Local non-secrets: copy `.env.example` to `.env` (or export in your shell) for values like `NEWSLETTER_SITE_URL`, `PUBLIC_FONT_AWESOME_KIT_ID`, `OBSIDIAN_VAULT`.
+- Production non-secrets: set in `wrangler.toml` under `[vars]`.
+- Production secrets: set in Cloudflare Pages → Settings → Environment variables → Secrets (`RESEND_API_KEY`, `RESEND_AUDIENCE_ID`, `SUBSCRIBE_HMAC_SECRET`).

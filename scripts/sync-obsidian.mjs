@@ -24,10 +24,9 @@ const parseEnvFile = (filePath) => {
 };
 
 const loadEnv = () => {
+	// Prefer unified local dev secrets in .dev.vars; fall back to .env if present.
+	parseEnvFile(path.join(REPO_ROOT, ".dev.vars"));
 	parseEnvFile(path.join(REPO_ROOT, ".env"));
-	parseEnvFile(path.join(REPO_ROOT, ".env.local"));
-	const nodeEnv = process.env.NODE_ENV ?? "development";
-	parseEnvFile(path.join(REPO_ROOT, `.env.${nodeEnv}`));
 };
 
 const readConfig = () => {

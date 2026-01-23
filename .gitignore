@@ -5,6 +5,8 @@ node_modules/
 dist/
 .astro/
 build/
+src/.wrangler/
+.wrangler/
 
 # local environment / tooling
 .direnv/
@@ -21,6 +23,7 @@ src/blogupdate_runner.egg-info/
 .env.*.local
 deploy/config/secrets.env
 .dev.vars
+.secrets.prod
 
 # logs
 npm-debug.log*
