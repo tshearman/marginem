@@ -19,6 +19,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const snippetsDir = path.join(rootDir, "src/content/snippets");
 const isCloudflarePages = Boolean(process.env.CF_PAGES);
+const isPagesFunctions = process.env.PAGES_FUNCTIONS === "true";
 const runCodeEnabled =
 	process.env.RUN_CODE_SNIPPETS === "true" ||
 	(!isCloudflarePages && process.env.RUN_CODE_SNIPPETS !== "false");
@@ -52,17 +53,21 @@ const watchSnippets = () => ({
 
 export default defineConfig({
 	site: "https://marginem.io",
-	output: "server",
-	adapter: cloudflare({
-		platform: "pages",
-		imageService: "compile",
-	}),
+	output: isPagesFunctions ? "static" : "server",
+	adapter: isPagesFunctions
+		? undefined
+		: cloudflare({
+				platform: "pages",
+				imageService: "compile",
+			}),
 	integrations: [mdx(), preact()],
-	image: {
-		service: {
-			entrypoint: "astro/assets/services/compile",
-		},
-	},
+	image: isPagesFunctions
+		? undefined
+		: {
+				service: {
+					entrypoint: "astro/assets/services/compile",
+				},
+			},
 	markdown: {
 		syntaxHighlight: "prism",
 		prism: {
