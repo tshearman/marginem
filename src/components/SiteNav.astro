@@ -1,23 +1,23 @@
 ---
 import Search from "./Search.astro";
-import IconWriting from "./icons/IconWriting.astro";
-import IconCommonplace from "./icons/IconCommonplace.astro";
-import IconGarden from "./icons/IconGarden.astro";
-import IconArchive from "./icons/IconArchive.astro";
-import IconNewsletter from "./icons/IconNewsletter.astro";
+import iconWriting from "../assets/icons/fa-pen-nib-solid-full.svg?raw";
+import iconCommonplace from "../assets/icons/fa-quote-right-solid-full.svg?raw";
+import iconGarden from "../assets/icons/fa-leaf-solid-full.svg?raw";
+import iconArchive from "../assets/icons/fa-bookmark-solid-full.svg?raw";
+import iconNewsletter from "../assets/icons/pa-newspaper-solid-full.svg?raw";
 import { MAIN_NAV } from "../lib/site";
 
 interface SiteNavProps {
-	activePage?: string;
+  activePage?: string;
 }
 
 const { activePage } = Astro.props as SiteNavProps;
 const ICONS = {
-	writing: IconWriting,
-	commonplace: IconCommonplace,
-	garden: IconGarden,
-	archive: IconArchive,
-	newsletter: IconNewsletter,
+  writing: iconWriting,
+  commonplace: iconCommonplace,
+  garden: iconGarden,
+  archive: iconArchive,
+  newsletter: iconNewsletter,
 };
 ---
 
@@ -28,7 +28,7 @@ const ICONS = {
         const isActive = activePage
           ? item.label.toLowerCase() === activePage.toLowerCase()
           : false;
-        const Icon = ICONS[item.icon] ?? IconGarden;
+        const icon = ICONS[item.icon] ?? iconGarden;
         const linkClass = [
           isActive ? "is-active" : null,
           item.isCompact ? "is-compact" : null,
@@ -37,10 +37,8 @@ const ICONS = {
           .join(" ");
         return (
           <a href={item.href} class={linkClass || undefined}>
-            <span class="site-nav__text">{item.label}</span>
-            <span class="site-nav__icon">
-              <Icon />
-            </span>
+            <span class="site-nav__text sr-only">{item.label}</span>
+            <span class="site-nav__icon" aria-hidden="true" set:html={icon} />
           </a>
         );
       })
@@ -166,11 +164,19 @@ const ICONS = {
 
   @media (max-width: 420px) {
     .site-nav {
-      padding: 1rem 1rem 0.6rem;
+      padding: 1rem 1rem 0.4rem;
     }
 
-    .site-nav__links a.is-compact .site-nav__text {
-      display: none;
+    .site-nav__links a.is-compact .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .site-nav__links a.is-compact .site-nav__icon {

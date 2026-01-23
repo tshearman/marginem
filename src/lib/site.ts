@@ -23,7 +23,7 @@ export const MAIN_PAGES = {
 		label: "Garden",
 		href: "/garden/",
 		icon: "garden",
-		isCompact: false,
+		isCompact: true,
 		pageTitle: `Garden | ${SITE_NAME}`,
 		eyebrow: "Linked vault notes",
 		description:
