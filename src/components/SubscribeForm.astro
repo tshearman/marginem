@@ -1,16 +1,16 @@
 ---
 interface Props {
-	action?: string;
-	method?: "get" | "post";
-	idBase?: string;
-	variant?: "default" | "compact";
-	redirectUrl?: string;
+  action?: string;
+  method?: "get" | "post";
+  idBase?: string;
+  variant?: "default" | "compact";
+  redirectUrl?: string;
 }
 
 const {
-	action = "/api/subscribe",
-	method = "post",
-	idBase = "subscribe",
+  action = "/api/subscribe",
+  method = "post",
+  idBase = "subscribe",
 } = Astro.props as Props;
 
 const emailId = `${idBase}-email`;
@@ -91,7 +91,7 @@ const nameId = `${idBase}-name`;
   }
 
   .subscribe-form button {
-    justify-self: start;
+    justify-self: center;
     padding: 0.7rem 1.4rem;
     border-radius: 999px;
     border: 1px solid rgba(15, 23, 42, 0.35);
@@ -103,13 +103,7 @@ const nameId = `${idBase}-name`;
     cursor: pointer;
     transition:
       transform 0.15s ease,
-      box-shadow 0.2s ease,
       background 0.2s ease;
-  }
-
-  .subscribe-form button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
   }
 
   .subscribe-form button:focus-visible {
