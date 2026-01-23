@@ -40,6 +40,7 @@
             biome
             hlint
             ruff
+            gitleaks
           ];
           shellHook = ''
             export NODE_OPTIONS="--enable-source-maps --trace-warnings"

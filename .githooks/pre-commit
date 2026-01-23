@@ -1,5 +1,11 @@
 #!/bin/sh
 set -e
 
-npm run verify
+if ! command -v gitleaks >/dev/null 2>&1; then
+	echo "gitleaks not found; install from https://github.com/gitleaks/gitleaks" >&2
+	exit 1
+fi
 
+gitleaks protect --staged --redact
+
+npm run verify

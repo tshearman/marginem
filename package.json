@@ -17,6 +17,7 @@
     "test:blocks": "node scripts/run-code-blocks.mjs",
     "test": "vitest run && npm run test:blocks",
     "verify": "npm run lint && npm test && npm run build",
+    "gitleaks:staged": "gitleaks protect --staged --redact",
     "lint:source": "biome lint src plugins astro.config.mjs",
     "lint:snippets": "node scripts/lint-snippets.mjs",
     "lint": "npm run check && npm run lint:source && npm run lint:snippets",
