@@ -41,6 +41,8 @@ export interface GardenNote {
 	sourcePath: string;
 	relativePath: string;
 	published: boolean;
+	tags: string[];
+	date?: Date;
 }
 
 const isMarkdownFile = (fileName: string) => /\.md$/i.test(fileName);
@@ -49,6 +51,20 @@ const extractTitle = (_content: string, fallback: string) =>
 	fallback.replace(/\.md$/i, "");
 
 const normalizePath = (value: string) => value.split(path.sep).join("/");
+
+const normalizeTags = (value: unknown): string[] => {
+	if (Array.isArray(value)) {
+		return value.filter((item): item is string => typeof item === "string");
+	}
+	if (typeof value === "string") return [value];
+	return [];
+};
+
+const parseDate = (value: unknown): Date | undefined => {
+	if (!value) return undefined;
+	const date = new Date(String(value));
+	return Number.isNaN(date.getTime()) ? undefined : date;
+};
 
 export const loadGardenNotes = async (
 	options: { includeUnpublished?: boolean } = {},
@@ -97,6 +113,8 @@ export const loadGardenNotes = async (
 			const slug = slugifyObsidianTarget(relativePath);
 			const stats = fs.statSync(fullPath);
 			const published = isGardenPublished(frontmatter);
+			const tags = normalizeTags(frontmatter?.tags);
+			const date = parseDate(frontmatter?.date);
 			notes.push({
 				slug,
 				title:
@@ -107,6 +125,8 @@ export const loadGardenNotes = async (
 				sourcePath: fullPath,
 				relativePath,
 				published,
+				tags,
+				date,
 			});
 		}
 	};

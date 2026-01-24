@@ -17,6 +17,7 @@ type Props = {
 	href?: string;
 	showPermalink?: boolean;
 	kindLabel?: string;
+	permalinkHref?: string;
 	children?: ComponentChildren;
 };
 
@@ -36,6 +37,7 @@ export function NoteCard(props: Props) {
 		href,
 		showPermalink = true,
 		kindLabel,
+		permalinkHref,
 		children,
 	} = props;
 
@@ -47,13 +49,14 @@ export function NoteCard(props: Props) {
 	const Wrapper = variant === "search" ? "a" : "article";
 	const wrapperProps =
 		variant === "search" ? { href } : { id, style, "data-tags": dataTags };
+	const permalink = permalinkHref ?? (id ? `#${id}` : undefined);
 
 	return (
 		<Wrapper class={wrapperClass} {...wrapperProps}>
-			{variant === "default" && showPermalink && id ? (
+			{variant === "default" && showPermalink && id && permalink ? (
 				<a
 					class="note-card__anchor-link"
-					href={`#${id}`}
+					href={permalink}
 					aria-label="Permalink to this note"
 				>
 					#

@@ -1,49 +1,163 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import type { CommonplaceNote } from "../../lib/commonplace";
+import type { GardenNote } from "../../lib/garden";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageIntro from "../../components/PageIntro.astro";
 import FilterableCount from "../../components/FilterableCount.astro";
 import ArchiveEntry from "../../components/ArchiveEntry.astro";
+import NoteCard from "../../components/NoteCard.astro";
+import GardenNotePreview from "../../components/GardenNotePreview.astro";
+import Tag from "../../components/Tag.astro";
 import TagFilterPanel from "../../components/TagFilterPanel.astro";
 import { getCollection } from "astro:content";
 import { MAIN_PAGES } from "../../lib/site";
+import { loadCommonplaceNotes } from "../../lib/commonplace";
+import { loadGardenNotes } from "../../lib/garden";
+import { plainExcerpt } from "../../lib/gardenPageUtils";
 
 type BlogEntry = CollectionEntry<"blog">;
-type PostsByYear = Record<string, BlogEntry[]>;
+type NewsletterEntry = CollectionEntry<"newsletter">;
+
+type ArchiveItem =
+	| {
+			kind: "blog";
+			date?: Date;
+			tags: string[];
+			category: string;
+			post: BlogEntry;
+	  }
+	| {
+			kind: "newsletter";
+			date?: Date;
+			tags: string[];
+			category: string;
+			entry: NewsletterEntry;
+	  }
+	| {
+			kind: "commonplace";
+			date?: Date;
+			tags: string[];
+			category: string;
+			note: CommonplaceNote;
+	  }
+	| {
+			kind: "garden";
+			date?: Date;
+			tags: string[];
+			category: string;
+			note: GardenNote;
+			excerpt: string;
+	  };
+
+type ItemsByYear = Record<string, ArchiveItem[]>;
 
 export const prerender = true;
 
-const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-) as BlogEntry[];
+const [posts, newsletters, commonplaceNotes, gardenNotes] = await Promise.all([
+	getCollection("blog", ({ data }) => !data.draft),
+	getCollection("newsletter", ({ data }) => !data.draft),
+	loadCommonplaceNotes(),
+	loadGardenNotes(),
+]);
 
-const postsByYear = posts.reduce<PostsByYear>((acc, post) => {
-	const year = post.data.pubDate.getFullYear().toString();
-	if (!acc[year]) {
-		acc[year] = [];
-	}
-	acc[year].push(post);
+const gardenNotesWithExcerpt = gardenNotes.map((note) => ({
+	...note,
+	excerpt: plainExcerpt(note.content),
+}));
+
+const archiveItems: ArchiveItem[] = [
+	...posts.map((post) => ({
+		kind: "blog" as const,
+		date: post.data.pubDate,
+		tags: post.data.tags ?? [],
+		category: MAIN_PAGES.writing.label,
+		post,
+	})),
+	...newsletters.map((entry) => ({
+		kind: "newsletter" as const,
+		date: entry.data.pubDate,
+		tags: entry.data.tags ?? [],
+		category: MAIN_PAGES.newsletter.label,
+		entry,
+	})),
+	...commonplaceNotes.map((note) => ({
+		kind: "commonplace" as const,
+		date: note.date,
+		tags: note.tags ?? [],
+		category: MAIN_PAGES.commonplace.label,
+		note,
+	})),
+	...gardenNotesWithExcerpt.map((note) => ({
+		kind: "garden" as const,
+		date: note.date ?? note.updatedAt,
+		tags: note.tags ?? [],
+		category: MAIN_PAGES.garden.label,
+		note,
+		excerpt: note.excerpt,
+	})),
+];
+
+const sortedItems = archiveItems.sort((a, b) => {
+	const aTime = a.date?.getTime();
+	const bTime = b.date?.getTime();
+	if (aTime != null && bTime != null) return bTime - aTime;
+	if (aTime != null) return -1;
+	if (bTime != null) return 1;
+	const aLabel =
+		a.kind === "blog"
+			? a.post.data.title
+			: a.kind === "newsletter"
+				? a.entry.data.title
+				: a.kind === "commonplace"
+					? a.note.author ?? "Commonplace note"
+					: a.note.title;
+	const bLabel =
+		b.kind === "blog"
+			? b.post.data.title
+			: b.kind === "newsletter"
+				? b.entry.data.title
+				: b.kind === "commonplace"
+					? b.note.author ?? "Commonplace note"
+					: b.note.title;
+	return aLabel.localeCompare(bLabel);
+});
+
+const itemsByYear = sortedItems.reduce<ItemsByYear>((acc, item) => {
+	const year = item.date ? item.date.getFullYear().toString() : "Undated";
+	if (!acc[year]) acc[year] = [];
+	acc[year].push(item);
 	return acc;
 }, {});
 
-const groupedYears = Object.entries(postsByYear).sort(
-	(a, b) => Number(b[0]) - Number(a[0]),
+const groupedYears = Object.entries(itemsByYear).sort((a, b) => {
+	if (a[0] === "Undated") return 1;
+	if (b[0] === "Undated") return -1;
+	return Number(b[0]) - Number(a[0]);
+});
+
+const allTags = [...new Set(sortedItems.flatMap((item) => item.tags))].sort(
+	(a, b) => a.localeCompare(b),
 );
 
-const allTags = [
-	...new Set(posts.flatMap((post) => post.data.tags || [])),
-].sort((a, b) => a.localeCompare(b));
+const categoryOptions = [
+	{ label: MAIN_PAGES.writing.label, value: MAIN_PAGES.writing.label },
+	{ label: MAIN_PAGES.commonplace.label, value: MAIN_PAGES.commonplace.label },
+	{ label: MAIN_PAGES.garden.label, value: MAIN_PAGES.garden.label },
+	{ label: MAIN_PAGES.newsletter.label, value: MAIN_PAGES.newsletter.label },
+];
 
 const archiveFilterConfig = JSON.stringify({
 	filterSelector: ".tag-filter-container .tag--filter",
-	countId: "postsCount",
-	hintId: "postsClearHint",
-	itemSelector: ".archive-entry",
-	itemTagSelector: ".archive-entry .tag--filter",
+	categoryFilterSelector: ".category-filter-container [data-category]",
+	countId: "entriesCount",
+	hintId: "entriesClearHint",
+	itemSelector: ".archive-item",
+	itemTagSelector: ".archive-item .tag--filter",
 	groupSelector: ".archive-year",
-	groupItemSelector: ".archive-entry",
-	stateKey: "archive-posts",
-	countLabel: "posts",
+	groupItemSelector: ".archive-item",
+	stateKey: "archive-all",
+	countLabel: "entries",
 });
 ---
 <BaseLayout
@@ -59,30 +173,78 @@ const archiveFilterConfig = JSON.stringify({
     description={MAIN_PAGES.archive.description}
   />
   {
-    !posts.length ? (
-      <p>No posts yet. Check back soon.</p>
+    !sortedItems.length ? (
+      <p>No entries yet. Check back soon.</p>
     ) : (
       <section class="archive-page" data-filter-config={archiveFilterConfig}>
-        <TagFilterPanel tags={allTags} />
+        <TagFilterPanel tags={allTags} categories={categoryOptions} />
         <FilterableCount
-          contentType="posts"
-          totalCount={posts.length}
+          contentType="entries"
+          totalCount={sortedItems.length}
           class="archive-count"
         />
         <div class="archive-years">
-          {groupedYears.map(([year, yearPosts]) => (
+          {groupedYears.map(([year, yearEntries]) => (
             <section class="archive-year">
               <h2>{year}</h2>
               <div class="archive-year__entries">
-                {yearPosts.map((post) => (
-                  <ArchiveEntry
-                    title={post.data.title}
-                    url={`/posts/${post.slug}/`}
-                    date={post.data.pubDate}
-                    description={post.data.description}
-                    abstract={post.data.abstract}
-                    tags={post.data.tags}
-                  />
+                {yearEntries.map((entry) => (
+                  <div
+                    class="archive-item"
+                    data-tags={JSON.stringify(entry.tags)}
+                    data-categories={JSON.stringify([entry.category])}
+                  >
+                    {
+                      entry.kind === "blog" ? (
+                        <ArchiveEntry
+                          title={entry.post.data.title}
+                          url={`/posts/${entry.post.slug}/`}
+                          date={entry.post.data.pubDate}
+                          description={entry.post.data.description}
+                          abstract={entry.post.data.abstract}
+                          tags={entry.post.data.tags}
+                        />
+                      ) : entry.kind === "newsletter" ? (
+                        <ArchiveEntry
+                          title={`Issue ${entry.entry.data.issueNumber}: ${entry.entry.data.title}`}
+                          url={`/newsletter/${entry.entry.slug}/`}
+                          date={entry.entry.data.pubDate}
+                          description={entry.entry.data.description}
+                          tags={entry.entry.data.tags}
+                        />
+                      ) : entry.kind === "commonplace" ? (
+                        <NoteCard
+                          content={entry.note.content}
+                          source={entry.note.source}
+                          author={entry.note.author}
+                          date={entry.note.date}
+                          tags={entry.note.tags}
+                          permalinkBase={MAIN_PAGES.commonplace.href}
+                        />
+                      ) : (
+                        <>
+                          <GardenNotePreview
+                            note={{
+                              slug: entry.note.slug,
+                              title: entry.note.title,
+                              excerpt: entry.excerpt,
+                              updatedAt: entry.date ?? entry.note.updatedAt,
+                              relativePath: entry.note.relativePath,
+                            }}
+                          />
+                          {
+                            entry.tags.length ? (
+                              <div class="archive-item__tags">
+                                {entry.tags.map((tag) => (
+                                  <Tag tag={tag} variant="filter" size="small" />
+                                ))}
+                              </div>
+                            ) : null
+                          }
+                        </>
+                      )
+                    }
+                  </div>
                 ))}
               </div>
             </section>
@@ -123,6 +285,17 @@ const archiveFilterConfig = JSON.stringify({
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .archive-item.hidden {
+    display: none;
+  }
+
+  .archive-item__tags {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
   }
 
   .archive-entry {

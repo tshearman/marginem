@@ -115,17 +115,23 @@ const buildGardenEntries = (
 ) =>
 	gardenNotes.map((note) => {
 		const snippetSource = plainExcerpt(note.content);
+		const tags = note.tags ?? [];
 		return {
 			id: note.slug,
 			kind: "garden" as const,
 			title: note.title,
 			url: `/garden/${note.slug}/`,
 			snippet: ellipsizeText(snippetSource, 220, { alwaysAppend: true }),
-			tags: [],
+			tags,
 			displayDate: formatDate(note.updatedAt),
 			pubDate: note.updatedAt.toISOString(),
 			timestamp: note.updatedAt.getTime(),
-			searchText: toSearchText([note.title, note.relativePath, note.content]),
+			searchText: toSearchText([
+				note.title,
+				note.relativePath,
+				note.content,
+				tags.join(" "),
+			]),
 		};
 	});
 

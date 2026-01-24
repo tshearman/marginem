@@ -13,6 +13,7 @@ interface Props {
 	class?: string;
 	style?: string;
 	idOverride?: string;
+	permalinkBase?: string;
 }
 
 const {
@@ -24,8 +25,21 @@ const {
 	class: className,
 	style,
 	idOverride,
+	permalinkBase,
 } = Astro.props as Props;
 const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
+const resolvePermalink = (base: string | undefined, id: string) => {
+	if (!base) return `#${id}`;
+	const trimmed = base.trim();
+	if (!trimmed) return `#${id}`;
+	if (trimmed.includes("#")) {
+		return trimmed.endsWith("#") ? `${trimmed}${id}` : trimmed;
+	}
+	const normalized = trimmed.endsWith("/")
+		? trimmed.slice(0, -1)
+		: trimmed;
+	return `${normalized}/#${id}`;
+};
 ---
 
 <PreactNoteCard
@@ -39,6 +53,7 @@ const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
   style={style}
   id={noteId}
   dataTags={JSON.stringify(tags)}
+  permalinkHref={resolvePermalink(permalinkBase, noteId)}
 >
   <LikeButton slug={noteId} target="note" align="right" />
 </PreactNoteCard>

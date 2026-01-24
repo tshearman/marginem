@@ -7,8 +7,8 @@ export const MAIN_PAGES = {
 		icon: "writing",
 		isCompact: false,
 		pageTitle: `Writing | ${SITE_NAME}`,
-		eyebrow: "Essays and field notes",
-		description: "Essays, research notes, and experiments.",
+		eyebrow: "Essays, Experiments, and Explorations",
+		description: "Longer form writings on mathematics, computing, games, and anything else.",
 	},
 	commonplace: {
 		label: "Commonplace",
@@ -16,8 +16,8 @@ export const MAIN_PAGES = {
 		icon: "commonplace",
 		isCompact: false,
 		pageTitle: `Commonplace | ${SITE_NAME}`,
-		eyebrow: "Collected fragments",
-		description: "Collected passages, adversaria, and fragments.",
+		eyebrow: "Adversaria",
+		description: "Collected passages, quotations, and fragments.",
 	},
 	garden: {
 		label: "Garden",
@@ -25,9 +25,9 @@ export const MAIN_PAGES = {
 		icon: "garden",
 		isCompact: true,
 		pageTitle: `Garden | ${SITE_NAME}`,
-		eyebrow: "Linked vault notes",
+		eyebrow: "Personal Wikipedia",
 		description:
-			"Notes are imported from the configured Obsidian vault path at build time, keeping Obsidian and the site in sync.",
+			"Live view of the published notes in my personal Obsidian Vault.",
 	},
 	archive: {
 		label: "Archive",
@@ -36,7 +36,7 @@ export const MAIN_PAGES = {
 		isCompact: true,
 		pageTitle: `Archive | ${SITE_NAME}`,
 		eyebrow: "Full writing index",
-		description: "Browse every note and essay, organized by year.",
+		description: "Browse every note, quote, and essay, organized by year.",
 	},
 	newsletter: {
 		label: "Newsletter",
@@ -55,6 +55,6 @@ export const MAIN_NAV = [
 	MAIN_PAGES.writing,
 	MAIN_PAGES.commonplace,
 	MAIN_PAGES.garden,
-	MAIN_PAGES.archive,
 	MAIN_PAGES.newsletter,
+	MAIN_PAGES.archive,
 ];
