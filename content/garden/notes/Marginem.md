@@ -5,6 +5,3 @@ tags:
   - area/life
 ---
 
-
-
-# References

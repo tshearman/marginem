@@ -1,4 +1,5 @@
 export const SITE_NAME = "Ad Marginem";
+export const CONTENT_DIR = "content";
 
 export const MAIN_PAGES = {
 	writing: {
@@ -8,7 +9,7 @@ export const MAIN_PAGES = {
 		isCompact: false,
 		pageTitle: `Writing | ${SITE_NAME}`,
 		eyebrow: "Essays, Experiments, and Explorations",
-		description: "Longer form writings on mathematics, computing, games, and anything else.",
+		description: "Longer form writing on mathematics, computing, learning, games, and anything else.",
 	},
 	commonplace: {
 		label: "Commonplace",

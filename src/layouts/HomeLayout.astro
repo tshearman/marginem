@@ -1,10 +1,8 @@
 ---
-import type { CollectionEntry } from "astro:content";
 import PostPreview from "../components/PostPreview.astro";
 import HeroFeature from "../components/HeroFeature.astro";
 import { formatDate as formatDateHelper } from "../lib/date";
-
-type BlogEntry = CollectionEntry<"blog">;
+import type { BlogEntry } from "../lib/content";
 interface Props {
 	posts?: BlogEntry[];
 	formatDate?: (date: Date) => string;

@@ -1,11 +1,12 @@
 ---
-import { getCollection, getEntry } from "astro:content";
+import { getCollection, getEntry, render } from "astro:content";
 import PostLayout from "../../layouts/PostLayout.astro";
+import { withSlugs } from "../../lib/content";
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-	const posts = await getCollection("blog", ({ data }) => !data.draft);
+	const posts = withSlugs(await getCollection("blog", ({ data }) => !data.draft));
 	return posts.map((post) => ({
 		params: { slug: post.slug },
 	}));
@@ -21,7 +22,7 @@ if (!post) {
 	return Astro.redirect("/404");
 }
 
-const { Content } = await post.render();
+const { Content } = await render(post);
 const frontmatter = post.data;
 ---
 <PostLayout frontmatter={frontmatter} slug={slug} activePage="Writing">

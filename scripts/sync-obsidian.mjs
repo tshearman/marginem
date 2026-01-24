@@ -8,6 +8,7 @@ import {
 } from "../src/lib/obsidian-utils.js";
 
 const REPO_ROOT = process.cwd();
+const CONTENT_DIR = "content";
 
 const DEFAULT_CONFIG = {
 	commonplacePath: "commonplace",
@@ -88,8 +89,8 @@ if (!vaultOverride && !vaultEnv) {
 }
 
 const commonplaceRoot = path.join(vaultRoot, config.commonplacePath);
-const targetGardenRoot = path.join(REPO_ROOT, "src/content/garden");
-const targetCommonplaceRoot = path.join(REPO_ROOT, "src/content/commonplace");
+const targetGardenRoot = path.join(REPO_ROOT, CONTENT_DIR, "garden");
+const targetCommonplaceRoot = path.join(REPO_ROOT, CONTENT_DIR, "commonplace");
 
 const cleanDir = (dir) => {
 	fs.rmSync(dir, { recursive: true, force: true });

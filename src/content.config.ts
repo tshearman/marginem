@@ -1,7 +1,8 @@
 import { defineCollection, z } from "astro:content";
+import { glob } from "astro/loaders";
 
 const blog = defineCollection({
-	type: "content",
+	loader: glob({ base: "content/blog", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
 		title: z.string(),
 		description: z.string(),
@@ -15,7 +16,7 @@ const blog = defineCollection({
 });
 
 const commonplace = defineCollection({
-	type: "content",
+	loader: glob({ base: "content/commonplace", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
 		author: z.string().optional(),
 		source: z.string().optional(),
@@ -27,7 +28,7 @@ const commonplace = defineCollection({
 });
 
 const garden = defineCollection({
-	type: "content",
+	loader: glob({ base: "content/garden", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
 		published: z.boolean().optional(),
 		tags: z.array(z.string()).default([]),
@@ -38,7 +39,7 @@ const garden = defineCollection({
 });
 
 const imgs = defineCollection({
-	type: "content",
+	loader: glob({ base: "content/imgs", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
 		draft: z.boolean().optional(),
 		title: z.string().optional(),
@@ -46,7 +47,7 @@ const imgs = defineCollection({
 });
 
 const snippets = defineCollection({
-	type: "content",
+	loader: glob({ base: "content/snippets", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
 		draft: z.boolean().optional(),
 		title: z.string().optional(),
@@ -54,7 +55,7 @@ const snippets = defineCollection({
 });
 
 const newsletter = defineCollection({
-	type: "content",
+	loader: glob({ base: "content/newsletter", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
 		issueNumber: z.number().int().nonnegative(),
 		title: z.string(),

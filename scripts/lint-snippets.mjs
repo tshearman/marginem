@@ -5,8 +5,8 @@ import os from "node:os";
 import { spawnSync } from "node:child_process";
 
 const projectRoot = path.resolve(new URL("..", import.meta.url).pathname);
-const contentDir = path.join(projectRoot, "src", "content");
-const snippetsDir = path.join(projectRoot, "src", "content", "snippets");
+const contentDir = path.join(projectRoot, "content");
+const snippetsDir = path.join(contentDir, "snippets");
 
 const LANGUAGE_CONFIG = {
   javascript: {

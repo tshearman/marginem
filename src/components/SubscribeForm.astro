@@ -17,34 +17,37 @@ const emailId = `${idBase}-email`;
 const nameId = `${idBase}-name`;
 ---
 
-<form class="subscribe-form" action={action} method={method}>
-  <div class="subscribe-form__field">
-    <label for={emailId}>Email</label>
-    <input
-      id={emailId}
-      name="email"
-      type="email"
-      autocomplete="email"
-      inputmode="email"
-      required
-      placeholder="you@example.com"
-    />
-  </div>
-  <div class="subscribe-form__field">
-    <label for={nameId}>What should I call you?</label>
-    <input
-      id={nameId}
-      name="name"
-      type="text"
-      autocomplete="name"
-      placeholder="Optional"
-    />
-  </div>
-  <button type="submit">Subscribe</button>
-  <p class="subscribe-form__note">
-    Occasional updates, no spam. Unsubscribe anytime.
-  </p>
-</form>
+<div>
+  <h2>Get notified of updates!</h2>
+  <form class="subscribe-form" action={action} method={method}>
+    <div class="subscribe-form__field">
+      <label for={emailId}>Email</label>
+      <input
+        id={emailId}
+        name="email"
+        type="email"
+        autocomplete="email"
+        inputmode="email"
+        required
+        placeholder="you@example.com"
+      />
+    </div>
+    <div class="subscribe-form__field">
+      <label for={nameId}>What should I call you?</label>
+      <input
+        id={nameId}
+        name="name"
+        type="text"
+        autocomplete="name"
+        placeholder="Optional"
+      />
+    </div>
+    <button type="submit">Subscribe</button>
+    <p class="subscribe-form__note">
+      Occasional updates, no spam. Unsubscribe anytime.
+    </p>
+  </form>
+</div>
 
 <style>
   .subscribe-form {

@@ -11,7 +11,7 @@ import remarkRunCode from "../plugins/remark-run-code.js";
 import remarkObsidianLinks from "../plugins/remark-obsidian-links.js";
 
 const projectRoot = path.resolve(new URL("..", import.meta.url).pathname);
-const contentDir = path.join(projectRoot, "src", "content");
+const contentDir = path.join(projectRoot, "content");
 
 const failures = [];
 const snippetFailures = [];

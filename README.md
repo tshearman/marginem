@@ -44,7 +44,7 @@ A minimalist, technical blog starter built with [Astro](https://astro.build/) an
    ```bash
    npm run dev
    ```
-4. Create new posts inside `src/content/blog`. Use frontmatter that matches `src/content/config.ts`.
+4. Create new posts inside `content/blog`. Use frontmatter that matches `src/content.config.ts`.
 
 ## First-time setup
 
@@ -74,7 +74,7 @@ docker run -p 4321:4321 --env PORT=4321 marginem
 
 The container uses the Astro Node adapter in standalone mode (`node dist/server/entry.mjs`) and listens on `PORT` (default `4321`) with `HOST=0.0.0.0`.
 
-The build stage also installs `ghc`, `sbcl`, and `python3-numpy`, so `runghc`, Common Lisp, and Python+NumPy MDX snippets (e.g. `src/content/blog/haskell-runner-demo.mdx`, `common-lisp-runner-demo.mdx`, and `python-runner-demo.mdx`) can execute during `astro build`.
+The build stage also installs `ghc`, `sbcl`, and `python3-numpy`, so `runghc`, Common Lisp, and Python+NumPy MDX snippets (e.g. `content/blog/haskell-runner-demo.mdx`, `common-lisp-runner-demo.mdx`, and `python-runner-demo.mdx`) can execute during `astro build`.
 
 ## Next steps
 

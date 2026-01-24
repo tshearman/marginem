@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { CONTENT_DIR } from "./site";
 
 export type ObsidianConfig = {
 	vaultPath?: string | null;
@@ -48,7 +49,7 @@ export const resolveGardenRoot = () => {
 	if (localVault) return localVault;
 
 	const candidates = [
-		path.resolve(process.cwd(), "src/content/garden"),
+		path.resolve(process.cwd(), CONTENT_DIR, "garden"),
 		path.resolve(process.cwd(), "data/obsidian-vault-sample"),
 	];
 

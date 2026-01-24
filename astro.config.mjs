@@ -17,7 +17,8 @@ import remarkObsidianLinks from "./plugins/remark-obsidian-links.js";
 import { visualizer } from "rollup-plugin-visualizer";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
-const snippetsDir = path.join(rootDir, "src/content/snippets");
+const contentDir = path.join(rootDir, "content");
+const snippetsDir = path.join(contentDir, "snippets");
 const isCloudflarePages = Boolean(process.env.CF_PAGES);
 const isPagesFunctions = process.env.PAGES_FUNCTIONS === "true";
 const runCodeEnabled =

@@ -1,5 +1,4 @@
 ---
-import type { CollectionEntry } from "astro:content";
 import type { CommonplaceNote } from "../../lib/commonplace";
 import type { GardenNote } from "../../lib/garden";
 import BaseLayout from "../../layouts/BaseLayout.astro";
@@ -15,9 +14,7 @@ import { MAIN_PAGES } from "../../lib/site";
 import { loadCommonplaceNotes } from "../../lib/commonplace";
 import { loadGardenNotes } from "../../lib/garden";
 import { plainExcerpt } from "../../lib/gardenPageUtils";
-
-type BlogEntry = CollectionEntry<"blog">;
-type NewsletterEntry = CollectionEntry<"newsletter">;
+import { withSlugs, type BlogEntry, type NewsletterEntry } from "../../lib/content";
 
 type ArchiveItem =
 	| {
@@ -60,6 +57,8 @@ const [posts, newsletters, commonplaceNotes, gardenNotes] = await Promise.all([
 	loadCommonplaceNotes(),
 	loadGardenNotes(),
 ]);
+const postsWithSlugs = withSlugs(posts);
+const newslettersWithSlugs = withSlugs(newsletters);
 
 const gardenNotesWithExcerpt = gardenNotes.map((note) => ({
 	...note,
@@ -67,14 +66,14 @@ const gardenNotesWithExcerpt = gardenNotes.map((note) => ({
 }));
 
 const archiveItems: ArchiveItem[] = [
-	...posts.map((post) => ({
+	...postsWithSlugs.map((post) => ({
 		kind: "blog" as const,
 		date: post.data.pubDate,
 		tags: post.data.tags ?? [],
 		category: MAIN_PAGES.writing.label,
 		post,
 	})),
-	...newsletters.map((entry) => ({
+	...newslettersWithSlugs.map((entry) => ({
 		kind: "newsletter" as const,
 		date: entry.data.pubDate,
 		tags: entry.data.tags ?? [],

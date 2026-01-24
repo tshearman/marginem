@@ -113,6 +113,6 @@ const graphLinks = [...noteLinks, ...folderLinks, ...noteFolderLinks];
   notes={gardenNotes}
   vaultRoot={vaultRoot ?? undefined}
   graph={{ nodes: graphNodeList, links: graphLinks, labelKey: "title" }}
-  emptyMessage={`Set <code>OBSIDIAN_VAULT</code> to the root of an Obsidian vault (in your .env files or shell) and rebuild to generate Garden pages. Synced notes live at <code>./src/content/garden</code>; a sample vault lives at <code>./data/obsidian-vault-sample</code>.`}
+  emptyMessage={`Set <code>OBSIDIAN_VAULT</code> to the root of an Obsidian vault (in your .env files or shell) and rebuild to generate Garden pages. Synced notes live at <code>./content/garden</code>; a sample vault lives at <code>./data/obsidian-vault-sample</code>.`}
   activePage={MAIN_PAGES.garden.label}
 />

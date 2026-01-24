@@ -1,11 +1,14 @@
 ---
-import { getCollection, getEntry } from "astro:content";
+import { getCollection, getEntry, render } from "astro:content";
 import NewsletterLayout from "../../layouts/NewsletterLayout.astro";
+import { withSlugs } from "../../lib/content";
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-	const entries = await getCollection("newsletter", ({ data }) => !data.draft);
+	const entries = withSlugs(
+		await getCollection("newsletter", ({ data }) => !data.draft),
+	);
 	return entries.map((entry) => ({
 		params: { slug: entry.slug },
 	}));
@@ -21,7 +24,7 @@ if (!entry) {
 	return Astro.redirect("/404");
 }
 
-const { Content } = await entry.render();
+const { Content } = await render(entry);
 const frontmatter = entry.data;
 ---
 

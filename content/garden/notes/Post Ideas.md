@@ -17,6 +17,3 @@ A collection of ideas to write and post on [Marginem](Marginem.md)
 
 # RPG and Games
 
-
-
-# References

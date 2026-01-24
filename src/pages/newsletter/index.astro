@@ -5,10 +5,11 @@ import ArchiveEntry from "../../components/ArchiveEntry.astro";
 import SubscribeForm from "../../components/SubscribeForm.astro";
 import { SITE_NAME } from "../../lib/site";
 import { getCollection } from "astro:content";
+import { withSlugs } from "../../lib/content";
 
 const title = `Newsletter | ${SITE_NAME}`;
-const newsletters = (
-	await getCollection("newsletter", ({ data }) => !data.draft)
+const newsletters = withSlugs(
+  await getCollection("newsletter", ({ data }) => !data.draft),
 ).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
@@ -45,7 +46,6 @@ const newsletters = (
       }
     </div>
     <div class="newsletter-archive__subscribe">
-      <h2>Stay in the loop</h2>
       <SubscribeForm variant="compact" redirectUrl="/subscribe/confirmed" />
     </div>
   </section>

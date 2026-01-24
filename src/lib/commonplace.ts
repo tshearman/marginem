@@ -7,6 +7,7 @@ import {
 	resolveLocalVaultRoot,
 	resolveVaultSubpath,
 } from "./obsidianConfig";
+import { CONTENT_DIR } from "./site";
 
 export type CommonplaceNote = {
 	content: string;
@@ -42,7 +43,8 @@ export const loadCommonplaceNotes = async () => {
 	const localVault = resolveLocalVaultRoot();
 	const syncedCommonplaceRoot = path.resolve(
 		process.cwd(),
-		"src/content/commonplace",
+		CONTENT_DIR,
+		"commonplace",
 	);
 	const sampleCommonplaceRoot = path.resolve(
 		process.cwd(),

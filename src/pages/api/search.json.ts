@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
-import type { CollectionEntry } from "astro:content";
 import { getCollection } from "astro:content";
 import { loadGardenNotes } from "../../lib/garden";
 import { generateNoteId } from "../../lib/noteUtils";
 import { ellipsizeText, normalizeWhitespace } from "../../lib/text";
 import { formatDate } from "../../lib/date";
 import { loadCommonplaceNotes } from "../../lib/commonplace";
+import { withSlugs, type BlogEntry } from "../../lib/content";
 
 export const prerender = true;
 
@@ -37,8 +37,6 @@ const toSearchText = (segments: Array<string | undefined>) =>
 		)
 		.filter(Boolean)
 		.join(" ");
-
-type BlogEntry = CollectionEntry<"blog">;
 
 const plainExcerpt = (value = "") =>
 	stripFormatting(value.replace(/!?\[\[[^\]]+\]\]/g, " "));
@@ -141,7 +139,7 @@ export const GET: APIRoute = async () => {
 		loadCommonplaceNotes(),
 		loadGardenNotes(),
 	]);
-	const postEntries = buildPostEntries(posts);
+	const postEntries = buildPostEntries(withSlugs(posts));
 	const noteEntries = buildNoteEntries(vaultNotes);
 	const gardenEntries = buildGardenEntries(gardenNotes);
 	const payload: SearchEntry[] = [
