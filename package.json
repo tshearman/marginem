@@ -66,8 +66,9 @@
     "rollup-plugin-visualizer": "^6.0.5",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "unified": "^11.0.5""vitest": "^4.0.18",
-    "wrangler": "^4.60.0",
+    "unified": "^11.0.5",
+    "vitest": "^4.0.18",
+    "wrangler": "^4.60.0"
   },
   "overrides": {
     "undici": "^7.18.2",
