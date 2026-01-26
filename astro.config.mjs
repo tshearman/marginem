@@ -58,17 +58,17 @@ export default defineConfig({
 	adapter: isPagesFunctions
 		? undefined
 		: cloudflare({
-				platform: "pages",
-				imageService: "compile",
-			}),
+			platform: "pages",
+			imageService: "compile",
+		}),
 	integrations: [mdx(), preact()],
 	image: isPagesFunctions
 		? undefined
 		: {
-				service: {
-					entrypoint: "astro/assets/services/compile",
-				},
+			service: {
+				entrypoint: "astro/assets/services/compile",
 			},
+		},
 	markdown: {
 		syntaxHighlight: "prism",
 		prism: {
@@ -83,7 +83,7 @@ export default defineConfig({
 		rehypePlugins: [rehypeKatex, [rehypePrism, { showLineNumbers: true }]],
 	},
 	prefetch: {
-		defaultStrategy: "viewport",
+		defaultStrategy: "hover",
 		prefetchAll: true,
 	},
 	vite: {
