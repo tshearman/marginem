@@ -27,7 +27,7 @@ const { slug, title, excerpt, updatedAt } = Astro.props as Props;
   :global(.garden-card) {
     display: block;
     padding: 0.8rem 0;
-    border-bottom: 0px solid rgba(15, 23, 42, 0.08);
+    border-bottom: 0px solid rgb(var(--ink-rgb) / 0.08);
     text-decoration: none;
     color: inherit;
     text-align: left;
@@ -56,7 +56,7 @@ const { slug, title, excerpt, updatedAt } = Astro.props as Props;
   :global(.garden-card h3) {
     margin: 0;
     font-size: 1.05rem;
-    color: rgba(15, 23, 42, 0.95);
+    color: rgb(var(--ink-rgb) / 0.95);
     font-weight: 600;
   }
 
@@ -67,7 +67,7 @@ const { slug, title, excerpt, updatedAt } = Astro.props as Props;
 
   :global(.garden-card__excerpt) {
     margin: 0.2rem 0 0;
-    color: rgba(15, 23, 42, 0.85);
+    color: rgb(var(--ink-rgb) / 0.85);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

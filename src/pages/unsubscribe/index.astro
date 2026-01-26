@@ -43,9 +43,9 @@ export const prerender = true;
     display: grid;
     gap: 1.25rem;
     padding: 1.75rem;
-    border: 1px solid var(--border);
+    border: var(--thin-border);
     border-radius: 1.25rem;
-    background: #fff;
+    background: var(--bg);
   }
 
   .unsubscribe-form__field {
@@ -64,11 +64,11 @@ export const prerender = true;
     width: 100%;
     padding: 0.75rem 0.9rem;
     border-radius: 0.75rem;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: var(--thin-border);
     font-size: 1rem;
     font-family: inherit;
     color: var(--fg);
-    background: #fafafa;
+    background: var(--bg);
     transition:
       border-color 0.2s ease,
       box-shadow 0.2s ease,
@@ -77,9 +77,9 @@ export const prerender = true;
 
   .unsubscribe-form input:focus {
     outline: none;
-    border-color: rgba(15, 23, 42, 0.6);
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+    border-color: rgb(var(--ink-rgb) / 0.6);
+    background: var(--bg);
+    box-shadow: 0 0 0 3px rgb(var(--ink-rgb) / 0.1);
   }
 
   @media (max-width: 760px) {
@@ -92,9 +92,9 @@ export const prerender = true;
     justify-self: center;
     padding: 0.7rem 1.4rem;
     border-radius: 999px;
-    border: 1px solid rgba(15, 23, 42, 0.35);
+    border: var(--thin-border);
     background: var(--fg);
-    color: #fff;
+    color: var(--fg-inverse);
     font-size: 0.95rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -106,7 +106,7 @@ export const prerender = true;
   }
 
   .unsubscribe-form button:focus-visible {
-    outline: 2px solid rgba(15, 23, 42, 0.6);
+    outline: 2px solid rgb(var(--ink-rgb) / 0.6);
     outline-offset: 3px;
   }
 
@@ -117,10 +117,10 @@ export const prerender = true;
   }
 
   .unsubscribe-form__status[data-state="error"] {
-    color: #b91c1c;
+    color: var(--danger);
   }
 
   .unsubscribe-form__status[data-state="success"] {
-    color: #0f5132;
+    color: var(--success);
   }
 </style>

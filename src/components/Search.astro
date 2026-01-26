@@ -98,12 +98,12 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--bg, #fff);
-    border: 1px solid var(--border, #d4d4d4);
+    background: var(--bg);
+    border: var(--thin-border);
     border-radius: 999px;
     padding: 0.4rem 0.75rem;
     font: inherit;
-    color: var(--fg, #121212);
+    color: var(--fg);
     cursor: pointer;
     min-width: 9rem;
     justify-content: flex-start;
@@ -114,12 +114,12 @@
 
   .nav-search__trigger:hover,
   .nav-search__trigger:focus-visible {
-    border-color: rgba(0, 0, 0, 0.35);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    border-color: rgb(var(--shadow-rgb) / 0.35);
+    box-shadow: 0 10px 25px rgb(var(--shadow-rgb) / 0.06);
   }
 
   .nav-search__icon {
-    color: rgba(0, 0, 0, 0.55);
+    color: rgb(var(--shadow-rgb) / 0.55);
   }
 
   .nav-search__text {
@@ -131,8 +131,8 @@
   .nav-search__shortcut {
     margin-left: auto;
     font-size: 0.75rem;
-    color: var(--muted, #6a6a6a);
-    background: rgba(0, 0, 0, 0.05);
+    color: var(--muted);
+    background: rgb(var(--shadow-rgb) / 0.05);
     padding: 0.1rem 0.4rem;
     border-radius: 0.4rem;
   }
@@ -175,7 +175,7 @@
     bottom: -100vh;
     width: 100%;
     height: calc(100vh + 140vh);
-    background: rgba(0, 0, 0, 0.5);
+    background: rgb(var(--shadow-rgb) / 0.5);
     backdrop-filter: blur(6px);
   }
 
@@ -183,13 +183,13 @@
     position: relative;
     width: min(var(--site-max-width), 100%);
     max-height: calc(100vh - clamp(2rem, 8vh, 4rem));
-    background: var(--bg, #fff);
-    color: var(--fg, #111);
+    background: var(--bg);
+    color: var(--fg);
     border-radius: 1.35rem;
-    border: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+    border: var(--thin-border);
     box-shadow:
-      0 20px 60px rgba(0, 0, 0, 0.18),
-      0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+      0 20px 60px rgb(var(--shadow-rgb) / 0.18),
+      0 0 0 1px rgb(var(--white-rgb) / 0.2) inset;
     padding: 1.4rem;
     display: flex;
     flex-direction: column;
@@ -229,10 +229,10 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+    border-bottom: var(--thin-border);
     padding-bottom: 0.85rem;
     flex-shrink: 0;
-    background: var(--bg, #fff);
+    background: var(--bg);
   }
 
   .search-modal__field {
@@ -242,11 +242,12 @@
     gap: 0.65rem;
     padding: 0.4rem 0.9rem;
     border-radius: 0.75rem;
-    background: rgba(0, 0, 0, 0.04);
+    background: rgb(var(--shadow-rgb) / 0.04);
+    border: var(--thin-border);
   }
 
   .search-modal__field-icon {
-    color: rgba(0, 0, 0, 0.5);
+    color: rgb(var(--shadow-rgb) / 0.5);
   }
 
   .search-modal__input {
@@ -265,13 +266,13 @@
     padding: 0.4rem;
     border-radius: 999px;
     cursor: pointer;
-    color: var(--muted, #6a6a6a);
+    color: var(--muted);
   }
 
   .search-modal__close:hover,
   .search-modal__close:focus-visible {
-    background: rgba(0, 0, 0, 0.08);
-    color: var(--fg, #111);
+    background: rgb(var(--shadow-rgb) / 0.08);
+    color: var(--fg);
   }
 
   @media (max-width: 760px) {
@@ -298,7 +299,7 @@
   }
 
   .search-modal__results::-webkit-scrollbar-thumb {
-    background: rgba(15, 23, 42, 0.35);
+    background: rgb(var(--ink-rgb) / 0.35);
     border-radius: 999px;
   }
 
@@ -310,7 +311,7 @@
   .search-modal__empty {
     padding: 1.5rem;
     text-align: center;
-    color: rgba(15, 23, 42, 0.6);
+    color: rgb(var(--ink-rgb) / 0.6);
     font-size: 0.95rem;
   }
 
@@ -318,7 +319,7 @@
     font-size: 0.7rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(15, 23, 42, 0.5);
+    color: rgb(var(--ink-rgb) / 0.5);
     position: absolute;
     top: 0.7rem;
     right: 0.85rem;
@@ -355,7 +356,7 @@
     color: inherit;
     border-radius: 0.85rem;
     padding: 0.85rem 1rem;
-    background: #fff;
+    background: var(--bg);
     transition:
       border-color 0.2s ease,
       box-shadow 0.2s ease;
@@ -384,12 +385,12 @@
 
   .search-modal :global(.garden-search__excerpt) {
     margin: 0.4rem 0 0;
-    color: rgba(15, 23, 42, 0.75);
+    color: rgb(var(--ink-rgb) / 0.75);
   }
 
   .search-modal :global(.tag--filter:hover),
   .search-modal :global(.tag--default:hover) {
-    background: rgba(15, 23, 42, 0.05);
+    background: rgb(var(--ink-rgb) / 0.05);
   }
 
   :global(body.search-locked) {

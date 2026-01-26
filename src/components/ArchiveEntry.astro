@@ -56,12 +56,12 @@ const preview = ellipsizeText(abstract || description || "", 220);
     gap: 0.5rem;
     padding: 1.25rem;
     border-radius: 1rem;
-    background: #fff;
+    background: var(--bg);
     transition: border-color 0.2s ease;
   }
 
   .archive-entry:hover {
-    border-color: rgba(15, 23, 42, 0.25);
+    border-color: var(--thin-border-color);
   }
 
   .archive-entry.hidden {
@@ -92,7 +92,7 @@ const preview = ellipsizeText(abstract || description || "", 220);
 
   .archive-entry__excerpt {
     margin: 0.35rem 0 0;
-    color: rgba(15, 23, 42, 0.8);
+    color: rgb(var(--ink-rgb) / 0.8);
   }
 
   .archive-entry__tags {

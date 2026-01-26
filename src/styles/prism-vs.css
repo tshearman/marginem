@@ -5,7 +5,7 @@
 
 code[class*="language-"],
 pre[class*="language-"] {
-	color: #393A34;
+	color: var(--fg);
 	font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
 	direction: ltr;
 	text-align: left;
@@ -29,14 +29,14 @@ pre[class*="language-"]::-moz-selection,
 pre[class*="language-"] ::-moz-selection,
 code[class*="language-"]::-moz-selection,
 code[class*="language-"] ::-moz-selection {
-	background: #C1DEF1;
+	background: var(--accent-soft);
 }
 
 pre[class*="language-"]::selection,
 pre[class*="language-"] ::selection,
 code[class*="language-"]::selection,
 code[class*="language-"] ::selection {
-	background: #C1DEF1;
+	background: var(--accent-soft);
 }
 
 /* Code blocks */
@@ -44,7 +44,7 @@ pre[class*="language-"] {
 	padding: 1em;
 	margin: .5em 0;
 	overflow: auto;
-	background-color: white;
+	background-color: var(--code-bg);
 }
 
 /* Inline code */
@@ -58,7 +58,7 @@ pre[class*="language-"] {
 .token.prolog,
 .token.doctype,
 .token.cdata {
-	color: #008000;
+	color: var(--muted);
 	font-style: italic;
 }
 
@@ -67,12 +67,12 @@ pre[class*="language-"] {
 }
 
 .token.string {
-	color: #A31515;
+	color: var(--accent-2);
 }
 
 .token.punctuation,
 .token.operator {
-	color: #393A34;
+	color: var(--fg);
 	/* no highlight */
 }
 
@@ -83,7 +83,7 @@ pre[class*="language-"] {
 .token.variable,
 .token.constant,
 .token.inserted {
-	color: #36acaa;
+	color: var(--accent-3);
 }
 
 .token.atrule,
@@ -93,25 +93,25 @@ pre[class*="language-"] {
 .language-json .token.boolean,
 .language-json .token.number,
 code[class*="language-css"] {
-	color: #0000ff;
+	color: var(--accent);
 }
 
 .token.function {
-	color: #393A34;
+	color: var(--fg);
 }
 
 .token.deleted,
 .language-autohotkey .token.tag {
-	color: #9a050f;
+	color: var(--danger);
 }
 
 .token.selector,
 .language-autohotkey .token.keyword {
-	color: #00009f;
+	color: var(--accent);
 }
 
 .token.important {
-	color: #e90;
+	color: var(--accent-3);
 }
 
 .token.important,
@@ -125,42 +125,50 @@ code[class*="language-css"] {
 
 .token.class-name,
 .language-json .token.property {
-	color: #2B91AF;
+	color: color-mix(in srgb, var(--accent) 70%, var(--fg));
 }
 
 .token.tag,
 .token.selector {
-	color: #800000;
+	color: var(--danger);
 }
 
 .token.attr-name,
 .token.property,
 .token.regex,
 .token.entity {
-	color: #ff0000;
+	color: color-mix(in srgb, var(--accent-2) 70%, var(--fg));
 }
 
 .token.directive.tag .tag {
-	background: #ffff00;
-	color: #393A34;
+	background: var(--accent-soft);
+	color: var(--fg);
 }
 
 /* overrides color-values for the Line Numbers plugin
  * http://prismjs.com/plugins/line-numbers/
  */
 .line-numbers.line-numbers .line-numbers-rows {
-	border-right-color: #a5a5a5;
+	border-right-color: var(--thin-border-color);
 }
 
 .line-numbers .line-numbers-rows>span:before {
-	color: #2B91AF;
+	color: color-mix(in srgb, var(--accent) 70%, var(--fg));
 }
 
 /* overrides color-values for the Line Highlight plugin
 * http://prismjs.com/plugins/line-highlight/
 */
 .line-highlight.line-highlight {
-	background: rgba(193, 222, 241, 0.2);
-	background: -webkit-linear-gradient(left, rgba(193, 222, 241, 0.2) 70%, rgba(221, 222, 241, 0));
-	background: linear-gradient(to right, rgba(193, 222, 241, 0.2) 70%, rgba(221, 222, 241, 0));
+	background: color-mix(in srgb, var(--accent) 18%, transparent);
+	background: -webkit-linear-gradient(
+		left,
+		color-mix(in srgb, var(--accent) 18%, transparent) 70%,
+		transparent
+	);
+	background: linear-gradient(
+		to right,
+		color-mix(in srgb, var(--accent) 18%, transparent) 70%,
+		transparent
+	);
 }

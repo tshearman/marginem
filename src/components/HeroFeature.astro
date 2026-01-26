@@ -26,10 +26,13 @@ const {
 const summary = ellipsizeText(description, 260);
 const hasHeroImage = Boolean(backgroundImage);
 const blobPalettes = [
-  ["#0ea5e9", "#22d3ee"],
-  ["#22d3ee", "#10b981"],
-  ["#10b981", "#84cc16"],
-  ["#38bdf8", "#0ea5e9"],
+  ["var(--accent)", "var(--accent-2)"],
+  ["var(--accent-2)", "var(--accent-3)"],
+  ["var(--accent-3)", "var(--accent)"],
+  [
+    "color-mix(in srgb, var(--accent) 70%, var(--accent-2))",
+    "color-mix(in srgb, var(--accent-2) 70%, var(--accent))",
+  ],
 ];
 const blobs = hasHeroImage
   ? []
@@ -95,7 +98,7 @@ const blobs = hasHeroImage
   .hero-feature {
     border-radius: 1rem;
     padding: 2.5rem;
-    color: #fff;
+    color: var(--fg-inverse);
     background-size: cover;
     background-position: center;
     position: relative;
@@ -110,19 +113,19 @@ const blobs = hasHeroImage
     position: relative;
     z-index: 1;
     text-shadow: none;
-    background: rgba(255, 221, 212, 0.1);
+    background-color: rgb(var(--white-rgb) / 0.2);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 0 80px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-strong);
     border-radius: 25px;
     padding: 2.25rem;
   }
 
   .hero-feature__body--image {
     text-shadow:
-      0 0 3px rgba(0, 0, 0, 0.85),
-      0 0 6px rgba(0, 0, 0, 0.7),
-      0 0 12px rgba(0, 0, 0, 0.6);
+      0 0 3px rgb(var(--shadow-rgb) / 0.85),
+      0 0 6px rgb(var(--shadow-rgb) / 0.7),
+      0 0 12px rgb(var(--shadow-rgb) / 0.6);
   }
 
   .hero-feature__title {
@@ -160,16 +163,16 @@ const blobs = hasHeroImage
 
   .hero-feature__summary {
     margin: 0 0 1rem;
-    color: rgba(255, 255, 255, 0.95);
+    color: var(--fg-inverse-soft);
   }
 
   .hero-feature :global(.tag) {
-    background: rgba(0, 0, 0, 0.45);
-    border-color: rgba(255, 255, 255, 0.5);
-    color: #fff;
+    background: rgb(var(--shadow-rgb) / 0.45);
+    border-color: rgb(var(--white-rgb) / 0.5);
+    color: var(--fg-inverse);
     text-shadow:
-      0 0 3px rgba(0, 0, 0, 0.85),
-      0 0 6px rgba(0, 0, 0, 0.7);
+      0 0 3px rgb(var(--shadow-rgb) / 0.85),
+      0 0 6px rgb(var(--shadow-rgb) / 0.7);
     transition:
       background-color 0.2s ease,
       color 0.2s ease;
@@ -177,43 +180,43 @@ const blobs = hasHeroImage
 
   .hero-feature :global(.tag:hover),
   .hero-feature :global(.tag:focus-visible) {
-    background: rgba(0, 0, 0, 0.65);
-    border-color: rgba(255, 255, 255, 0.8);
-    color: #fff;
+    background: rgb(var(--shadow-rgb) / 0.65);
+    border-color: rgb(var(--white-rgb) / 0.8);
+    color: var(--fg-inverse);
   }
 
   .hero-feature :global(.date-stamp) {
-    color: #fff;
+    color: var(--fg-inverse);
   }
 
   .hero-feature--fallback {
-    color: #0f172a;
+    color: var(--fg);
     background: var(--bg);
-    border: 1px solid rgba(15, 23, 42, 0.2);
+    border: var(--thin-border);
   }
 
   .hero-feature--fallback .hero-feature__summary {
-    color: #000;
+    color: var(--fg);
   }
 
   .hero-feature--fallback .hero-feature__title,
   .hero-feature--fallback .hero-feature__summary,
   .hero-feature--fallback :global(.date-stamp) {
-    text-shadow: 2px 2px 2px rgba(255, 255, 255, 0.5);
+    text-shadow: 2px 2px 2px rgb(var(--white-rgb) / 0.5);
   }
 
   .hero-feature--fallback :global(.tag) {
-    background: rgba(15, 23, 42, 0.05);
-    border-color: rgba(15, 23, 42, 0.2);
-    color: rgba(15, 23, 42, 0.75);
+    background: rgb(var(--ink-rgb) / 0.05);
+    border-color: var(--thin-border-color);
+    color: rgb(var(--ink-rgb) / 0.75);
     text-shadow: none;
   }
 
   .hero-feature--fallback :global(.tag:hover),
   .hero-feature--fallback :global(.tag:focus-visible) {
-    background: rgba(15, 23, 42, 0.12);
-    border-color: rgba(15, 23, 42, 0.35);
-    color: rgba(15, 23, 42, 0.85);
+    background: rgb(var(--ink-rgb) / 0.12);
+    border-color: var(--thin-border-color);
+    color: rgb(var(--ink-rgb) / 0.85);
   }
 
   .hero-feature--fallback :global(.date-stamp) {
@@ -226,6 +229,7 @@ const blobs = hasHeroImage
     z-index: 0;
     overflow: hidden;
     pointer-events: none;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
   }
 
   .hero-feature__blob {

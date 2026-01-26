@@ -13,4 +13,4 @@ A list of todos for the [Marginem](Marginem.md) site itself
 - [ ] Setup automated obsidian syncs and deployments
 - [ ] Update the Garden pages to be more consistent - the garden page should look just like any of the other folder/note pages
 - [ ] Extend the Archive to include anything on the site
-- [ ] Move the content folder to parallel with src to ease contributions
+- [x] Move the content folder to parallel with src to ease contributions ✅ 2026-01-26

@@ -14,6 +14,7 @@ import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import CleanCSS from "clean-css";
+import { SITE_NAME } from "src/lib/site";
 
 const BASE_REQUIRED_ENV = [
 	"RESEND_API_KEY",
@@ -526,7 +527,7 @@ const main = async () => {
 				? Number(data.issueNumber)
 				: null;
 	const emailTitle = String(
-		data.title || `Newsletter from ${process.env.SUBSCRIBE_SITE_NAME || "Ad Marginem"}`,
+		data.title || `Newsletter from ${process.env.SUBSCRIBE_SITE_NAME || SITE_NAME}`,
 	);
 	const rawHtml = buildEmailTemplate({
 		title: emailTitle,
@@ -542,7 +543,7 @@ const main = async () => {
 	const html = await sanitizeEmailHtml(rewriteRelativeUrls(rawHtml, siteUrl));
 	const subject = typeof data.title === "string" && data.title.trim()
 		? data.title.trim()
-		: `Newsletter from ${process.env.SUBSCRIBE_SITE_NAME || "Ad Marginem"}`;
+		: `Newsletter from ${process.env.SUBSCRIBE_SITE_NAME || SITE_NAME}`;
 	const text = `${subject}\n\nRead online: ${issueUrl}\n\nUnsubscribe: ${siteUrl ? `${siteUrl}/unsubscribe` : "Manage your subscription via the unsubscribe link in your email client."}`;
 	const name = Number.isFinite(parsedIssueNumber)
 		? `Issue ${parsedIssueNumber} - ${subject}`

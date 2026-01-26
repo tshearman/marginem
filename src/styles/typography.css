@@ -1,15 +1,3 @@
-:root {
-  color-scheme: light;
-  --bg: #fff;
-  --fg: #1a1a1a;
-  --accent: #1b1b1d;
-  --muted: #6a6a6a;
-  --border: rgba(0, 0, 0, 0.15);
-  --code-bg: #efeee9;
-  --code-fg: #1b1b1b;
-  --site-max-width: 760px;
-}
-
 html {
   font-size: 16px;
   background: var(--bg);
@@ -43,7 +31,7 @@ a:hover {
 article img {
   max-width: 100%;
   border-radius: 0.5rem;
-  border: 1px solid var(--border);
+  border: var(--thin-border);
 }
 
 article figure img {
@@ -71,12 +59,18 @@ pre {
   display: inline-block;
 }
 
+/* Slightly reduce KaTeX sizing for a tighter look */
+.katex,
+.katex-display {
+  font-size: 0.925em;
+}
+
 code {
   font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
 }
 
 code:not(pre code) {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgb(var(--shadow-rgb) / 0.02);
   padding: 0.15rem 0.35rem;
   font-size: 0.9em;
 }
@@ -96,7 +90,7 @@ blockquote::before {
   bottom: -0.25rem;
   left: 1.65rem;
   width: 0.35rem;
-  border: 1px solid rgba(0, 0, 0, 0.5);
+  border: var(--thin-border);
 }
 
 @media (min-width: 761px) {

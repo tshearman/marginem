@@ -15,11 +15,11 @@ const heroImage = (post: BlogEntry | undefined) =>
 	post?.data?.heroImage ?? null;
 const heroStyle = (
 	post: BlogEntry | undefined,
-	overlay = "rgba(0,0,0,0.45)",
+	overlay = "rgb(var(--shadow-rgb) / 0.45)",
 ) => {
 	const src = heroImage(post);
 	if (!src) return null;
-	return `linear-gradient(135deg, ${overlay}, rgba(0,0,0,0.2)), url(${src})`;
+	return `linear-gradient(135deg, ${overlay}, rgb(var(--shadow-rgb) / 0.2)), url(${src})`;
 };
 const getUrl = (post: BlogEntry) => `/posts/${post.slug}/`;
 const getAbstract = (post: BlogEntry) =>
@@ -44,7 +44,10 @@ const hybridListPosts = posts.slice(1);
               dateTime={mostRecentPost.data.pubDate}
               description={getAbstract(mostRecentPost)}
               tags={mostRecentPost.data.tags}
-              backgroundImage={heroStyle(mostRecentPost, "rgba(18,18,18,0.75)")}
+              backgroundImage={heroStyle(
+                mostRecentPost,
+                "rgb(var(--shadow-rgb) / 0.75)",
+              )}
             />
           </div>
         </div>

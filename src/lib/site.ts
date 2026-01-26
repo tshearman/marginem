@@ -18,7 +18,7 @@ export const MAIN_PAGES = {
 		icon: "about",
 		isCompact: true,
 		pageTitle: `About | ${SITE_NAME}`,
-		eyebrow: "About the site",
+		eyebrow: "About",
 		description: "Notes on the work, the newsletter, and how to reach me.",
 	},
 	commonplace: {

@@ -37,7 +37,7 @@ export const prerender = true;
 
   .subscribe-cta__copy {
     margin: 0;
-    color: rgba(15, 23, 42, 0.72);
+    color: rgb(var(--ink-rgb) / 0.72);
   }
 
   .subscribe-cta__actions {
@@ -53,9 +53,9 @@ export const prerender = true;
     justify-content: center;
     padding: 0.75rem 1.6rem;
     border-radius: 999px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    background-color: #000;
-    color: #fff;
+    border: var(--thin-border);
+    background-color: var(--fg);
+    color: var(--fg-inverse);
   }
 
   @media (max-width: 640px) {

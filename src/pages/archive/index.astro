@@ -281,7 +281,7 @@ const archiveFilterConfig = JSON.stringify({
     letter-spacing: 0.1em;
     text-transform: uppercase;
     margin: 0 0 1rem;
-    color: rgba(15, 23, 42, 0.65);
+    color: rgb(var(--ink-rgb) / 0.65);
   }
 
   .archive-year__entries {
@@ -302,14 +302,14 @@ const archiveFilterConfig = JSON.stringify({
   }
 
   .archive-entry {
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    border: var(--thin-border);
     border-radius: 1rem;
-    background: #fff;
+    background: var(--bg);
     transition: border-color 0.2s ease;
   }
 
   .archive-entry:hover {
-    border-color: rgba(15, 23, 42, 0.25);
+    border-color: var(--thin-border-color);
   }
 
   .archive-entry.hidden {

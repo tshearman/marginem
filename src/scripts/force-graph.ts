@@ -150,7 +150,7 @@ function hydrateGraph(el: HTMLElement) {
 
 		const link = svg
 			.append("g")
-			.attr("stroke", "rgba(15, 23, 42, 0.25)")
+			.attr("stroke", "var(--thin-border-color)")
 			.attr("stroke-width", 1.4)
 			.selectAll("line")
 			.data(links)
@@ -242,7 +242,7 @@ function hydrateGraph(el: HTMLElement) {
 					),
 			);
 
-		node.append("circle").attr("r", 9).attr("fill", "#f8fafc");
+		node.append("circle").attr("r", 9).attr("fill", "var(--bg-subtle)");
 
 		node
 			.append("circle")
@@ -252,7 +252,7 @@ function hydrateGraph(el: HTMLElement) {
 				if (d.id.startsWith("folder:")) {
 					return withAlpha(stroke, 1.0);
 				}
-				return "#f8fafc";
+				return "var(--bg-subtle)";
 			})
 			.attr("stroke", (d: GraphNode) => color(String(d.group ?? 0)))
 			.attr("stroke-width", 2);
@@ -262,9 +262,9 @@ function hydrateGraph(el: HTMLElement) {
 			? svg
 					.append("g")
 					.attr("font-size", "12px")
-					.attr("fill", "rgba(15, 23, 42, 0.8)")
+					.attr("fill", "rgb(var(--ink-rgb) / 0.8)")
 					.attr("paint-order", "stroke")
-					.attr("stroke", "rgba(255, 255, 255, 0.95)")
+					.attr("stroke", "rgb(var(--white-rgb) / 0.95)")
 					.attr("stroke-width", 3)
 					.selectAll("text")
 					.data(nodes)
