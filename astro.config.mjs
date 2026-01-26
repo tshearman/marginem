@@ -83,7 +83,7 @@ export default defineConfig({
 		rehypePlugins: [rehypeKatex, [rehypePrism, { showLineNumbers: true }]],
 	},
 	prefetch: {
-		defaultStrategy: "hover",
+		defaultStrategy: "viewport",
 		prefetchAll: true,
 	},
 	vite: {
