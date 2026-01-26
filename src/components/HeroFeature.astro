@@ -4,55 +4,55 @@ import DateStamp from "./DateStamp.astro";
 import { ellipsizeText } from "../lib/text";
 
 interface Props {
-	title: string;
-	url: string;
-	dateLabel?: string;
-	dateTime?: string | Date;
-	description?: string;
-	tags?: string[];
-	backgroundImage?: string | null;
+  title: string;
+  url: string;
+  dateLabel?: string;
+  dateTime?: string | Date;
+  description?: string;
+  tags?: string[];
+  backgroundImage?: string | null;
 }
 
 const {
-	title,
-	url,
-	dateLabel = "",
-	dateTime,
-	description = "",
-	tags = [],
-	backgroundImage = null,
+  title,
+  url,
+  dateLabel = "",
+  dateTime,
+  description = "",
+  tags = [],
+  backgroundImage = null,
 } = Astro.props as Props;
 
 const summary = ellipsizeText(description, 260);
 const hasHeroImage = Boolean(backgroundImage);
 const blobPalettes = [
-	["#0ea5e9", "#22d3ee"],
-	["#22d3ee", "#10b981"],
-	["#10b981", "#84cc16"],
-	["#38bdf8", "#0ea5e9"],
+  ["#0ea5e9", "#22d3ee"],
+  ["#22d3ee", "#10b981"],
+  ["#10b981", "#84cc16"],
+  ["#38bdf8", "#0ea5e9"],
 ];
 const blobs = hasHeroImage
-	? []
-	: Array.from({ length: Math.floor(Math.random() * 3) + 3 }, () => {
-			const size = Math.floor(160 + Math.random() * 260);
-			const primary = Math.floor(Math.random() * 110) - 10;
-			const secondary = Math.floor(Math.random() * 110) - 10;
-			const left = Math.min(primary, secondary);
-			const top = Math.max(primary, secondary);
-			const palette =
-				blobPalettes[Math.floor(Math.random() * blobPalettes.length)];
-			const angle = Math.floor(Math.random() * 160) - 80;
-			const opacity = (0.75 + Math.random() * 0.2).toFixed(2);
+  ? []
+  : Array.from({ length: Math.floor(Math.random() * 3) + 3 }, () => {
+      const size = Math.floor(160 + Math.random() * 260);
+      const primary = Math.floor(Math.random() * 110) - 10;
+      const secondary = Math.floor(Math.random() * 110) - 10;
+      const left = Math.min(primary, secondary);
+      const top = Math.max(primary, secondary);
+      const palette =
+        blobPalettes[Math.floor(Math.random() * blobPalettes.length)];
+      const angle = Math.floor(Math.random() * 160) - 80;
+      const opacity = (0.75 + Math.random() * 0.2).toFixed(2);
 
-			return {
-				size,
-				top,
-				left,
-				palette,
-				angle,
-				opacity,
-			};
-		});
+      return {
+        size,
+        top,
+        left,
+        palette,
+        angle,
+        opacity,
+      };
+    });
 ---
 
 <article
@@ -188,7 +188,7 @@ const blobs = hasHeroImage
 
   .hero-feature--fallback {
     color: #0f172a;
-    background: #f8fafc;
+    background: var(--bg);
     border: 1px solid rgba(15, 23, 42, 0.2);
   }
 
