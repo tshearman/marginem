@@ -2,30 +2,30 @@
 import Tag from "./Tag.astro";
 
 interface Props {
-  title?: string;
-  tags?: string[];
-  categoryTitle?: string;
-  categories?: Array<string | { label: string; value: string }>;
+	title?: string;
+	tags?: string[];
+	categoryTitle?: string;
+	categories?: Array<string | { label: string; value: string }>;
 }
 
 const {
-  title = "Filter by tags:",
-  tags = [],
-  categoryTitle = "Filter by category:",
-  categories = [],
+	title = "Filter by tags:",
+	tags = [],
+	categoryTitle = "Filter by category:",
+	categories = [],
 } = Astro.props as Props;
 
 const normalizedCategories = categories
-  .map((category) =>
-    typeof category === "string"
-      ? { label: category, value: category }
-      : category,
-  )
-  .filter(
-    (category) =>
-      typeof category?.label === "string" &&
-      typeof category?.value === "string",
-  );
+	.map((category) =>
+		typeof category === "string"
+			? { label: category, value: category }
+			: category,
+	)
+	.filter(
+		(category) =>
+			typeof category?.label === "string" &&
+			typeof category?.value === "string",
+	);
 ---
 
 <div class="tag-filter-container">

@@ -3,27 +3,26 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageIntro from "../../components/PageIntro.astro";
 import ArchiveEntry from "../../components/ArchiveEntry.astro";
 import SubscribeForm from "../../components/SubscribeForm.astro";
-import { SITE_NAME } from "../../lib/site";
 import { getCollection } from "astro:content";
 import { withSlugs } from "../../lib/content";
+import { MAIN_PAGES } from "../../lib/site";
 
-const title = `Newsletter | ${SITE_NAME}`;
 const newsletters = withSlugs(
-  await getCollection("newsletter", ({ data }) => !data.draft),
+	await getCollection("newsletter", ({ data }) => !data.draft),
 ).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <BaseLayout
-  title={title}
-  description="Newsletter archive"
-  hero="Newsletter"
+  title={MAIN_PAGES.newsletter.pageTitle}
+  description={MAIN_PAGES.newsletter.label}
+  hero={MAIN_PAGES.newsletter.label}
   showHero={false}
-  activePage="Newsletter"
+  activePage={MAIN_PAGES.newsletter.label}
 >
   <PageIntro
-    eyebrow="Newsletter"
-    title="Newsletter archive"
-    description="Every issue, with MDX formatting, available to browse at any time."
+    eyebrow={MAIN_PAGES.newsletter.eyebrow}
+    title={MAIN_PAGES.newsletter.label}
+    description={MAIN_PAGES.newsletter.description}
   />
   <section class="newsletter-archive">
     <div class="newsletter-archive__list">

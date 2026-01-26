@@ -6,7 +6,9 @@ import { withSlugs } from "../../lib/content";
 export const prerender = true;
 
 export async function getStaticPaths() {
-	const posts = withSlugs(await getCollection("blog", ({ data }) => !data.draft));
+	const posts = withSlugs(
+		await getCollection("blog", ({ data }) => !data.draft),
+	);
 	return posts.map((post) => ({
 		params: { slug: post.slug },
 	}));
@@ -25,6 +27,6 @@ if (!post) {
 const { Content } = await render(post);
 const frontmatter = post.data;
 ---
-<PostLayout frontmatter={frontmatter} slug={slug} activePage="Writing">
+<PostLayout frontmatter={frontmatter} activePage="Writing">
   <Content />
 </PostLayout>

@@ -1,5 +1,4 @@
 ---
-import LikeButton from "./LikeButton.astro";
 import { PostPreview as PreactPostPreview } from "./preact/PostPreview";
 import { ellipsizeText } from "../lib/text";
 
@@ -12,7 +11,6 @@ interface Props {
 	description?: string;
 	abstract?: string;
 	tags?: string[];
-	showLikes?: boolean;
 }
 
 const {
@@ -24,7 +22,6 @@ const {
 	description = "",
 	abstract = "",
 	tags = [],
-	showLikes = false,
 } = Astro.props as Props;
 
 const EXCERPT_LIMIT = 340;
@@ -43,15 +40,5 @@ const excerptPreview = ellipsizeText(excerptSource, EXCERPT_LIMIT, {
   displayDate={displayDate}
   excerpt={excerptPreview}
   tags={tags}
-  showLikes={showLikes && Boolean(id)}
->
-  {
-    showLikes && id ? (
-      <LikeButton
-        slug={id}
-        target="post"
-        class="post-preview__like-button"
-      />
-    ) : null
-  }
-</PreactPostPreview>
+  showLikes={false}
+/>

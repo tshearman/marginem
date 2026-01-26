@@ -111,8 +111,7 @@
 				const parsed = JSON.parse(item.dataset.categories || "[]");
 				categories = Array.isArray(parsed)
 					? parsed.filter(
-							(category) =>
-								typeof category === "string" && category.length > 0,
+							(category) => typeof category === "string" && category.length > 0,
 						)
 					: [];
 			} catch {

@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
 import TagList from "../components/TagList.astro";
-import LikeButton from "../components/LikeButton.astro";
 import DateStamp from "../components/DateStamp.astro";
 import { formatDate } from "../lib/date";
 import { SITE_NAME } from "../lib/site";
@@ -16,11 +15,10 @@ interface Frontmatter {
 
 interface Props {
 	frontmatter: Frontmatter;
-	slug: string;
 	activePage?: string;
 }
 
-const { frontmatter: rawFrontmatter, slug, activePage } = Astro.props as Props;
+const { frontmatter: rawFrontmatter, activePage } = Astro.props as Props;
 const frontmatter = rawFrontmatter ?? {};
 const pubDate =
 	typeof frontmatter.pubDate === "string" || frontmatter.pubDate instanceof Date
@@ -89,9 +87,6 @@ const description =
         </section>
       ) : null
     }
-    <div class="paper-title__likes">
-      <LikeButton slug={slug} target="post" />
-    </div>
     <div class="paper-title__rule paper-title__rule--thin" aria-hidden="true">
     </div>
   </section>
@@ -170,9 +165,4 @@ const description =
     margin-top: 0;
   }
 
-  .paper-title__likes {
-    display: flex;
-    justify-content: center;
-    margin-top: 0.5rem;
-  }
 </style>

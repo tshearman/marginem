@@ -1,5 +1,4 @@
 ---
-import LikeButton from "./LikeButton.astro";
 import { NoteCard as PreactNoteCard } from "./preact/NoteCard";
 import { formatDate } from "../lib/date";
 import { generateNoteId } from "../lib/noteUtils";
@@ -35,9 +34,7 @@ const resolvePermalink = (base: string | undefined, id: string) => {
 	if (trimmed.includes("#")) {
 		return trimmed.endsWith("#") ? `${trimmed}${id}` : trimmed;
 	}
-	const normalized = trimmed.endsWith("/")
-		? trimmed.slice(0, -1)
-		: trimmed;
+	const normalized = trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
 	return `${normalized}/#${id}`;
 };
 ---
@@ -54,6 +51,4 @@ const resolvePermalink = (base: string | undefined, id: string) => {
   id={noteId}
   dataTags={JSON.stringify(tags)}
   permalinkHref={resolvePermalink(permalinkBase, noteId)}
->
-  <LikeButton slug={noteId} target="note" align="right" />
-</PreactNoteCard>
+/>

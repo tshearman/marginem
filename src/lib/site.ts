@@ -9,7 +9,17 @@ export const MAIN_PAGES = {
 		isCompact: false,
 		pageTitle: `Writing | ${SITE_NAME}`,
 		eyebrow: "Essays, Experiments, and Explorations",
-		description: "Longer form writing on mathematics, computing, learning, games, and anything else.",
+		description:
+			"Longer form writing on mathematics, computing, learning, games, and anything else.",
+	},
+	about: {
+		label: "About",
+		href: "/about/",
+		icon: "about",
+		isCompact: true,
+		pageTitle: `About | ${SITE_NAME}`,
+		eyebrow: "About the site",
+		description: "Notes on the work, the newsletter, and how to reach me.",
 	},
 	commonplace: {
 		label: "Commonplace",
@@ -44,9 +54,9 @@ export const MAIN_PAGES = {
 		href: "/newsletter/",
 		icon: "newsletter",
 		isCompact: true,
-		pageTitle: `Newsletter | ${SITE_NAME}`,
-		eyebrow: "Email updates",
-		description: "Newsletter issues and subscription.",
+		pageTitle: `Newsletters | ${SITE_NAME}`,
+		eyebrow: "Back Catalog",
+		description: "Previous issues available to browse at any time.",
 	},
 } as const;
 
@@ -58,4 +68,5 @@ export const MAIN_NAV = [
 	MAIN_PAGES.garden,
 	MAIN_PAGES.newsletter,
 	MAIN_PAGES.archive,
+	MAIN_PAGES.about,
 ];

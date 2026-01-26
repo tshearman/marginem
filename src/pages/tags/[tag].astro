@@ -8,7 +8,9 @@ import { slugifyTag } from "../../lib/tags";
 import { withSlugs, type BlogEntry } from "../../lib/content";
 
 export async function getStaticPaths() {
-	const posts = withSlugs(await getCollection("blog", ({ data }) => !data.draft));
+	const posts = withSlugs(
+		await getCollection("blog", ({ data }) => !data.draft),
+	);
 
 	const tagsBySlug = posts.reduce((map, post) => {
 		for (const tag of post.data.tags ?? []) {

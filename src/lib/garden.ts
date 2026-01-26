@@ -104,7 +104,9 @@ export const loadGardenNotes = async (
 				content = parsed.content ?? rawContent;
 			} catch (error) {
 				console.warn(
-					`[obsidian] Skipping note with invalid frontmatter at ${fullPath}: ${error instanceof Error ? error.message : String(error)}`,
+					`[obsidian] Skipping note with invalid frontmatter at ${fullPath}: ${
+						error instanceof Error ? error.message : String(error)
+					}`,
 				);
 				continue;
 			}
@@ -206,11 +208,11 @@ export const renderGardenMarkdown = async (
 	}) =>
 		| string
 		| {
-			text: string;
-			isLink: boolean;
-			slug?: string;
-			url?: string;
-		},
+				text: string;
+				isLink: boolean;
+				slug?: string;
+				url?: string;
+		  },
 ) => {
 	const processor = await createMarkdownProcessor({
 		syntaxHighlight: "prism",

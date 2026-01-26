@@ -11,7 +11,7 @@
 }
 
 html {
-  font-size: 14.3px;
+  font-size: 16px;
   background: var(--bg);
   color: var(--fg);
 }
@@ -67,7 +67,7 @@ pre {
   -webkit-overflow-scrolling: touch;
 }
 
-.katex-display > .katex {
+.katex-display>.katex {
   display: inline-block;
 }
 

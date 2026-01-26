@@ -1,30 +1,39 @@
 ---
 import Search from "./Search.astro";
 import iconWriting from "../assets/icons/fa-pen-nib-solid-full.svg?raw";
+import favicon from "../assets/favicon.png";
 import iconCommonplace from "../assets/icons/fa-quote-right-solid-full.svg?raw";
 import iconGarden from "../assets/icons/fa-leaf-solid-full.svg?raw";
-import iconArchive from "../assets/icons/fa-bookmark-solid-full.svg?raw";
+import iconArchive from "../assets/icons/fa-box-archive-solid-full.svg?raw";
 import iconNewsletter from "../assets/icons/pa-newspaper-solid-full.svg?raw";
+import iconMore from "../assets/icons/fa-ellipsis-solid-full.svg?raw";
 import { MAIN_NAV } from "../lib/site";
 
 interface SiteNavProps {
-  activePage?: string;
+	activePage?: string;
 }
 
 const { activePage } = Astro.props as SiteNavProps;
+const MORE_LABELS = new Set(["Newsletter", "Archive", "About"]);
+const primaryLinks = MAIN_NAV.filter((item) => !MORE_LABELS.has(item.label));
+const moreLinks = MAIN_NAV.filter((item) => MORE_LABELS.has(item.label));
+const isMoreActive = moreLinks.some((item) =>
+	activePage ? item.label.toLowerCase() === activePage.toLowerCase() : false,
+);
 const ICONS = {
-  writing: iconWriting,
-  commonplace: iconCommonplace,
-  garden: iconGarden,
-  archive: iconArchive,
-  newsletter: iconNewsletter,
+	writing: iconWriting,
+	about: favicon.src,
+	commonplace: iconCommonplace,
+	garden: iconGarden,
+	archive: iconArchive,
+	newsletter: iconNewsletter,
 };
 ---
 
 <nav class="site-nav">
   <div class="site-nav__links">
     {
-      MAIN_NAV.map((item) => {
+      primaryLinks.map((item) => {
         const isActive = activePage
           ? item.label.toLowerCase() === activePage.toLowerCase()
           : false;
@@ -35,19 +44,148 @@ const ICONS = {
         ]
           .filter(Boolean)
           .join(" ");
+        const isImageIcon = typeof icon === "string" && !icon.trim().startsWith("<");
         return (
           <a href={item.href} class={linkClass || undefined}>
             <span class="site-nav__text sr-only">{item.label}</span>
-            <span class="site-nav__icon" aria-hidden="true" set:html={icon} />
+            {
+              isImageIcon ? (
+                <img class="site-nav__icon" src={icon} alt="" aria-hidden="true" />
+              ) : (
+                <span class="site-nav__icon" aria-hidden="true" set:html={icon} />
+              )
+            }
           </a>
         );
       })
     }
+    {
+      moreLinks.map((item) => {
+        const isActive = activePage
+          ? item.label.toLowerCase() === activePage.toLowerCase()
+          : false;
+        const icon = ICONS[item.icon] ?? iconGarden;
+        const isImageIcon = typeof icon === "string" && !icon.trim().startsWith("<");
+        const linkClass = [
+          "site-nav__more-link",
+          isActive ? "is-active" : null,
+          item.isCompact ? "is-compact" : null,
+        ]
+          .filter(Boolean)
+          .join(" ");
+        return (
+          <a href={item.href} class={linkClass || undefined}>
+            <span class="site-nav__text sr-only">{item.label}</span>
+            {
+              isImageIcon ? (
+                <img class="site-nav__icon" src={icon} alt="" aria-hidden="true" />
+              ) : (
+                <span class="site-nav__icon" aria-hidden="true" set:html={icon} />
+              )
+            }
+          </a>
+        );
+      })
+    }
+    <div class={`site-nav__more ${isMoreActive ? "is-active" : ""}`}>
+      <button
+        class="site-nav__more-toggle"
+        type="button"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <span class="site-nav__text">More</span>
+        <span class="site-nav__icon" aria-hidden="true" set:html={iconMore} />
+      </button>
+      <div class="site-nav__more-menu" role="menu">
+        {
+          moreLinks.map((item) => {
+            const isActive = activePage
+              ? item.label.toLowerCase() === activePage.toLowerCase()
+              : false;
+            return (
+              <a
+                href={item.href}
+                class={isActive ? "is-active" : undefined}
+                role="menuitem"
+              >
+                {item.label}
+              </a>
+            );
+          })
+        }
+      </div>
+    </div>
   </div>
   <div class="site-nav__search">
     <Search />
   </div>
 </nav>
+
+<script>
+  const moreMenus = document.querySelectorAll<HTMLElement>(".site-nav__more");
+
+  const positionMenu = (menu: HTMLElement) => {
+    const dropdown = menu.querySelector<HTMLElement>(".site-nav__more-menu");
+    if (!dropdown) return;
+    dropdown.classList.remove("align-right");
+    const rect = dropdown.getBoundingClientRect();
+    const overflowRight = rect.right > window.innerWidth - 8;
+    const overflowLeft = rect.left < 8;
+    if (overflowRight && !overflowLeft) {
+      dropdown.classList.add("align-right");
+    }
+  };
+
+  const closeMenus = () => {
+    moreMenus.forEach((menu) => {
+      menu.classList.remove("is-open");
+      const button = menu.querySelector(".site-nav__more-toggle");
+      if (button) button.setAttribute("aria-expanded", "false");
+    });
+  };
+
+  const handleOutside = (event: Event) => {
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    const insideMenu = Array.from(moreMenus).some((menu) =>
+      menu.contains(target),
+    );
+    if (!insideMenu) closeMenus();
+  };
+
+  document.addEventListener("click", handleOutside);
+  document.addEventListener("pointerdown", handleOutside);
+  document.addEventListener("touchstart", handleOutside);
+  document.addEventListener("scroll", closeMenus, { passive: true });
+
+  moreMenus.forEach((menu) => {
+    const button = menu.querySelector(".site-nav__more-toggle");
+    if (!button) return;
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      const isOpen = menu.classList.contains("is-open");
+      closeMenus();
+      if (!isOpen) {
+        menu.classList.add("is-open");
+        button.setAttribute("aria-expanded", "true");
+        positionMenu(menu);
+      }
+    });
+  });
+
+  window.addEventListener("orientationchange", () => {
+    moreMenus.forEach((menu) => {
+      if (menu.classList.contains("is-open")) {
+        positionMenu(menu);
+      }
+    });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeMenus();
+  });
+</script>
 
 <style>
   .site-nav {
@@ -84,6 +222,102 @@ const ICONS = {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
+  }
+
+  .site-nav__more {
+    position: relative;
+  }
+
+  .site-nav__links a.site-nav__more-link {
+    display: none;
+  }
+
+  .site-nav__more-toggle {
+    cursor: pointer;
+    color: rgba(15, 23, 42, 0.78);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: transparent;
+    border: none;
+    padding: 0;
+    font: inherit;
+  }
+
+  .site-nav__more-toggle .site-nav__text::after {
+    content: "▾";
+    margin-left: 0.35rem;
+    font-size: 0.7em;
+  }
+
+  .site-nav__more.is-active .site-nav__more-toggle,
+  .site-nav__more-toggle:hover,
+  .site-nav__more-toggle:focus-visible {
+    color: rgba(15, 23, 42, 1);
+  }
+
+  .site-nav__more-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    min-width: 180px;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 0.6rem;
+    padding: 0.5rem;
+    display: grid;
+    gap: 0.35rem;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    z-index: 20;
+
+    left: 0;
+    right: auto;
+    width: max-content;
+    max-width: min(220px, 90vw);
+  }
+
+  .site-nav__more-menu.align-right {
+    right: 0;
+    left: auto;
+  }
+
+  .site-nav__more:not(.is-open) .site-nav__more-menu {
+    display: none;
+  }
+
+  .site-nav__more-menu a {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.4rem;
+    color: rgba(15, 23, 42, 0.78);
+    text-decoration: none;
+    font-size: 0.85rem;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    background-image: linear-gradient(
+      rgba(15, 23, 42, 0.85),
+      rgba(15, 23, 42, 0.85)
+    );
+    background-repeat: no-repeat;
+    background-size: 0 2px;
+    background-position: center calc(100% - 2px);
+  }
+
+  .site-nav__more-menu a::after {
+    content: none;
+  }
+
+  .site-nav__more-menu a:hover,
+  .site-nav__more-menu a:focus-visible,
+  .site-nav__more-menu a.is-active {
+    background-size: 1.5rem 2px;
+  }
+
+  .site-nav__more-menu a.is-active {
+    background-size: 1.5rem 4px;
+    color: rgba(15, 23, 42, 1);
   }
 
   .site-nav__links a::after {
@@ -124,6 +358,10 @@ const ICONS = {
     height: 4px;
   }
 
+  .site-nav__more-menu a::after {
+    content: none;
+  }
+
   .site-nav__search {
     margin-left: auto;
     display: flex;
@@ -160,6 +398,23 @@ const ICONS = {
       order: 2;
       margin-left: 0;
     }
+
+    .site-nav__links a .site-nav__text {
+      display: none;
+    }
+
+    .site-nav__links a .site-nav__icon {
+      display: inline-flex;
+    }
+
+    .site-nav__more {
+      display: none;
+    }
+
+    .site-nav__links a.site-nav__more-link {
+      display: inline-flex;
+    }
+
   }
 
   @media (max-width: 420px) {
@@ -167,20 +422,7 @@ const ICONS = {
       padding: 1rem 1rem 0.4rem;
     }
 
-    .site-nav__links a.is-compact .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .site-nav__links a.is-compact .site-nav__icon {
-      display: inline-flex;
+    .site-nav__icon {
       width: 1.35rem;
       height: 1.35rem;
     }

@@ -2,60 +2,57 @@
 import TagList from "./TagList.astro";
 import DateStamp from "./DateStamp.astro";
 import { ellipsizeText } from "../lib/text";
-import LikeButton from "./LikeButton.astro";
 
 interface Props {
-  id?: string;
-  title: string;
-  url: string;
-  dateLabel?: string;
-  dateTime?: string | Date;
-  description?: string;
-  tags?: string[];
-  backgroundImage?: string | null;
+	title: string;
+	url: string;
+	dateLabel?: string;
+	dateTime?: string | Date;
+	description?: string;
+	tags?: string[];
+	backgroundImage?: string | null;
 }
 
 const {
-  id,
-  title,
-  url,
-  dateLabel = "",
-  dateTime,
-  description = "",
-  tags = [],
-  backgroundImage = null,
+	title,
+	url,
+	dateLabel = "",
+	dateTime,
+	description = "",
+	tags = [],
+	backgroundImage = null,
 } = Astro.props as Props;
 
 const summary = ellipsizeText(description, 260);
 const hasHeroImage = Boolean(backgroundImage);
 const blobPalettes = [
-  ["#0ea5e9", "#22d3ee"],
-  ["#22d3ee", "#10b981"],
-  ["#10b981", "#84cc16"],
-  ["#38bdf8", "#0ea5e9"],
+	["#0ea5e9", "#22d3ee"],
+	["#22d3ee", "#10b981"],
+	["#10b981", "#84cc16"],
+	["#38bdf8", "#0ea5e9"],
 ];
 const blobs = hasHeroImage
-  ? []
-  : Array.from({ length: Math.floor(Math.random() * 3) + 3 }, () => {
-      const size = Math.floor(160 + Math.random() * 260);
-      const primary = Math.floor(Math.random() * 110) - 10;
-      const secondary = Math.floor(Math.random() * 110) - 10;
-      const left = Math.min(primary, secondary);
-      const top = Math.max(primary, secondary);
-      const palette =
-        blobPalettes[Math.floor(Math.random() * blobPalettes.length)];
-      const angle = Math.floor(Math.random() * 160) - 80;
-      const opacity = (0.75 + Math.random() * 0.2).toFixed(2);
+	? []
+	: Array.from({ length: Math.floor(Math.random() * 3) + 3 }, () => {
+			const size = Math.floor(160 + Math.random() * 260);
+			const primary = Math.floor(Math.random() * 110) - 10;
+			const secondary = Math.floor(Math.random() * 110) - 10;
+			const left = Math.min(primary, secondary);
+			const top = Math.max(primary, secondary);
+			const palette =
+				blobPalettes[Math.floor(Math.random() * blobPalettes.length)];
+			const angle = Math.floor(Math.random() * 160) - 80;
+			const opacity = (0.75 + Math.random() * 0.2).toFixed(2);
 
-      return {
-        size,
-        top,
-        left,
-        palette,
-        angle,
-        opacity,
-      };
-    });
+			return {
+				size,
+				top,
+				left,
+				palette,
+				angle,
+				opacity,
+			};
+		});
 ---
 
 <article
@@ -91,15 +88,6 @@ const blobs = hasHeroImage
     </h2>
     {summary ? <p class="hero-feature__summary">{summary}</p> : null}
     <TagList tags={tags} />
-    {
-      id ? (
-        <div
-          class={`hero-feature__likes ${hasHeroImage ? "hero-feature__likes--image" : ""}`}
-        >
-          <LikeButton slug={id} target="post" />
-        </div>
-      ) : null
-    }
   </div>
 </article>
 
@@ -140,6 +128,7 @@ const blobs = hasHeroImage
   .hero-feature__title {
     margin: 0.35rem 0 0.75rem;
     font-size: clamp(2rem, 3vw, 2rem);
+    line-height: 1.3;
   }
 
   @media (max-width: 760px) {
@@ -172,28 +161,6 @@ const blobs = hasHeroImage
   .hero-feature__summary {
     margin: 0 0 1rem;
     color: rgba(255, 255, 255, 0.95);
-  }
-
-  .hero-feature__likes {
-    margin-top: 1rem;
-    display: flex;
-    justify-content: center;
-  }
-
-  .hero-feature__likes--image :global(.feelback-icon),
-  .hero-feature__likes--image :global(.feelback-icon svg) {
-    color: #fff;
-    fill: #fff;
-  }
-
-  .hero-feature__likes--image :global(.feelback-count) {
-    color: #fff;
-  }
-
-  .hero-feature__likes--image
-    :global(.feelback-btn.active > .feelback-icon.active svg path) {
-    fill: #ec5a8d;
-    stroke: #fff;
   }
 
   .hero-feature :global(.tag) {

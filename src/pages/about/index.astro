@@ -1,0 +1,76 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageIntro from "../../components/PageIntro.astro";
+import { MAIN_PAGES, SITE_NAME } from "../../lib/site";
+
+export const prerender = true;
+---
+
+<BaseLayout
+  title={`About | ${SITE_NAME}`}
+  description={MAIN_PAGES.about.description}
+  hero={MAIN_PAGES.about.label}
+  showHero={false}
+  activePage={MAIN_PAGES.about.label}
+>
+  <PageIntro
+    eyebrow="About"
+    title="About this site"
+    description="Ad Marginem is a place for long-form writing, notes in progress, and newsletters."
+  />
+  <section class="about-page">
+    <div class="about-page__card">
+      <h2>What you’ll find here</h2>
+      <p>
+        Essays on mathematics, computing, learning, and games live alongside
+        shorter notes and drafts. The newsletter collects highlights and new
+        writing as it ships.
+      </p>
+    </div>
+    <div class="about-page__card">
+      <h2>Newsletter</h2>
+      <p>
+        Subscribe to get new essays and updates in your inbox. You can browse
+        every issue in the archive anytime.
+      </p>
+    </div>
+    <div class="about-page__card">
+      <h2>Get in touch</h2>
+      <p>
+        Have feedback, a correction, or a topic request? Reply to a newsletter
+        email or reach out through the contact information shared there.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about-page {
+    display: grid;
+    gap: 1.5rem;
+    margin: 0 auto 3rem;
+  }
+
+  .about-page__card {
+    background: rgba(15, 23, 42, 0.04);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+
+  .about-page__card h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1.2rem;
+  }
+
+  .about-page__card p {
+    margin: 0;
+    color: rgba(15, 23, 42, 0.75);
+  }
+
+  @media (max-width: 640px) {
+    .about-page__card {
+      padding: 1.25rem;
+    }
+  }
+</style>
