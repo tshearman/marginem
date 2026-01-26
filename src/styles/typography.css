@@ -21,11 +21,17 @@ body {
 
 a {
   color: var(--accent);
-  text-decoration: none;
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: var(--thin-border-color);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
 }
 
 a:hover {
-  text-decoration: underline;
+  text-decoration-style: solid;
+  text-decoration-color: var(--fg);
+  text-decoration-thickness: 1.5px;
 }
 
 article img {
