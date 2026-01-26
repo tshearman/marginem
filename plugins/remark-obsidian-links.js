@@ -36,6 +36,13 @@ const parseMatch = (matchArray) => {
 export default function remarkObsidianLinks(options = {}) {
 	const { linkPrefix = "/garden", resolveLink } = options;
 	const normalizedPrefix = linkPrefix.replace(/\/+$/, "");
+	const isExternalOrAbsolute = (url = "") =>
+		url.startsWith("#") ||
+		url.startsWith("/") ||
+		url.startsWith("http://") ||
+		url.startsWith("https://") ||
+		url.startsWith("mailto:") ||
+		url.startsWith("tel:");
 
 	return (tree) => {
 		visit(tree, "text", (node, index, parent) => {
@@ -106,6 +113,37 @@ export default function remarkObsidianLinks(options = {}) {
 			}
 
 			parent.children.splice(index, 1, ...newNodes);
+		});
+
+		visit(tree, "link", (node) => {
+			if (!node || typeof node.url !== "string") return;
+			if (isExternalOrAbsolute(node.url)) return;
+			if (!resolveLink) return;
+
+			const [rawTarget, rawHeading] = node.url.split("#");
+			const normalizedTarget = rawTarget.replace(/\.mdx?$/i, "");
+			const resolution = resolveLink({ target: normalizedTarget });
+			const slugOrUrl =
+				typeof resolution === "string"
+					? resolution
+					: resolution?.slug ?? resolution?.url;
+			const isLink =
+				typeof resolution === "object" && resolution
+					? resolution.isLink ?? Boolean(slugOrUrl)
+					: Boolean(slugOrUrl);
+
+			if (!isLink || !slugOrUrl) return;
+
+			const anchor = rawHeading ? `#${slugifyHeading(rawHeading)}` : "";
+			node.url =
+				slugOrUrl.startsWith("/") || slugOrUrl.startsWith("http")
+					? `${slugOrUrl}${anchor}`
+					: `${normalizedPrefix}/${slugOrUrl}/${anchor}`;
+			node.data = node.data || {};
+			node.data.hProperties = {
+				...(node.data.hProperties || {}),
+				"data-obsidian-link": true,
+			};
 		});
 	};
 }
