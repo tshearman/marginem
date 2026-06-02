@@ -15,7 +15,7 @@ src/.wrangler/
 .npm/
 .cache/
 .ruff_cache/
-src/blogupdate_runner.egg-info/
+**/*.egg-info/
 
 # env files
 .env
