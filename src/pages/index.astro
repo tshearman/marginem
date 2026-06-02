@@ -1,12 +1,10 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import HomeLayout from "../layouts/HomeLayout.astro";
-import PageIntro from "../components/PageIntro.astro";
-import { MAIN_PAGES, WRITING_PAGE_POST_LIMIT } from "../lib/site";
+import { MAIN_PAGES, MAIN_NAV, SITE_NAME, WRITING_PAGE_POST_LIMIT } from "../lib/site";
 import { getCollection } from "astro:content";
 import { formatDate } from "../lib/date";
-import SubscribeForm from "src/components/SubscribeForm.astro";
 import { withSlugs, type BlogEntry } from "../lib/content";
+import favicon from "../assets/favicon.png";
+import "../styles/home.css";
 
 export const prerender = true;
 
@@ -15,43 +13,154 @@ const posts = withSlugs(
 ).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 ) as BlogEntry[];
-const pagePosts = posts.slice(0, WRITING_PAGE_POST_LIMIT);
+const latestPosts = posts.slice(0, WRITING_PAGE_POST_LIMIT);
+
+const getAbstract = (post: BlogEntry) =>
+	post.data.abstract ?? post.data.description ?? "";
+
+// The six site sections, rendered as an overview grid of brutalist cells.
+const sections = MAIN_NAV.map((page, i) => ({
+	label: page.label,
+	href: page.href,
+	eyebrow: page.eyebrow,
+	description: page.description,
+	mark: `§${i + 1}`,
+}));
+
+const title = `${SITE_NAME} — Notes from the Margins`;
+const description = MAIN_PAGES.writing.description;
+const postCount = posts.length;
 ---
 
-<BaseLayout
-  title={MAIN_PAGES.writing.pageTitle}
-  description={MAIN_PAGES.writing.description}
-  hero={MAIN_PAGES.writing.label}
-  showHero={false}
-  activePage={MAIN_PAGES.writing.label}
->
-  <PageIntro
-    eyebrow={MAIN_PAGES.writing.eyebrow}
-    title={MAIN_PAGES.writing.label}
-    description={MAIN_PAGES.writing.description}
-  />
-  <HomeLayout posts={pagePosts} formatDate={formatDate} />
-  <hr class="subscription-divider" />
-  <div>
-    <SubscribeForm variant="compact" redirectUrl="/subscribe/confirmed" />
-  </div>
-</BaseLayout>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={favicon.src} type="image/png" />
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="meta">
+        <span>{SITE_NAME}</span>
+        <nav class="meta__nav">
+          {
+            MAIN_NAV.map((page, i) => (
+              <>
+                {i > 0 && <span aria-hidden="true"> / </span>}
+                <a href={page.href}>{page.label}</a>
+              </>
+            ))
+          }
+        </nav>
+        <span>MATH &middot; CODE &middot; VISUALIZATION</span>
+      </div>
+      <div class="banner">
+        <canvas
+          data-banner
+          data-src="/banners/notebook_banner_c.png"
+          data-text="MARGINEM"
+          data-text-narrow={"MARG\nINEM"}
+          data-narrow-max="720"
+          data-height="300"
+          data-pixel="1"
+          data-invert="true"
+          data-shadow-dx="5"
+          data-shadow-dy="5"></canvas>
+        <h1 class="sr-only">Ad Marginem — Notes from the margins</h1>
+      </div>
+    </header>
 
-<style>
-  .notes-older {
-    margin-top: 2.5rem;
-    padding-top: 2rem;
-    border-top: var(--thin-border);
-    text-align: right;
-  }
+    <div class="grid">
+      <div class="cell tall" id="about">
+        <h2>Edition MMXXVI</h2>
+        <p class="lead">Essays, experiments, and explorations from the margins.</p>
+        <p>
+          A working notebook on mathematics, computing, learning, and games.
+          Longer-form writing sits beside collected quotations and a live view
+          of a personal Obsidian vault &mdash; theory and marginalia in one place.
+        </p>
+        <p class="stat">
+          {postCount} essays<br />+ commonplace &amp; garden<br />1 newsletter
+        </p>
+        <p><a class="btn btn-invert" href="#subscribe">Subscribe</a></p>
+      </div>
 
-  .notes-older a {
-    font-size: 0.95rem;
-  }
+      {
+        sections.map((s) => (
+          <a class="cell cell--link" href={s.href}>
+            <h2>{s.label}</h2>
+            <p class="cell__eyebrow">{s.eyebrow}</p>
+            <p>{s.description}</p>
+          </a>
+        ))
+      }
 
-  .subscription-divider {
-    border: 0;
-    border-top: var(--thin-border);
-    margin: 5rem 0 5rem;
-  }
-</style>
+    </div>
+
+    <section class="block" id="writing">
+      <h2>Latest Writing</h2>
+      <ul class="index">
+        {
+          latestPosts.map((post) => (
+            <li>
+              <span>
+                <a href={`/posts/${post.slug}/`}>{post.data.title}</a>
+                <span class="index__excerpt">{getAbstract(post)}</span>
+              </span>
+              <span class="index__date">{formatDate(post.data.pubDate)}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="block__more"><a class="btn" href={MAIN_PAGES.archive.href}>Full Archive</a></p>
+    </section>
+
+    <section class="block" id="subscribe">
+      <h2>Subscribe</h2>
+      <p>
+        Get notified when a new essay or note goes up. Occasional updates,
+        no spam, unsubscribe anytime.
+      </p>
+      <form class="reg-form" action="/api/subscribe" method="post">
+        <div class="reg-cols">
+          <div class="form-row">
+            <label for="subscribe-email">Email</label>
+            <input
+              id="subscribe-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              inputmode="email"
+              required
+              placeholder="you@example.com"
+            />
+          </div>
+          <div class="form-row">
+            <label for="subscribe-name">What should I call you?</label>
+            <input
+              id="subscribe-name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              placeholder="Optional"
+            />
+          </div>
+        </div>
+        <input type="submit" value="[ Subscribe ]" class="btn" />
+      </form>
+    </section>
+
+    <footer>
+      <span>{SITE_NAME}</span>
+      <span>NOTES FROM THE MARGINS</span>
+      <span>&copy; 2026</span>
+    </footer>
+
+    <script>
+      import "../scripts/banner.ts";
+    </script>
+  </body>
+</html>

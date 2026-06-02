@@ -1,0 +1,314 @@
+/*
+ * Brutalist homepage styles (Ad Marginem).
+ *
+ * Loaded only by src/pages/index.astro, which renders its own standalone
+ * document and does NOT use BaseLayout/global.css — so although the selectors
+ * here are global, this stylesheet only ships on the homepage and cannot leak
+ * into the rest of the site.
+ */
+
+:root {
+  --display: "Arial Black", Helvetica, sans-serif;
+  --mono: "Courier New", Courier, monospace;
+  --ink: #000; /* borders, body text, dark fills */
+  --paper: #fff; /* card + page background, inverted text */
+  --accent: #ff0; /* button hover */
+  --shadow: #ffe600; /* hot-yellow drop shadow — single source, also read by banner.ts */
+  --page: #e8e8e8; /* backdrop outside the frame */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--page);
+}
+
+body {
+  max-width: 1100px;
+  margin: 0 auto;
+  font-family: var(--mono);
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--paper);
+  border-left: 4px solid var(--ink);
+  border-right: 4px solid var(--ink);
+}
+
+a {
+  color: var(--ink);
+}
+
+.masthead {
+  border-bottom: 6px solid var(--ink);
+}
+
+/* ---- INLINE STRIP (top meta bar + footer share a layout) ---- */
+.meta,
+footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.meta {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--ink);
+}
+.meta__nav a {
+  text-decoration: none;
+}
+.meta__nav a:hover {
+  background: var(--accent);
+}
+footer {
+  padding: 12px;
+  border-top: 6px solid var(--ink);
+}
+
+/* ---- BANNER (image masthead with composited title) ---- */
+.banner {
+  background: var(--ink);
+  line-height: 0;
+}
+.banner canvas {
+  display: block;
+  width: 100%;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- GRID ---- */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.grid > * {
+  padding: 18px;
+  border-right: 4px solid var(--ink);
+  border-bottom: 4px solid var(--ink);
+}
+/* The tall cell fills column 1 across all three rows; the six section cells
+   fill columns 2–3. The right column (children 3, 5, 7 — every odd cell after
+   the tall one) drops its divider so it meets the page's right border. */
+.grid > *:nth-child(odd):not(.tall) {
+  border-right: none;
+}
+.cell p {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+
+/* ---- SECTION LABELS (grid cells + full-width blocks) ---- */
+.cell h2,
+.block > h2 {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 2px 8px;
+  font-family: var(--display);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+}
+.block > h2 {
+  margin-bottom: 14px;
+}
+
+.cell__eyebrow {
+  font-size: 11px !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.cell__more {
+  display: inline-block;
+  font-weight: bold;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+/* ---- LINKED CELLS ---- */
+.cell--link,
+.cell--cta {
+  text-decoration: none;
+  color: var(--ink);
+}
+.cell--link:hover,
+.cell--cta:hover {
+  background: var(--accent);
+}
+
+/* ---- DARK (TALL) CELL ---- */
+.tall {
+  grid-column: 1;
+  grid-row: span 3;
+  color: var(--paper);
+  background: var(--ink);
+}
+.tall h2 {
+  color: var(--ink);
+  background: var(--paper);
+}
+.tall a {
+  color: var(--paper);
+}
+.lead {
+  margin: 0 0 12px;
+  font-family: var(--display);
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.stat {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ---- FULL-WIDTH BLOCK ---- */
+.block {
+  padding: 18px;
+  border-top: 6px solid var(--ink);
+}
+.block__more {
+  margin-top: 18px;
+}
+
+/* ---- LISTS (index rows) ---- */
+.index {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+.index li {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 0;
+  border-bottom: 1px dotted var(--ink);
+}
+.index li:last-child {
+  border-bottom: none;
+}
+.index a {
+  font-weight: bold;
+  text-decoration: none;
+}
+.index a:hover {
+  background: var(--accent);
+}
+.index__excerpt {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: normal;
+  opacity: 0.75;
+}
+.index__date {
+  flex: none;
+  font-size: 11px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---- BUTTONS ---- */
+.btn {
+  display: inline-block;
+  padding: 10px 18px;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  cursor: pointer;
+}
+.btn:hover {
+  background: var(--accent);
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: translate(3px, 3px);
+}
+.btn-invert {
+  color: var(--paper);
+  background: var(--ink);
+  border-color: var(--paper);
+  box-shadow: 6px 6px 0 var(--paper);
+}
+.btn-invert:hover {
+  color: var(--ink);
+  background: var(--accent);
+  box-shadow: 3px 3px 0 var(--paper);
+}
+
+/* ---- SUBSCRIBE FORM ---- */
+.reg-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.form-row {
+  margin: 0 0 12px;
+}
+.reg-form label {
+  display: block;
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.reg-form input[type="email"],
+.reg-form input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  font-family: var(--mono);
+  font-size: 14px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+}
+.reg-form input:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 0;
+}
+
+/* ---- MOBILE ---- */
+@media (max-width: 720px) {
+  .meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .grid > * {
+    border-right: none;
+  }
+  .tall {
+    grid-row: auto;
+  }
+  .reg-cols {
+    grid-template-columns: 1fr;
+  }
+  .index li {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

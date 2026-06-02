@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sips -g pixelWidth -g pixelHeight ~/Downloads/notebook_banner_a.png)",
+      "Read(//Users/toby/Projects/cocobconcom/img/banners/**)"
+    ]
+  }
+}
