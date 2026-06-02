@@ -6,10 +6,6 @@
  * verbatim rather than reinventing them.
  */
 
-html {
-  background: var(--page-bg);
-}
-
 /* ---- PAGE FRAME (matches homepage body) ---- */
 body.post-page {
   max-width: 860px;
@@ -453,6 +449,27 @@ body.post-page .site-footer::after {
   font-family: var(--display);
   font-weight: 900;
   color: var(--ink);
+}
+
+/* GFM task lists: drop list marker so only the checkbox shows. */
+.paper-body ul.contains-task-list,
+.paper-body ol.contains-task-list {
+  list-style: none;
+  padding-left: 1.2rem;
+}
+
+.paper-body li.task-list-item {
+  list-style: none;
+  padding-left: 0;
+}
+
+.paper-body li.task-list-item::marker {
+  content: "";
+}
+
+.paper-body li.task-list-item > input[type="checkbox"] {
+  margin: 0 0.5rem 0 0;
+  transform: translateY(1px);
 }
 
 /* Nested lists tuck in tighter so the hierarchy is visible. */

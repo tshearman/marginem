@@ -2,11 +2,12 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import NoteCard from "../../components/NoteCard.astro";
 import FilterableCount from "../../components/FilterableCount.astro";
-import PageIntro from "../../components/PageIntro.astro";
 import TagFilterPanel from "../../components/TagFilterPanel.astro";
+import Banner from "../../components/Banner.astro";
 import { generateNoteId } from "../../lib/noteUtils";
 import { MAIN_PAGES } from "../../lib/site";
 import { loadCommonplaceNotes } from "../../lib/commonplace";
+import "../../styles/commonplace.css";
 
 export const prerender = true;
 
@@ -62,110 +63,59 @@ const commonplaceFilterConfig = JSON.stringify({
   hero={MAIN_PAGES.commonplace.label}
   showHero={false}
   activePage={MAIN_PAGES.commonplace.label}
+  bodyClass="commonplace-page"
 >
+  <div class="commonplace-hero">
+    <div class="commonplace-hero__banner">
+      <Banner
+        text="COMMONPLACE"
+        textNarrow={"COMMON\nPLACE"}
+        height={140}
+        srLabel={MAIN_PAGES.commonplace.label}
+      />
+      <span class="commonplace-hero__eyebrow">{MAIN_PAGES.commonplace.eyebrow}</span>
+    </div>
+    <p class="commonplace-hero__subtitle">{MAIN_PAGES.commonplace.description}</p>
+  </div>
   <section
     class="commonplace-page"
     data-filter-config={commonplaceFilterConfig}
   >
-    <PageIntro
-      eyebrow={MAIN_PAGES.commonplace.eyebrow}
-      title={MAIN_PAGES.commonplace.label}
-      description={MAIN_PAGES.commonplace.description}
+    <TagFilterPanel tags={allTags} />
+
+    <FilterableCount
+      contentType="notes"
+      totalCount={sortedNotes.length}
+      class="commonplace-count"
     />
 
-    <div class="content-layout">
-      <TagFilterPanel tags={allTags} />
-
-      <FilterableCount
-        contentType="notes"
-        totalCount={sortedNotes.length}
-        class="commonplace-count"
-      />
-
-      <div class="notes-masonry" id="notesMasonry">
-        {
-          notesWithGrid.map((note) => {
-            const spanClass =
-              note.columnSpan > 1 ? `span-${note.columnSpan}` : "";
-            return (
-              <section
-                id={note.noteId}
-                class={`note-section ${spanClass}`}
-                aria-label="Commonplace note"
-                data-tags={JSON.stringify(note.tags)}
-              >
-                <NoteCard
-                  content={note.content}
-                  source={note.source}
-                  author={note.author}
-                  date={note.date}
-                  tags={note.tags}
-                  idOverride={note.noteId}
-                />
-              </section>
-            );
-          })
-        }
-      </div>
+    <div class="notes-masonry" id="notesMasonry">
+      {
+        notesWithGrid.map((note) => {
+          const spanClass =
+            note.columnSpan > 1 ? `span-${note.columnSpan}` : "";
+          return (
+            <section
+              id={note.noteId}
+              class={`note-section ${spanClass}`}
+              aria-label="Commonplace note"
+              data-tags={JSON.stringify(note.tags)}
+            >
+              <NoteCard
+                content={note.content}
+                source={note.source}
+                author={note.author}
+                date={note.date}
+                tags={note.tags}
+                idOverride={note.noteId}
+              />
+            </section>
+          );
+        })
+      }
     </div>
   </section>
 </BaseLayout>
-
-<style>
-  .content-layout {
-    padding: 0 1rem;
-  }
-
-  .tag-filter-container {
-    width: 100%;
-  }
-
-  .commonplace-count {
-    padding: 0 1rem;
-  }
-
-  .notes-masonry {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-auto-flow: dense;
-    gap: 1rem;
-    padding-top: 1rem;
-    width: 100%;
-    min-height: 60vh;
-    contain: layout style paint;
-    grid-template-rows: auto;
-  }
-  :global(.note-section.hidden) {
-    display: none;
-  }
-
-  :global(.note-section.span-2) {
-    grid-column: span 2 !important;
-  }
-
-  :global(.note-section.span-3) {
-    grid-column: span 3 !important;
-  }
-
-  @media (max-width: 800px) {
-    .content-layout {
-      padding: 0;
-    }
-
-    .notes-masonry {
-      grid-template-columns: 1fr;
-    }
-
-    :global(.note-section.span-2),
-    :global(.note-section.span-3) {
-      grid-column: span 1 !important;
-    }
-
-    .commonplace-count {
-      padding: 0;
-    }
-  }
-</style>
 
 <script>
   import "../../scripts/filterable-content.js";

@@ -1,0 +1,425 @@
+/*
+ * Brutalist garden styles. Loaded by the garden landing layout and the
+ * garden entry page via the `garden-page` body class. The entry page
+ * additionally sets `post-page` so it inherits the article body styles in
+ * post.css verbatim — this stylesheet only adds garden-specific bits
+ * (hero, card grid, breadcrumbs, backlinks, neighbor graph).
+ */
+
+/* ---- PAGE FRAME (matches commonplace + post) ---- */
+body.garden-page {
+  max-width: 860px;
+  margin: 0 auto;
+  font-family: var(--mono);
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--paper);
+  border-left: 4px solid var(--ink);
+  border-right: 4px solid var(--ink);
+}
+
+body.garden-page .site-main {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  background: var(--paper);
+}
+
+body.garden-page .site-nav {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 6px 12px;
+  background: var(--paper);
+  border-bottom: 6px solid var(--ink);
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  gap: 12px;
+}
+
+body.garden-page .site-footer {
+  margin-top: 4rem;
+  padding: 12px;
+  border-top: 6px solid var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.garden-page .site-footer::before {
+  content: "AD MARGINEM";
+}
+body.garden-page .site-footer::after {
+  content: "© 2026";
+}
+
+/* ---- HERO (banner with eyebrow stamp overlay + subtitle strip) ---- */
+body.garden-page .garden-hero {
+  margin: 0;
+}
+
+body.garden-page .garden-hero__banner {
+  position: relative;
+}
+
+body.garden-page .garden-hero .banner {
+  width: 100%;
+  border-bottom: 4px solid var(--ink);
+}
+
+body.garden-page .garden-hero__eyebrow {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 3px 10px;
+  font-family: var(--display);
+  font-size: var(--fs-2xs);
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+body.garden-page .garden-hero__subtitle {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+/* ---- PAGE SHELL ---- */
+body.garden-page .garden-shell {
+  padding: 24px clamp(16px, 4vw, 48px) 40px;
+}
+
+/* ---- BREADCRUMBS ---- */
+body.garden-page .garden-entry__breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 14px;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+body.garden-page .garden-entry__breadcrumbs a {
+  color: var(--ink);
+  text-decoration: none;
+  padding: 1px 4px;
+  border-bottom: 1.5px solid var(--ink);
+}
+
+body.garden-page .garden-entry__breadcrumbs a:hover,
+body.garden-page .garden-entry__breadcrumbs a:focus-visible {
+  background: var(--paper-accent);
+}
+
+/* ---- COUNT (matches commonplace) ---- */
+body.garden-page .garden-count {
+  margin: 1.25rem 0;
+  padding: 8px 0;
+  border-top: 1px dotted var(--ink);
+  border-bottom: 1px dotted var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+body.garden-page .garden-count .count-text {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+body.garden-page .garden-count .clear-hint {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-3xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.65);
+}
+
+/* ---- FORCE GRAPH FRAME ---- */
+body.garden-page .garden-content > :first-child {
+  margin-top: 0;
+}
+
+body.garden-page .garden-content .force-graph {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* ---- NOTE LIST (one per row, full width of shell) ---- */
+body.garden-page .garden-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  width: 100%;
+}
+
+/* ---- GARDEN CARD (lightweight list row) ---- */
+body.garden-page .garden-card {
+  display: block;
+  width: 100%;
+  padding: 10px 8px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color 0.12s ease;
+}
+
+body.garden-page .garden-card:hover,
+body.garden-page .garden-card:focus-visible {
+  background: var(--paper-accent);
+}
+
+body.garden-page .garden-card__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+body.garden-page .garden-card h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: var(--fs-md);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+body.garden-page .garden-card:hover h3,
+body.garden-page .garden-card:focus-visible h3 {
+  text-decoration: none;
+}
+
+body.garden-page .garden-card__date {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: var(--fs-3xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.7);
+  white-space: nowrap;
+}
+
+body.garden-page .garden-card__excerpt {
+  margin: 8px 0 0;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  line-height: 1.5;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- EMPTY STATE ---- */
+body.garden-page .garden-empty {
+  margin: 1.5rem 0 0;
+  padding: 16px;
+  border: 3px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  color: var(--ink);
+}
+
+body.garden-page .garden-empty code {
+  font-family: var(--mono);
+  background: var(--paper-shadow);
+  border: 1.5px solid var(--ink);
+  padding: 0 4px;
+  font-size: 0.95em;
+}
+
+/* ---- ENTRY (single note) PAGE ---- */
+/* Entry pages add `post-page` to bodyClass to inherit all article styles
+   from post.css. The bits below extend that with garden-specific chrome. */
+
+body.post-page.garden-entry-page .garden-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+body.post-page.garden-entry-page .garden-entry__header {
+  margin: 0 0 1.5rem;
+  padding-bottom: 18px;
+  border-bottom: 6px solid var(--ink);
+}
+
+body.post-page.garden-entry-page .garden-entry__eyebrow {
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 2px 8px;
+  font-family: var(--display);
+  font-size: var(--fs-sm);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+}
+
+body.post-page.garden-entry-page .garden-entry__eyebrow .date-stamp {
+  font-style: normal;
+  color: var(--paper);
+}
+
+body.post-page.garden-entry-page .garden-entry__title {
+  margin: 0 0 12px;
+  font-family: var(--display);
+  font-size: var(--fs-display-sm);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+body.post-page.garden-entry-page .garden-entry__breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+body.post-page.garden-entry-page .garden-entry__breadcrumbs a {
+  color: var(--ink);
+  text-decoration: none;
+  padding: 1px 4px;
+  border-bottom: 1.5px solid var(--ink);
+}
+
+body.post-page.garden-entry-page .garden-entry__breadcrumbs a:hover,
+body.post-page.garden-entry-page .garden-entry__breadcrumbs a:focus-visible {
+  background: var(--paper-accent);
+}
+
+body.post-page.garden-entry-page .garden-entry__content {
+  font-family: var(--mono);
+  font-size: var(--fs-base);
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+body.post-page.garden-entry-page .garden-entry__backlinks {
+  margin-top: 2rem;
+  padding-top: 16px;
+  border-top: 6px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+body.post-page.garden-entry-page .garden-entry__backlinks h2 {
+  display: inline-block;
+  margin: 0;
+  padding: 2px 8px;
+  font-family: var(--display);
+  font-size: var(--fs-sm);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+  align-self: flex-start;
+}
+
+body.post-page.garden-entry-page .garden-entry__backlinks ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+body.post-page.garden-entry-page .garden-entry__backlinks a {
+  font-family: var(--mono);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1.5px solid var(--ink);
+  padding: 1px 2px;
+}
+
+body.post-page.garden-entry-page .garden-entry__backlinks a:hover,
+body.post-page.garden-entry-page .garden-entry__backlinks a:focus-visible {
+  background: var(--paper-accent);
+}
+
+body.post-page.garden-entry-page .garden-entry__neighbors {
+  margin-top: 2rem;
+  padding-top: 16px;
+  border-top: 6px solid var(--ink);
+}
+
+body.post-page.garden-entry-page .garden-entry__neighbors .force-graph {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+@media (max-width: 720px) {
+  body.garden-page {
+    border-left: none;
+    border-right: none;
+  }
+  body.garden-page .garden-shell {
+    padding: 18px 14px 32px;
+  }
+  body.garden-page .site-footer {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+}
