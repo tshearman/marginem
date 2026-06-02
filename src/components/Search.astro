@@ -94,62 +94,69 @@
 </div>
 
 <style>
+  /*
+   * Brutalist search styling: hard 2–4px black borders, no border-radius,
+   * Courier mono, paper/ink/accent palette. Colours are hard-coded so this
+   * component renders identically on pages that haven't been ported to the
+   * brutalist token set yet (the global restyle is a follow-up).
+   */
+
+  /* ---- TRIGGER (sits inline in the meta strip) ---- */
   .nav-search__trigger {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    background: var(--bg);
-    border: var(--thin-border);
-    border-radius: 999px;
-    padding: 0.4rem 0.75rem;
-    font: inherit;
-    color: var(--fg);
+    gap: 6px;
+    padding: 3px 6px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #000;
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 0;
     cursor: pointer;
-    min-width: 9rem;
-    justify-content: flex-start;
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+    line-height: 1;
   }
 
   .nav-search__trigger:hover,
   .nav-search__trigger:focus-visible {
-    border-color: rgb(var(--shadow-rgb) / 0.35);
-    box-shadow: 0 10px 25px rgb(var(--shadow-rgb) / 0.06);
+    background: #ff0;
+    outline: none;
   }
 
   .nav-search__icon {
-    color: rgb(var(--shadow-rgb) / 0.55);
+    width: 14px;
+    height: 14px;
+    color: #000;
+    flex: none;
   }
 
   .nav-search__text {
-    font-size: 0.85rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font: inherit;
   }
 
   .nav-search__shortcut {
-    margin-left: auto;
-    font-size: 0.75rem;
-    color: var(--muted);
-    background: rgb(var(--shadow-rgb) / 0.05);
-    padding: 0.1rem 0.4rem;
-    border-radius: 0.4rem;
+    padding: 1px 4px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 10px;
+    font-weight: bold;
+    color: #000;
+    background: transparent;
+    border: 0;
   }
 
-  @media (max-width: 760px) {
+  @media (max-width: 720px) {
     .nav-search__trigger {
-      min-width: 0;
+      padding: 4px 6px;
     }
     .nav-search__text {
-      font-size: 0.8rem;
-      display: none;
-    }
-    .nav-search__shortcut {
       display: none;
     }
   }
 
+  /* ---- MODAL ---- */
   .search-modal {
     position: fixed;
     inset: 0;
@@ -169,39 +176,31 @@
 
   .search-modal__overlay {
     position: fixed;
-    left: 0;
-    right: 0;
-    top: 0vh;
-    bottom: -100vh;
-    width: 100%;
-    height: calc(100vh + 140vh);
-    background: rgb(var(--shadow-rgb) / 0.5);
-    backdrop-filter: blur(6px);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
   }
 
   .search-modal__panel {
     position: relative;
-    width: min(var(--site-max-width), 100%);
+    width: min(960px, 100%);
     max-height: calc(100vh - clamp(2rem, 8vh, 4rem));
-    background: var(--bg);
-    color: var(--fg);
-    border-radius: 1.35rem;
-    border: var(--thin-border);
-    box-shadow:
-      0 20px 60px rgb(var(--shadow-rgb) / 0.18),
-      0 0 0 1px rgb(var(--white-rgb) / 0.2) inset;
-    padding: 1.4rem;
+    background: #fff;
+    color: #000;
+    border: 4px solid #000;
+    border-radius: 0;
+    box-shadow: 8px 8px 0 #000;
+    padding: 18px;
+    font-family: "Courier New", Courier, monospace;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    backdrop-filter: blur(6px);
   }
 
-  @media (max-width: 760px) {
+  @media (max-width: 720px) {
     .search-modal__panel {
       width: 100%;
-      border-radius: 1rem;
-      padding: 1rem;
+      padding: 14px;
+      box-shadow: 4px 4px 0 #000;
       max-height: calc(100vh - 2rem);
     }
   }
@@ -210,11 +209,8 @@
     .search-modal {
       padding: 0.75rem;
     }
-
     .search-modal__panel {
-      border-radius: 0.85rem;
-      padding: 0.85rem;
-      max-width: 100%;
+      padding: 12px;
       max-height: calc(100vh - 1.5rem);
     }
   }
@@ -227,80 +223,86 @@
 
   .search-modal__header {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    border-bottom: var(--thin-border);
-    padding-bottom: 0.85rem;
+    align-items: stretch;
+    gap: 10px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #000;
     flex-shrink: 0;
-    background: var(--bg);
   }
 
   .search-modal__field {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 0.65rem;
-    padding: 0.4rem 0.9rem;
-    border-radius: 0.75rem;
-    background: rgb(var(--shadow-rgb) / 0.04);
-    border: var(--thin-border);
+    gap: 10px;
+    padding: 8px 10px;
+    background: #fff;
+    border: 0px solid #000;
+    border-radius: 0;
   }
 
   .search-modal__field-icon {
-    color: rgb(var(--shadow-rgb) / 0.5);
+    color: #000;
+    flex: none;
   }
 
   .search-modal__input {
     flex: 1;
     border: none;
     background: transparent;
+    font-family: "Courier New", Courier, monospace;
     font-size: 1rem;
-    font-family: inherit;
-    color: inherit;
+    color: #000;
     outline: none;
   }
 
+  .search-modal__input::placeholder {
+    color: #000;
+    opacity: 0.55;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.85rem;
+  }
+
   .search-modal__close {
-    border: none;
-    background: transparent;
-    padding: 0.4rem;
-    border-radius: 999px;
+    padding: 6px 8px;
+    background: #fff;
+    color: #000;
+    border: 3px solid #000;
+    border-radius: 0;
     cursor: pointer;
-    color: var(--muted);
   }
 
   .search-modal__close:hover,
   .search-modal__close:focus-visible {
-    background: rgb(var(--shadow-rgb) / 0.08);
-    color: var(--fg);
+    background: #ff0;
+    outline: none;
   }
 
-  @media (max-width: 760px) {
+  @media (max-width: 720px) {
     .search-modal__input {
       font-size: 16px;
     }
   }
 
+  /* ---- RESULTS ---- */
   .search-modal__results {
-    margin-top: 1rem;
+    margin-top: 14px;
     overflow-y: auto;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
-    padding-right: 0.4rem;
-    padding-bottom: 0.75rem;
-    scrollbar-width: thin;
+    padding-right: 4px;
     min-height: 0;
+    scrollbar-width: thin;
   }
 
   .search-modal__results::-webkit-scrollbar {
-    width: 0.4rem;
+    width: 8px;
   }
 
   .search-modal__results::-webkit-scrollbar-thumb {
-    background: rgb(var(--ink-rgb) / 0.35);
-    border-radius: 999px;
+    background: #000;
   }
 
   .search-modal__results::-webkit-scrollbar-track {
@@ -309,88 +311,128 @@
 
   .search-modal__placeholder,
   .search-modal__empty {
-    padding: 1.5rem;
+    padding: 24px 12px;
     text-align: center;
-    color: rgb(var(--ink-rgb) / 0.6);
-    font-size: 0.95rem;
-  }
-
-  .search-modal :global(.search-kind) {
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
+    color: #000;
+    font-family: "Arial Black", Helvetica, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgb(var(--ink-rgb) / 0.5);
+  }
+
+  /* "Kind" tag on each result, inverted and pinned to the row's top-right. */
+  .search-modal :global(.search-kind) {
     position: absolute;
-    top: 0.1rem;
-    right: 0.85rem;
+    top: 8px;
+    right: 8px;
+    padding: 1px 6px;
+    font-family: "Arial Black", Helvetica, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    background: #000;
+    border-radius: 0;
   }
 
-  .search-modal :global(.post-preview__body) {
-    position: relative;
-    padding-right: 3.5rem;
-  }
-
-  .search-modal :global(.note-card--interactive) {
-    position: relative;
-    padding-right: 3.5rem;
-  }
-
+  /* Common row treatment for all three result shapes. */
+  .search-modal :global(.post-preview__body),
+  .search-modal :global(.note-card--interactive),
   .search-modal :global(.garden-search) {
     position: relative;
+    display: block;
+    padding: 12px 80px 12px 12px;
+    background: #fff;
+    color: #000;
+    text-decoration: none;
+    border: 0;
+    border-bottom: 1px dotted #000;
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+    cursor: pointer;
   }
 
-  .search-modal :global(.garden-search__header) {
-    padding-right: 3.5rem;
-  }
-
+  .search-modal :global(.post-preview__body:hover),
   .search-modal :global(.note-card--interactive:hover),
-  .search-modal :global(.note-card--interactive:focus-visible) {
+  .search-modal :global(.note-card--interactive:focus-visible),
+  .search-modal :global(.garden-search:hover),
+  .search-modal :global(.garden-search:focus-visible) {
+    background: #ff0;
     box-shadow: none;
     transform: none;
     outline: none;
-  }
-
-  .search-modal :global(.garden-search) {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-    border-radius: 0.85rem;
-    padding: 0.85rem 1rem;
-    background: var(--bg);
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
-  }
-
-  .search-modal :global(.garden-search:hover),
-  .search-modal :global(.garden-search:focus-visible) {
     text-decoration: none;
   }
 
   .search-modal :global(.garden-search__header) {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 2px;
   }
 
-  .search-modal :global(.garden-search__title) {
+  .search-modal :global(.garden-search__title),
+  .search-modal :global(.post-preview__title) {
     margin: 0;
-    font-size: 1.05rem;
-    font-weight: 600;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.95rem;
+    font-weight: bold;
   }
 
-  .search-modal :global(.garden-search__date) {
+  .search-modal :global(.garden-search__date),
+  .search-modal :global(.post-preview__authors) {
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #000;
+    opacity: 0.7;
+  }
+
+  .search-modal :global(.garden-search__excerpt),
+  .search-modal :global(.post-preview__excerpt) {
+    margin: 4px 0 0;
     font-size: 0.85rem;
+    color: #000;
   }
 
-  .search-modal :global(.garden-search__excerpt) {
-    margin: 0.4rem 0 0;
-    color: rgb(var(--ink-rgb) / 0.75);
+  /* Commonplace notes use NoteCard, which defaults to a larger italic body;
+     bring it in line with post/garden rows inside the modal. */
+  .search-modal :global(.note-text) {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #000;
+  }
+
+  .search-modal :global(.note-attribution) {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #000;
+    opacity: 0.7;
+  }
+
+  .search-modal :global(.note-date) {
+    font-size: 0.7rem;
+  }
+
+  .search-modal :global(.tag) {
+    border-radius: 0;
+    border: 2px solid #000;
+    background: #fff;
+    color: #000;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    padding: 3px 8px;
+    margin: 0 6px 6px 0;
+    text-transform: uppercase;
   }
 
   .search-modal :global(.tag--filter:hover),
   .search-modal :global(.tag--default:hover) {
-    background: rgb(var(--ink-rgb) / 0.05);
+    background: #ff0;
   }
 
   :global(body.search-locked) {

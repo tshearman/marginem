@@ -3,7 +3,9 @@ import { MAIN_PAGES, MAIN_NAV, SITE_NAME, WRITING_PAGE_POST_LIMIT } from "../lib
 import { getCollection } from "astro:content";
 import { formatDate } from "../lib/date";
 import { withSlugs, type BlogEntry } from "../lib/content";
+import { loadCommonplaceNotes } from "../lib/commonplace";
 import favicon from "../assets/favicon.png";
+import Search from "../components/Search.astro";
 import "../styles/home.css";
 
 export const prerender = true;
@@ -15,8 +17,25 @@ const posts = withSlugs(
 ) as BlogEntry[];
 const latestPosts = posts.slice(0, WRITING_PAGE_POST_LIMIT);
 
+const RECENT_COMMONPLACE_LIMIT = 5;
+const recentCommonplace = (await loadCommonplaceNotes())
+	.sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime())
+	.slice(0, RECENT_COMMONPLACE_LIMIT);
+
 const getAbstract = (post: BlogEntry) =>
 	post.data.abstract ?? post.data.description ?? "";
+
+// One-line snippet of a quote for the homepage index list.
+const snippet = (text: string, max = 160): string => {
+	const collapsed = text.replace(/\s+/g, " ").trim();
+	if (collapsed.length <= max) return collapsed;
+	const cut = collapsed.slice(0, max);
+	const lastSpace = cut.lastIndexOf(" ");
+	return `${cut.slice(0, lastSpace > 0 ? lastSpace : max).trimEnd()}…`;
+};
+
+const attribution = (note: { author?: string; source?: string }): string =>
+	[note.author, note.source].filter(Boolean).join(" — ");
 
 // The six site sections, rendered as an overview grid of brutalist cells.
 const sections = MAIN_NAV.map((page, i) => ({
@@ -55,7 +74,7 @@ const postCount = posts.length;
             ))
           }
         </nav>
-        <span>MATH &middot; CODE &middot; VISUALIZATION</span>
+        <Search />
       </div>
       <div class="banner">
         <canvas
@@ -75,7 +94,7 @@ const postCount = posts.length;
 
     <div class="grid">
       <div class="cell tall" id="about">
-        <h2>Edition MMXXVI</h2>
+        <h2>MATH · CODE · VISUALIZATION</h2>
         <p class="lead">Essays, experiments, and explorations from the margins.</p>
         <p>
           A working notebook on mathematics, computing, learning, and games.
@@ -116,6 +135,24 @@ const postCount = posts.length;
         }
       </ul>
       <p class="block__more"><a class="btn" href={MAIN_PAGES.archive.href}>Full Archive</a></p>
+    </section>
+
+    <section class="block" id="recent-commonplace">
+      <h2>Recent Commonplace</h2>
+      <ul class="index">
+        {
+          recentCommonplace.map((note) => (
+            <li>
+              <span>
+                <a href={MAIN_PAGES.commonplace.href}>"{snippet(note.content)}"</a>
+                <span class="index__excerpt">{attribution(note)}</span>
+              </span>
+              <span class="index__date">{note.date ? formatDate(note.date) : ""}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="block__more"><a class="btn" href={MAIN_PAGES.commonplace.href}>All Notes</a></p>
     </section>
 
     <section class="block" id="subscribe">

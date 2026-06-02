@@ -14,7 +14,12 @@ export type CommonplaceNote = {
 	source?: string;
 	author?: string;
 	tags: string[];
+	/** Date attributed to the quote (from frontmatter). */
 	date?: Date;
+	/** When the note was added to the site — file birthtime, falling back to
+	 *  mtime on filesystems that don't track birth dates. Used as the
+	 *  "added to commonplace" ordering signal. */
+	addedAt: Date;
 	sourcePath: string;
 	relativePath: string;
 };
@@ -72,6 +77,11 @@ export const loadCommonplaceNotes = async () => {
 		const relativePath = localVault
 			? path.relative(localVault, fullPath)
 			: path.relative(syncedCommonplaceRoot, fullPath);
+		const stat = fs.statSync(fullPath);
+		// Birthtime is 0 on filesystems that don't track it (e.g. ext4) — fall
+		// back to mtime so the field is always meaningful.
+		const addedAt =
+			stat.birthtime.getTime() > 0 ? stat.birthtime : stat.mtime;
 		notes.push({
 			content: content.trim(),
 			source:
@@ -84,6 +94,7 @@ export const loadCommonplaceNotes = async () => {
 					: undefined,
 			tags: normalizeTags(frontmatter?.tags),
 			date: parseDate(frontmatter?.date),
+			addedAt,
 			sourcePath: fullPath,
 			relativePath,
 		});
