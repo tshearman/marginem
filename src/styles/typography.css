@@ -1,5 +1,7 @@
+@import "./type-scale.css";
+
 html {
-  font-size: 16px;
+  font-size: var(--fs-md);
   background: var(--bg);
   color: var(--fg);
 }
@@ -19,13 +21,19 @@ body {
   line-height: 1.65;
 }
 
+/* Base link styling. `text-decoration-skip-ink: auto` is the spec default
+   but we set it explicitly as documentation: every context-specific link
+   override (`.paper-body a`, `.post-preview__link:hover`, etc.) should use
+   `text-decoration` rather than a background-image trick so descenders on
+   g/y/p/q/j break the underline. */
 a {
   color: var(--accent);
   text-decoration-line: underline;
   text-decoration-style: dashed;
   text-decoration-color: var(--thin-border-color);
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.18em;
+  text-underline-offset: 0.12em;
+  text-decoration-skip-ink: auto;
 }
 
 a:hover {
@@ -61,14 +69,14 @@ pre {
   -webkit-overflow-scrolling: touch;
 }
 
-.katex-display>.katex {
+.katex-display > .katex {
   display: inline-block;
 }
 
 /* Slightly reduce KaTeX sizing for a tighter look */
 .katex,
 .katex-display {
-  font-size: 0.925em;
+  font-size: 0.925em; /* em — relative to surrounding text, intentionally not tokenized */
 }
 
 code {
@@ -92,7 +100,7 @@ blockquote {
 blockquote::before {
   content: "";
   position: absolute;
-  top: 0.0rem;
+  top: 0rem;
   bottom: -0.25rem;
   left: 1.65rem;
   width: 0.35rem;

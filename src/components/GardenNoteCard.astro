@@ -55,13 +55,13 @@ const { slug, title, excerpt, updatedAt } = Astro.props as Props;
 
   :global(.garden-card h3) {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: var(--fs-md);
     color: rgb(var(--ink-rgb) / 0.95);
     font-weight: 600;
   }
 
   :global(.garden-card__date) {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     white-space: nowrap;
   }
 

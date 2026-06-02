@@ -1,0 +1,545 @@
+/*
+ * Brutalist post page styles. Loaded only by PostLayout.astro.
+ * Selectors are global — they override BaseLayout's neutral chrome so post
+ * pages adopt the same brutalist frame, tokens, and type scale as the
+ * homepage (see src/styles/home.css). Where possible we reuse those rules
+ * verbatim rather than reinventing them.
+ */
+
+html {
+  background: var(--page-bg);
+}
+
+/* ---- PAGE FRAME (matches homepage body) ---- */
+body.post-page {
+  max-width: 860px;
+  margin: 0 auto;
+  font-family: var(--mono);
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--paper);
+  border-left: 4px solid var(--ink);
+  border-right: 4px solid var(--ink);
+}
+
+body.post-page .site-main {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  background: var(--paper);
+}
+
+/* ---- MASTHEAD: re-skin SiteNav as the homepage's .meta strip ---- */
+body.post-page .site-nav {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 6px 12px;
+  background: var(--paper);
+  border-bottom: 6px solid var(--ink);
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  gap: 12px;
+}
+
+body.post-page .site-nav__links {
+  font-size: var(--fs-2xs);
+  gap: 0.85rem;
+  letter-spacing: 0.04em;
+}
+
+body.post-page .site-nav__links a {
+  color: var(--ink);
+  font-weight: 700;
+  padding: 2px 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.post-page .site-nav__links a::after {
+  content: none !important;
+}
+
+body.post-page .site-nav__links a:hover,
+body.post-page .site-nav__links a:focus-visible,
+body.post-page .site-nav__links a.is-active {
+  background: var(--paper-accent);
+  color: var(--ink);
+}
+
+body.post-page .site-nav__more-toggle {
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+body.post-page .site-nav__more-menu {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 0;
+  box-shadow: 6px 6px 0 var(--paper-shadow);
+  padding: 6px;
+}
+
+body.post-page .site-nav__more-menu a {
+  border-radius: 0;
+  background-image: none;
+  color: var(--ink);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.post-page .site-nav__more-menu a:hover,
+body.post-page .site-nav__more-menu a.is-active {
+  background: var(--paper-accent);
+}
+
+body.post-page .site-footer {
+  margin-top: 4rem;
+  padding: 12px;
+  border-top: 6px solid var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.post-page .site-footer::before {
+  content: "AD MARGINEM";
+}
+body.post-page .site-footer::after {
+  content: "© 2026";
+}
+
+/* ---- ARTICLE FRAME ---- */
+.post-shell {
+  padding: 24px clamp(16px, 4vw, 48px) 40px;
+}
+
+/* ---- TITLE BLOCK (mirrors homepage .block + h2 stamp) ---- */
+.paper-title {
+  text-align: left;
+  margin: 0 0 2rem;
+  padding-bottom: 18px;
+  border-bottom: 6px solid var(--ink);
+}
+
+/* Eyebrow stamp = homepage's `.cell h2 / .block > h2` rule. */
+.paper-title__eyebrow {
+  display: inline-block;
+  margin: 0 0 14px;
+  padding: 2px 8px;
+  font-family: var(--display);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+}
+
+/* Heading scale follows homepage `.lead` (22px Arial Black). */
+.paper-title__heading {
+  margin: 0;
+  font-family: var(--display);
+  font-size: var(--fs-display-sm);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* Subtitle: thick ink rule + monospace uppercase tagline, sat between the
+   display heading and the meta strip. */
+.paper-title__subtitle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 16px 0 0;
+}
+
+.paper-title__subtitle-rule {
+  display: block;
+  flex: none;
+  width: 56px;
+  height: 6px;
+  background: var(--ink);
+}
+
+.paper-title__subtitle-text {
+  font-family: var(--mono);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.paper-title__meta {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.paper-title__meta .date-stamp {
+  font-style: normal;
+  color: var(--ink);
+}
+
+.paper-title__tags {
+  margin-top: 10px;
+  justify-content: flex-start;
+}
+
+.paper-title__tags .tag-list {
+  justify-content: flex-start;
+  margin: 6px 0 0;
+}
+
+/* Abstract: same surface treatment as a homepage cell — no extra shadow. */
+.paper-abstract {
+  max-width: none;
+  margin: 18px 0 0;
+  padding: 14px 16px 16px;
+  text-align: left;
+  border: 0px solid var(--ink);
+  background: var(--paper);
+}
+
+.paper-abstract__heading {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 2px 8px;
+  font-family: var(--display);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+  text-align: left;
+}
+
+.paper-abstract__body {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+/* ---- BODY (14px mono; tall leading + generous paragraph rhythm to give
+   dense long-form reading enough air) ---- */
+.paper-body {
+  font-family: var(--mono);
+  font-size: var(--fs-base);
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+.paper-body > *:first-child {
+  margin-top: 0;
+}
+
+.paper-body p {
+  margin: 0 0 1.25em;
+}
+
+/* Tighten the trailing paragraph before a stamp heading so the gap above
+   the next section reads as a deliberate break rather than dead space. */
+.paper-body p + h2,
+.paper-body p + h3,
+.paper-body p + h4 {
+  margin-top: 2.25em;
+}
+
+/* ---- HEADINGS: use the homepage stamp pattern. Inline-block so margin
+   notes that float right can never collide with an h2 underline. ---- */
+.paper-body h2,
+.paper-body h3,
+.paper-body h4 {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--paper);
+  background: var(--ink);
+  display: inline-block;
+  padding: 2px 8px;
+  line-height: 1.25;
+}
+
+.paper-body h2 {
+  margin: 28px 0 14px;
+  font-size: var(--fs-md);
+}
+
+.paper-body h3 {
+  margin: 22px 0 10px;
+  font-size: var(--fs-sm);
+}
+
+.paper-body h4 {
+  margin: 18px 0 8px;
+  font-size: var(--fs-xs);
+}
+
+/* ---- LINKS (homepage `.index a` pattern: bold, yellow on hover).
+   Only color/style/thickness/offset are overridden here — descender
+   skip-ink is inherited from the base `a` rule in typography.css. ---- */
+.paper-body a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ink);
+  text-decoration-thickness: 1.5px;
+  padding-bottom: 1px;
+  transition: background-color 0.15s ease;
+}
+
+.paper-body a:hover {
+  background-color: var(--paper-accent);
+  text-decoration: none;
+}
+
+/* ---- INLINE CODE / CODE BLOCKS ---- */
+.paper-body code:not(pre code) {
+  font-family: var(--mono);
+  background: var(--paper-shadow);
+  border: 1.5px solid var(--ink);
+  border-radius: 0;
+  padding: 0 4px;
+  font-size: 0.9em;
+}
+
+.paper-body pre {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 0;
+  box-shadow: 6px 6px 0 var(--paper-shadow);
+  padding: 14px 16px;
+  margin: 18px 0 22px;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.paper-body blockquote {
+  position: relative;
+  margin: 18px 0;
+  padding: 10px 14px 10px 16px;
+  font-style: normal;
+  border-radius: 0;
+  border-left: 6px solid var(--ink);
+  background: rgb(var(--ink-rgb) / 0.04);
+}
+
+.paper-body blockquote::before {
+  content: none;
+}
+
+@media (min-width: 761px) {
+  .paper-body blockquote {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* ---- IMAGES / FIGURES / PLOTS: no borders, no shadows ---- */
+.paper-body img,
+.paper-body figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.paper-body figure {
+  margin: 24px 0 28px;
+}
+
+.paper-body figcaption {
+  margin-top: 10px;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border-left: 3px solid var(--ink);
+  padding-left: 8px;
+}
+
+/* ---- PLOTLY: bare chart, no frame ---- */
+.paper-body .plotly-shell {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin: 18px 0 22px;
+}
+
+/* ---- KaTeX: keep math typeface; no background, no side rule ---- */
+.paper-body .katex,
+.paper-body .katex-display {
+  color: var(--ink);
+}
+
+.paper-body .katex-display {
+  margin: 1.5em 0 1.75em;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow-x: auto;
+}
+
+/* A paragraph that ends with a colon and introduces a display equation or
+   list shouldn't feel detached — pull the gap in slightly. */
+.paper-body p + .katex-display,
+.paper-body p + ul,
+.paper-body p + ol {
+  margin-top: 1em;
+}
+
+/* ---- LISTS: own block with clear separation from surrounding paragraphs,
+   each item given its own paragraph-level rhythm so nothing reads as a
+   single wall of text. ---- */
+.paper-body ul,
+.paper-body ol {
+  margin: 1.5em 0 1.75em;
+  padding-left: 2.4rem;
+}
+
+.paper-body ul {
+  list-style: square;
+}
+
+.paper-body ol {
+  list-style: decimal-leading-zero;
+}
+
+.paper-body li {
+  margin: 0 0 0.85em;
+  padding-left: 0.35rem;
+  line-height: 1.75;
+}
+
+.paper-body li:last-child {
+  margin-bottom: 0;
+}
+
+.paper-body li > p {
+  margin: 0 0 0.6em;
+}
+
+.paper-body li > p:last-child {
+  margin-bottom: 0;
+}
+
+.paper-body ul li::marker,
+.paper-body ol > li::marker {
+  font-family: var(--display);
+  font-weight: 900;
+  color: var(--ink);
+}
+
+/* Nested lists tuck in tighter so the hierarchy is visible. */
+.paper-body li > ul,
+.paper-body li > ol {
+  margin: 0.6em 0 0.4em;
+}
+
+/* ---- FOOTNOTES ---- */
+.post-shell .footnotes {
+  border-top: 6px solid var(--ink);
+  margin-top: 36px;
+  padding-top: 16px;
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+}
+
+.post-shell .footnotes::before {
+  content: "Footnotes";
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 2px 8px;
+  font-family: var(--display);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.post-shell .footnotes h2 {
+  display: none;
+}
+
+.footnote-panel {
+  background: var(--paper);
+  border-top: 6px solid var(--ink);
+  border-radius: 0;
+  box-shadow: 0 -8px 0 var(--paper-shadow);
+  font-family: var(--mono);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+}
+
+.footnote-panel__number {
+  color: var(--ink);
+  font-weight: 900;
+}
+
+/* ---- MARGIN NOTES (re-emphasise inside post body) ---- */
+.paper-body .margin-note {
+  background: rgb(var(--ink-rgb) / 0.04);
+  border-left: 4px solid var(--ink);
+  font-size: var(--fs-xs);
+}
+
+/* ---- TAGS inside post pages ---- */
+.paper-title .tag,
+.paper-body .tag {
+  border-radius: 0;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--fs-2xs);
+  color: var(--ink);
+  padding: 1px 6px;
+}
+
+.paper-title .tag:hover,
+.paper-body .tag:hover {
+  background: var(--paper-accent);
+}
+
+/* ---- MOBILE ---- */
+@media (max-width: 720px) {
+  body.post-page {
+    border-left: none;
+    border-right: none;
+  }
+  .post-shell {
+    padding: 18px 14px 32px;
+  }
+  body.post-page .site-footer {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+}

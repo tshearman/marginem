@@ -32,13 +32,13 @@ body {
 .email-eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: rgb(var(--ink-rgb) / 0.6);
   margin: 0 0 12px;
 }
 
 .email-meta {
-  font-size: 14px;
+  font-size: var(--fs-base);
   color: rgb(var(--ink-rgb) / 0.7);
   margin-bottom: 20px;
 }
@@ -59,7 +59,7 @@ body {
   border: var(--thin-border);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 0.7rem;
+  font-size: var(--fs-2xs);
   color: rgb(var(--ink-rgb) / 0.85);
   background: rgb(var(--ink-rgb) / 0.03);
   text-decoration: none;
@@ -83,7 +83,7 @@ body {
   border: var(--thin-border);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   color: rgb(var(--ink-rgb) / 0.85);
   background: rgb(var(--ink-rgb) / 0.03);
 }
@@ -94,7 +94,7 @@ body {
 }
 
 .email-body {
-  font-size: 16px;
+  font-size: var(--fs-md);
   line-height: 1.7;
 }
 
@@ -110,7 +110,7 @@ body {
 }
 
 .email-body blockquote>p {
-  border-left: 8px solid rgb(var(--shadow-rgb));
+  border-left: 8px solid var(--fg);
   margin-left: 0;
   padding-left: 12px;
 }
@@ -118,11 +118,13 @@ body {
 .email-body a {
   color: var(--accent);
   text-decoration: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-skip-ink: auto;
 }
 
 .email-footer {
   margin-top: 28px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: rgb(var(--ink-rgb) / 0.6);
   border-top: var(--thin-border);
   padding-top: 16px;

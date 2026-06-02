@@ -1,0 +1,33 @@
+/*
+ * iA Writer Duo (SIL OFL). Self-hosted from /public/fonts/.
+ * Shared by global.css (BaseLayout) and home.css (standalone homepage),
+ * so the face is declared exactly once across the bundle.
+ */
+@font-face {
+  font-family: "iA Writer Duo";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/iAWriterDuoS-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "iA Writer Duo";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/iAWriterDuoS-Italic.ttf") format("truetype");
+}
+@font-face {
+  font-family: "iA Writer Duo";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/iAWriterDuoS-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "iA Writer Duo";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/iAWriterDuoS-BoldItalic.ttf") format("truetype");
+}

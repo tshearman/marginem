@@ -1,8 +1,19 @@
+@import "./fonts.css";
 @import "./prism-vs.css";
 @import "./typography.css";
+@import "./page-texture.css";
 
 :root {
   color-scheme: light;
+
+  /* Brutalist palette tokens shared with the homepage. */
+  --display: "Arial Black", Helvetica, sans-serif;
+  --mono: "iA Writer Duo", "Courier New", Courier, monospace;
+  --paper: #ffffff;
+  --page-bg: #e8e8e8;
+  --highlight: #ffe600;
+  --paper-shadow: var(--highlight);
+  --paper-accent: var(--highlight);
 
   --bg: #ffffff;
   --bg-subtle: #f8fafc;
@@ -41,25 +52,19 @@
   --success: #0f5132;
   --danger: #b91c1c;
 
-  --site-max-width: 760px;
+  --site-max-width: 860px;
 }
 
 .eyebrow-text {
   margin: 0;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: var(--muted);
 }
 
-.uppercase-meta {
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-}
-
 .footnotes {
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   border-top: var(--thin-border);
   margin-top: 3rem;
   padding-top: 1rem;
@@ -79,9 +84,11 @@
   transform: translateY(100%);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
   z-index: 50;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
 }
 
 .footnote-panel--visible {
@@ -113,7 +120,7 @@
   overflow-y: auto;
 }
 
-.footnote-panel__text>p {
+.footnote-panel__text > p {
   margin-top: 0;
 }
 
@@ -130,7 +137,7 @@
   right: 0.6rem;
   border: none;
   background: transparent;
-  font-size: 1.35rem;
+  font-size: var(--fs-2xl);
   color: var(--muted);
   cursor: pointer;
   line-height: 1;
@@ -139,16 +146,6 @@
 
 .footnote-panel__close:hover {
   color: var(--fg);
-}
-
-.run-output {
-  margin-top: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  background: rgb(var(--ink-rgb) / 0.08);
-  border: var(--thin-border);
-  font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
-  font-size: 0.9rem;
 }
 
 .post-preview {
@@ -164,7 +161,7 @@
 
 .post-preview__title {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: var(--fs-2xl);
   font-weight: 600;
 }
 
@@ -175,11 +172,12 @@
 
 .post-preview__link:hover {
   text-decoration: underline;
+  text-underline-offset: 0.12em;
 }
 
 .post-preview__authors {
   margin: 0.5rem 0 0;
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   color: var(--fg);
   display: flex;
   flex-direction: column;
@@ -200,7 +198,7 @@
 }
 
 .post-preview__meta-empty {
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
@@ -214,7 +212,7 @@
 
 .post-preview__excerpt {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   line-height: 1.6;
   color: var(--fg);
 }
@@ -251,15 +249,11 @@ a.note-card {
   outline-offset: 4px;
 }
 
-.note-card::after {
-  content: none;
-}
-
 .note-card__anchor-link {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: rgb(var(--ink-rgb) / 0.4);
   text-decoration: none;
   opacity: 0;
@@ -281,7 +275,7 @@ a.note-card {
 
 .note-text {
   margin: 0 0 1rem;
-  font-size: 1.05rem;
+  font-size: var(--fs-md);
   line-height: 1.6;
   color: var(--fg);
   font-style: italic;
@@ -290,7 +284,7 @@ a.note-card {
 .note-attribution {
   text-align: right;
   margin-top: 1rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-base);
   color: rgb(var(--ink-rgb) / 0.7);
 }
 
@@ -304,7 +298,7 @@ a.note-card {
 
 .note-date {
   display: block;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
 }
 
 .note-tags {
@@ -343,7 +337,7 @@ a.note-card {
   border-radius: 999px;
   border: var(--thin-border);
   margin: 0 0.5rem 0.4rem 0;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   text-transform: lowercase;
   color: var(--fg);
   background: rgb(var(--shadow-rgb) / 0.03);
@@ -356,12 +350,12 @@ a.note-card {
 }
 
 .tag--small {
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   padding: 0.1rem 0.45rem;
 }
 
 .tag--large {
-  font-size: 0.9rem;
+  font-size: var(--fs-base);
   padding: 0.2rem 0.75rem;
 }
 
@@ -388,7 +382,7 @@ a.note-card {
 
 .tag--display {
   background: rgb(var(--ink-rgb) / 0.02);
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   margin: 0 0.35rem;
   text-transform: none;
 }

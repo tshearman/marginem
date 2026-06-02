@@ -194,14 +194,34 @@ export function renderBanner(
 	};
 
 	// Pick the narrow variant on small viewports, then split on explicit "\n"
-	// line breaks. If a single line still overflows, fall back to space-wrap.
+	// line breaks. If a single line still overflows, greedy-wrap each line on
+	// word boundaries so the title fills the available width instead of
+	// collapsing to one word per line.
 	const text =
 		cfg.textNarrow && window.innerWidth <= cfg.narrowMax
 			? cfg.textNarrow
 			: cfg.text;
+	const greedyWrap = (line: string, px: number): string[] => {
+		const words = line.split(/\s+/).filter(Boolean);
+		if (words.length <= 1) return [line];
+		mctx.font = fontStr(cfg, px);
+		const g = px * 0.1;
+		const out: string[] = [];
+		let cur = words[0];
+		for (let i = 1; i < words.length; i++) {
+			const trial = `${cur} ${words[i]}`;
+			if (measureSpaced(mctx, trial, g) <= availW) cur = trial;
+			else {
+				out.push(cur);
+				cur = words[i];
+			}
+		}
+		out.push(cur);
+		return out;
+	};
 	let lines = text.split("\n");
-	if (lines.length === 1 && maxLineWidth(fontPx, lines) > availW)
-		lines = text.split(" ");
+	if (maxLineWidth(fontPx, lines) > availW)
+		lines = lines.flatMap((l) => greedyWrap(l, fontPx));
 	const mw = maxLineWidth(fontPx, lines);
 	if (mw > availW) fontPx *= availW / mw;
 	const totalH = lines.length * (fontPx * 1.02);

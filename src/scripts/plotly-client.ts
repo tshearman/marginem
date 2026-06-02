@@ -8,6 +8,13 @@ type Payload = {
 	config?: Record<string, unknown>;
 };
 
+// Match the body font (iA Writer Duo) and ink color of the post page.
+const DEFAULT_FONT = {
+	family: '"iA Writer Duo", "Courier New", Courier, monospace',
+	size: 12,
+	color: "#0f172a",
+};
+
 function asNumber(value: unknown): number | undefined {
 	return typeof value === "number" && Number.isFinite(value)
 		? value
@@ -42,6 +49,48 @@ async function hydrateChart(el: HTMLElement) {
 		const data = payload.data ?? [];
 		const layout = { ...(payload.layout ?? {}) };
 		const config = payload.config ?? {};
+
+		// Merge a default font into the layout so every chart picks up the
+		// page's monospace face. Per-chart `layout.font` overrides win.
+		const incomingFont =
+			typeof layout.font === "object" && layout.font !== null
+				? (layout.font as Record<string, unknown>)
+				: {};
+		layout.font = { ...DEFAULT_FONT, ...incomingFont };
+
+		// Hover tooltips don't inherit from layout.font — they have their own
+		// hoverlabel.font slot. Per-trace hoverlabel.font also has to be set
+		// explicitly because traces don't fall back to layout.hoverlabel either.
+		const incomingHover =
+			typeof layout.hoverlabel === "object" && layout.hoverlabel !== null
+				? (layout.hoverlabel as Record<string, unknown>)
+				: {};
+		const incomingHoverFont =
+			typeof incomingHover.font === "object" && incomingHover.font !== null
+				? (incomingHover.font as Record<string, unknown>)
+				: {};
+		layout.hoverlabel = {
+			...incomingHover,
+			font: { ...DEFAULT_FONT, ...incomingHoverFont },
+		};
+
+		for (const trace of data) {
+			if (typeof trace !== "object" || trace === null) continue;
+			const t = trace as Record<string, unknown>;
+			const traceHover =
+				typeof t.hoverlabel === "object" && t.hoverlabel !== null
+					? (t.hoverlabel as Record<string, unknown>)
+					: {};
+			const traceHoverFont =
+				typeof traceHover.font === "object" && traceHover.font !== null
+					? (traceHover.font as Record<string, unknown>)
+					: {};
+			t.hoverlabel = {
+				...traceHover,
+				font: { ...DEFAULT_FONT, ...traceHoverFont },
+			};
+		}
+
 		const Plotly = await loadPlotly();
 		const layoutHeight = asNumber(layout.height);
 		const rect = el.getBoundingClientRect();

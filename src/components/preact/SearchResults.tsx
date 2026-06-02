@@ -3,6 +3,7 @@ import { GardenNoteCard } from "./GardenNoteCard";
 import { NoteCard } from "./NoteCard";
 import { PostPreview } from "./PostPreview";
 import type { SearchItem } from "../../scripts/search/types";
+import { KIND_LABELS } from "../../lib/kinds";
 
 type Props = {
 	results: SearchItem[];
@@ -30,7 +31,7 @@ export function SearchResults(props: Props) {
 							tags={item.tags}
 							dateLabel={label}
 							dateTime={item.pubDate}
-							kindLabel="Note"
+							kindLabel={KIND_LABELS.note}
 						/>
 					);
 				}
@@ -45,7 +46,7 @@ export function SearchResults(props: Props) {
 							excerpt={item.snippet}
 							dateLabel={label}
 							updatedAt={item.pubDate}
-							kindLabel="Garden"
+							kindLabel={KIND_LABELS.garden}
 						/>
 					);
 				}
@@ -59,7 +60,7 @@ export function SearchResults(props: Props) {
 						displayDate={label}
 						excerpt={item.snippet}
 						tags={item.tags}
-						kindLabel="Writing"
+						kindLabel={KIND_LABELS.writing}
 					/>
 				);
 			})}

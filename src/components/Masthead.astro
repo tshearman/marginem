@@ -1,0 +1,105 @@
+---
+import Search from "./Search.astro";
+import { MAIN_NAV, SITE_NAME } from "../lib/site";
+
+interface MastheadProps {
+	activePage?: string;
+}
+
+const { activePage } = Astro.props as MastheadProps;
+---
+
+<header class="masthead">
+  <div class="meta">
+    <span class="meta__brand">{SITE_NAME}</span>
+    <nav class="meta__nav" aria-label="Primary">
+      {
+        MAIN_NAV.map((page, i) => {
+          const isActive = activePage
+            ? page.label.toLowerCase() === activePage.toLowerCase()
+            : false;
+          return (
+            <>
+              {i > 0 && <span aria-hidden="true"> / </span>}
+              <a href={page.href} class={isActive ? "is-active" : undefined}>
+                {page.label}
+              </a>
+            </>
+          );
+        })
+      }
+    </nav>
+    <div class="meta__search">
+      <Search />
+    </div>
+  </div>
+</header>
+
+<style>
+  .masthead {
+    --masthead-ink: #000;
+    --masthead-paper: #fff;
+    --masthead-accent: var(--highlight);
+    width: min(860px, 100%);
+    margin: 0 auto;
+    background: var(--masthead-paper);
+    color: var(--masthead-ink);
+    border-bottom: 1px solid var(--masthead-ink);
+  }
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px;
+    font-family:
+      "iA Writer Duo", "Courier New", Courier, monospace;
+    font-size: var(--fs-2xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .meta__brand {
+    font-weight: 700;
+  }
+
+  .meta__nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+  }
+
+  .meta__nav a {
+    color: var(--masthead-ink);
+    text-decoration: none;
+    padding: 2px 4px;
+  }
+
+  .meta__nav a:hover,
+  .meta__nav a:focus-visible {
+    background: var(--masthead-accent);
+  }
+
+  .meta__nav a.is-active {
+    background: var(--masthead-ink);
+    color: var(--masthead-paper);
+  }
+
+  .meta__search {
+    display: flex;
+    align-items: center;
+  }
+
+  @media (max-width: 720px) {
+    .meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .meta__search {
+      width: 100%;
+    }
+  }
+</style>

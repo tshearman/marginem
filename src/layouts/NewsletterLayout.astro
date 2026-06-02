@@ -92,14 +92,14 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : [];
   .newsletter-hero__eyebrow {
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: rgb(var(--ink-rgb) / 0.6);
     margin: 0 0 0.5rem;
   }
 
   .newsletter-hero__title {
     margin: 0.25rem 0 0.75rem;
-    font-size: clamp(2.2rem, 4vw, 3rem);
+    font-size: var(--fs-display-md);
   }
 
   .newsletter-hero__meta {
@@ -107,7 +107,7 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : [];
     justify-content: center;
     align-items: center;
     gap: 0.75rem;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     color: rgb(var(--ink-rgb) / 0.7);
   }
 
@@ -115,7 +115,7 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : [];
     padding: 0.25rem 0.6rem;
     border-radius: 999px;
     border: var(--thin-border);
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
@@ -130,11 +130,11 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : [];
   }
 
   .newsletter-hero__tags :global(.tag) {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
   }
 
   .newsletter-body {
-    font-size: 1.05rem;
+    font-size: var(--fs-md);
     line-height: 1.85;
     color: var(--fg);
   }

@@ -108,7 +108,7 @@
     gap: 6px;
     padding: 3px 6px;
     font-family: "Courier New", Courier, monospace;
-    font-size: 11px;
+    font-size: var(--fs-2xs);
     font-weight: bold;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -122,7 +122,7 @@
 
   .nav-search__trigger:hover,
   .nav-search__trigger:focus-visible {
-    background: #ff0;
+    background: var(--highlight);
     outline: none;
   }
 
@@ -140,7 +140,7 @@
   .nav-search__shortcut {
     padding: 1px 4px;
     font-family: "Courier New", Courier, monospace;
-    font-size: 10px;
+    font-size: var(--fs-3xs);
     font-weight: bold;
     color: #000;
     background: transparent;
@@ -251,7 +251,7 @@
     border: none;
     background: transparent;
     font-family: "Courier New", Courier, monospace;
-    font-size: 1rem;
+    font-size: var(--fs-md);
     color: #000;
     outline: none;
   }
@@ -261,7 +261,7 @@
     opacity: 0.55;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
   }
 
   .search-modal__close {
@@ -275,13 +275,13 @@
 
   .search-modal__close:hover,
   .search-modal__close:focus-visible {
-    background: #ff0;
+    background: var(--highlight);
     outline: none;
   }
 
   @media (max-width: 720px) {
     .search-modal__input {
-      font-size: 16px;
+      font-size: var(--fs-md);
     }
   }
 
@@ -315,7 +315,7 @@
     text-align: center;
     color: #000;
     font-family: "Arial Black", Helvetica, sans-serif;
-    font-size: 11px;
+    font-size: var(--fs-2xs);
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
@@ -327,7 +327,7 @@
     right: 8px;
     padding: 1px 6px;
     font-family: "Arial Black", Helvetica, sans-serif;
-    font-size: 10px;
+    font-size: var(--fs-3xs);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #fff;
@@ -358,7 +358,7 @@
   .search-modal :global(.note-card--interactive:focus-visible),
   .search-modal :global(.garden-search:hover),
   .search-modal :global(.garden-search:focus-visible) {
-    background: #ff0;
+    background: var(--highlight);
     box-shadow: none;
     transform: none;
     outline: none;
@@ -375,13 +375,13 @@
   .search-modal :global(.post-preview__title) {
     margin: 0;
     font-family: "Courier New", Courier, monospace;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: bold;
   }
 
   .search-modal :global(.garden-search__date),
   .search-modal :global(.post-preview__authors) {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: #000;
@@ -391,7 +391,7 @@
   .search-modal :global(.garden-search__excerpt),
   .search-modal :global(.post-preview__excerpt) {
     margin: 4px 0 0;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: #000;
   }
 
@@ -399,14 +399,14 @@
      bring it in line with post/garden rows inside the modal. */
   .search-modal :global(.note-text) {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     line-height: 1.4;
     color: #000;
   }
 
   .search-modal :global(.note-attribution) {
     margin-top: 6px;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: #000;
@@ -414,7 +414,7 @@
   }
 
   .search-modal :global(.note-date) {
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
   }
 
   .search-modal :global(.tag) {
@@ -423,7 +423,7 @@
     background: #fff;
     color: #000;
     font-family: "Courier New", Courier, monospace;
-    font-size: 0.7rem;
+    font-size: var(--fs-2xs);
     line-height: 1.2;
     padding: 3px 8px;
     margin: 0 6px 6px 0;
@@ -432,7 +432,7 @@
 
   .search-modal :global(.tag--filter:hover),
   .search-modal :global(.tag--default:hover) {
-    background: #ff0;
+    background: var(--highlight);
   }
 
   :global(body.search-locked) {

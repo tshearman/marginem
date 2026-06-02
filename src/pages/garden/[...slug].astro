@@ -216,7 +216,7 @@ const { html } =
 		margin: 0 0 0.4rem;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		font-size: 0.85rem;
+		font-size: var(--fs-sm);
 		color: rgb(var(--ink-rgb) / 0.65);
 	}
 
@@ -225,7 +225,7 @@ const { html } =
 		align-items: center;
 		gap: 0.35rem;
 		margin: 0 0 0.35rem;
-		font-size: 0.95rem;
+		font-size: var(--fs-base);
 		color: rgb(var(--ink-rgb) / 0.7);
 	}
 
@@ -241,7 +241,7 @@ const { html } =
 
 	.garden-entry__header h1 {
 		margin: 0 0 0.25rem;
-		font-size: clamp(1.6rem, 4vw, 2.2rem);
+		font-size: var(--fs-display-sm);
 	}
 
 	.garden-entry__content :global(h2) {
@@ -258,7 +258,7 @@ const { html } =
 
 	.garden-entry__backlinks h2 {
 		margin: 0;
-		font-size: 1.2rem;
+		font-size: var(--fs-xl);
 	}
 
 	.garden-entry__backlinks ul {
@@ -288,6 +288,6 @@ const { html } =
 
 	.garden-entry__neighbors h2 {
 		margin: 0;
-		font-size: 1.2rem;
+		font-size: var(--fs-xl);
 	}
 </style>

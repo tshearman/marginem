@@ -54,7 +54,7 @@ export const prerender = true;
   }
 
   .unsubscribe-form label {
-    font-size: 0.9rem;
+    font-size: var(--fs-base);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--muted);
@@ -65,7 +65,7 @@ export const prerender = true;
     padding: 0.75rem 0.9rem;
     border-radius: 0.75rem;
     border: var(--thin-border);
-    font-size: 1rem;
+    font-size: var(--fs-md);
     font-family: inherit;
     color: var(--fg);
     background: var(--bg);
@@ -84,7 +84,7 @@ export const prerender = true;
 
   @media (max-width: 760px) {
     .unsubscribe-form input {
-      font-size: 16px;
+      font-size: var(--fs-md);
     }
   }
 
@@ -95,7 +95,7 @@ export const prerender = true;
     border: var(--thin-border);
     background: var(--fg);
     color: var(--fg-inverse);
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     cursor: pointer;
@@ -112,7 +112,7 @@ export const prerender = true;
 
   .unsubscribe-form__status {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     color: var(--muted);
   }
 

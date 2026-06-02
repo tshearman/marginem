@@ -1,7 +1,8 @@
 ---
 import "../styles/global.css";
 import "katex/dist/katex.min.css";
-import SiteNav from "../components/SiteNav.astro";
+import Masthead from "../components/Masthead.astro";
+import Banner from "../components/Banner.astro";
 import { SITE_NAME } from "../lib/site";
 import favicon from "../assets/favicon.png";
 
@@ -12,6 +13,7 @@ interface BaseLayoutProps {
 	showHero?: boolean;
 	includeFootnotes?: boolean;
 	activePage?: string;
+	bodyClass?: string;
 }
 
 const {
@@ -21,6 +23,7 @@ const {
 	showHero = true,
 	includeFootnotes = false,
 	activePage,
+	bodyClass,
 } = Astro.props as BaseLayoutProps;
 ---
 
@@ -33,17 +36,17 @@ const {
     <meta name="description" content={description} />
     <link rel="icon" href={favicon.src} type="image/png" />
   </head>
-  <body>
-    <SiteNav activePage={activePage} />
+  <body class={bodyClass}>
+    <Masthead activePage={activePage} />
+    {
+      showHero && (
+        <Banner
+          text={hero.toUpperCase()}
+          srLabel={hero}
+        />
+      )
+    }
     <main class="site-main">
-      {
-        showHero && (
-          <header class="site-header">
-            <p class="eyebrow-text">{description}</p>
-            <h1>{hero}</h1>
-          </header>
-        )
-      }
       <slot />
       <footer class="site-footer"></footer>
     </main>
@@ -66,7 +69,7 @@ const {
 
   .site-header h1 {
     margin: 0.25rem 0 1.5rem;
-    font-size: clamp(2.2rem, 4vw, 3.1rem);
+    font-size: var(--fs-display-md);
     font-weight: 500;
     color: var(--fg);
   }

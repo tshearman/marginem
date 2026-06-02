@@ -4,8 +4,10 @@ import { getCollection } from "astro:content";
 import { formatDate } from "../lib/date";
 import { withSlugs, type BlogEntry } from "../lib/content";
 import { loadCommonplaceNotes } from "../lib/commonplace";
+import { KIND_LABELS } from "../lib/kinds";
 import favicon from "../assets/favicon.png";
-import Search from "../components/Search.astro";
+import Masthead from "../components/Masthead.astro";
+import Banner from "../components/Banner.astro";
 import "../styles/home.css";
 
 export const prerender = true;
@@ -21,6 +23,25 @@ const RECENT_COMMONPLACE_LIMIT = 5;
 const recentCommonplace = (await loadCommonplaceNotes())
 	.sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime())
 	.slice(0, RECENT_COMMONPLACE_LIMIT);
+
+type FeedItem =
+	| { kind: "writing"; date: Date; post: BlogEntry }
+	| {
+			kind: "commonplace";
+			date: Date;
+			note: (typeof recentCommonplace)[number];
+	  };
+
+const feed: FeedItem[] = [
+	...latestPosts.map(
+		(post) => ({ kind: "writing", date: post.data.pubDate, post }) as FeedItem,
+	),
+	...recentCommonplace.map(
+		(note) => ({ kind: "commonplace", date: note.addedAt, note }) as FeedItem,
+	),
+]
+	.sort((a, b) => b.date.valueOf() - a.date.valueOf())
+	.slice(0, WRITING_PAGE_POST_LIMIT + RECENT_COMMONPLACE_LIMIT);
 
 const getAbstract = (post: BlogEntry) =>
 	post.data.abstract ?? post.data.description ?? "";
@@ -61,36 +82,12 @@ const postCount = posts.length;
     <link rel="icon" href={favicon.src} type="image/png" />
   </head>
   <body>
-    <header class="masthead">
-      <div class="meta">
-        <span>{SITE_NAME}</span>
-        <nav class="meta__nav">
-          {
-            MAIN_NAV.map((page, i) => (
-              <>
-                {i > 0 && <span aria-hidden="true"> / </span>}
-                <a href={page.href}>{page.label}</a>
-              </>
-            ))
-          }
-        </nav>
-        <Search />
-      </div>
-      <div class="banner">
-        <canvas
-          data-banner
-          data-src="/banners/notebook_banner_c.png"
-          data-text="MARGINEM"
-          data-text-narrow={"MARG\nINEM"}
-          data-narrow-max="720"
-          data-height="300"
-          data-pixel="1"
-          data-invert="true"
-          data-shadow-dx="5"
-          data-shadow-dy="5"></canvas>
-        <h1 class="sr-only">Ad Marginem — Notes from the margins</h1>
-      </div>
-    </header>
+    <Masthead activePage="Writing" />
+    <Banner
+      text="MARGINEM"
+      textNarrow={"MARG\nINEM"}
+      srLabel="Ad Marginem — Notes from the margins"
+    />
 
     <div class="grid">
       <div class="cell tall" id="about">
@@ -119,40 +116,36 @@ const postCount = posts.length;
 
     </div>
 
-    <section class="block" id="writing">
-      <h2>Latest Writing</h2>
+    <section class="block" id="still-drying">
+      <h2>Still Drying</h2>
       <ul class="index">
         {
-          latestPosts.map((post) => (
-            <li>
-              <span>
-                <a href={`/posts/${post.slug}/`}>{post.data.title}</a>
-                <span class="index__excerpt">{getAbstract(post)}</span>
-              </span>
-              <span class="index__date">{formatDate(post.data.pubDate)}</span>
-            </li>
-          ))
+          feed.map((item) =>
+            item.kind === "writing" ? (
+              <li>
+                <span class="index__kind">{KIND_LABELS.writing}</span>
+                <span class="index__body">
+                  <a href={`/posts/${item.post.slug}/`}>{item.post.data.title}</a>
+                  <span class="index__excerpt">{getAbstract(item.post)}</span>
+                </span>
+                <span class="index__date">{formatDate(item.post.data.pubDate)}</span>
+              </li>
+            ) : (
+              <li>
+                <span class="index__kind">{KIND_LABELS.note}</span>
+                <span class="index__body">
+                  <a href={MAIN_PAGES.commonplace.href}>"{snippet(item.note.content)}"</a>
+                  <span class="index__excerpt">{attribution(item.note)}</span>
+                </span>
+                <span class="index__date">{item.note.date ? formatDate(item.note.date) : ""}</span>
+              </li>
+            ),
+          )
         }
       </ul>
-      <p class="block__more"><a class="btn" href={MAIN_PAGES.archive.href}>Full Archive</a></p>
-    </section>
-
-    <section class="block" id="recent-commonplace">
-      <h2>Recent Commonplace</h2>
-      <ul class="index">
-        {
-          recentCommonplace.map((note) => (
-            <li>
-              <span>
-                <a href={MAIN_PAGES.commonplace.href}>"{snippet(note.content)}"</a>
-                <span class="index__excerpt">{attribution(note)}</span>
-              </span>
-              <span class="index__date">{note.date ? formatDate(note.date) : ""}</span>
-            </li>
-          ))
-        }
-      </ul>
-      <p class="block__more"><a class="btn" href={MAIN_PAGES.commonplace.href}>All Notes</a></p>
+      <p class="block__more">
+        <a class="btn" href={MAIN_PAGES.archive.href}>Full Archive</a>
+      </p>
     </section>
 
     <section class="block" id="subscribe">
@@ -186,7 +179,7 @@ const postCount = posts.length;
             />
           </div>
         </div>
-        <input type="submit" value="[ Subscribe ]" class="btn" />
+        <input type="submit" value="Subscribe" class="btn" />
       </form>
     </section>
 
@@ -196,8 +189,5 @@ const postCount = posts.length;
       <span>&copy; 2026</span>
     </footer>
 
-    <script>
-      import "../scripts/banner.ts";
-    </script>
   </body>
 </html>
