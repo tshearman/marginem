@@ -1,5 +1,5 @@
 ---
-import { GardenNoteCard as PreactGardenNoteCard } from "./preact/GardenNoteCard";
+import { renderGardenNoteCard } from "../lib/card-html";
 import { formatDate } from "../lib/date";
 
 interface Props {
@@ -12,13 +12,14 @@ interface Props {
 }
 
 const { slug, title, excerpt, updatedAt } = Astro.props as Props;
+const html = renderGardenNoteCard({
+	variant: "card",
+	href: `/garden/${slug}/`,
+	title,
+	excerpt,
+	updatedAt,
+	dateLabel: formatDate(updatedAt),
+});
 ---
 
-<PreactGardenNoteCard
-  variant="card"
-  href={`/garden/${slug}/`}
-  title={title}
-  excerpt={excerpt}
-  updatedAt={updatedAt}
-  dateLabel={formatDate(updatedAt)}
-/>
+<Fragment set:html={html} />

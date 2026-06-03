@@ -3,7 +3,6 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
-import preact from "@astrojs/preact";
 import remarkMath from "remark-math";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
@@ -61,7 +60,7 @@ export default defineConfig({
 			platform: "pages",
 			imageService: "compile",
 		}),
-	integrations: [mdx(), preact()],
+	integrations: [mdx()],
 	image: isPagesFunctions
 		? undefined
 		: {

@@ -1,5 +1,5 @@
 ---
-import { NoteCard as PreactNoteCard } from "./preact/NoteCard";
+import { renderNoteCard } from "../lib/card-html";
 import { formatDate } from "../lib/date";
 import { generateNoteId } from "../lib/noteUtils";
 
@@ -37,18 +37,19 @@ const resolvePermalink = (base: string | undefined, id: string) => {
 	const normalized = trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
 	return `${normalized}/#${id}`;
 };
+const html = renderNoteCard({
+	content,
+	source,
+	author,
+	tags,
+	dateLabel: date ? formatDate(date) : undefined,
+	dateTime: date,
+	className,
+	style,
+	id: noteId,
+	dataTags: JSON.stringify(tags),
+	permalinkHref: resolvePermalink(permalinkBase, noteId),
+});
 ---
 
-<PreactNoteCard
-  content={content}
-  source={source}
-  author={author}
-  tags={tags}
-  dateLabel={date ? formatDate(date) : undefined}
-  dateTime={date}
-  className={className}
-  style={style}
-  id={noteId}
-  dataTags={JSON.stringify(tags)}
-  permalinkHref={resolvePermalink(permalinkBase, noteId)}
-/>
+<Fragment set:html={html} />

@@ -11,4 +11,5 @@ export type SearchItem = {
 	source?: string;
 	searchText: string;
 	timestamp: number;
+	html: string;
 };

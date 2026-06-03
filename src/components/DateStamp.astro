@@ -1,5 +1,5 @@
 ---
-import { DateStamp as PreactDateStamp } from "./preact/DateStamp";
+import { renderDateStamp } from "../lib/card-html";
 
 interface Props {
 	datetime: string | Date;
@@ -8,16 +8,7 @@ interface Props {
 }
 
 const { datetime, label = "", class: className } = Astro.props as Props;
+const html = renderDateStamp({ datetime, label, className });
 ---
 
-<PreactDateStamp datetime={datetime} label={label} className={className} />
-
-<style>
-  .hero-feature__date {
-    /* margin: 0;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-size: var(--fs-sm); */
-    color: var(--fg-inverse-soft);
-  }
-</style>
+<Fragment set:html={html} />

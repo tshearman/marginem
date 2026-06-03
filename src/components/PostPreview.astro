@@ -1,5 +1,5 @@
 ---
-import { PostPreview as PreactPostPreview } from "./preact/PostPreview";
+import { renderPostPreview } from "../lib/card-html";
 import { ellipsizeText } from "../lib/text";
 
 interface Props {
@@ -25,20 +25,19 @@ const {
 } = Astro.props as Props;
 
 const EXCERPT_LIMIT = 340;
-
 const excerptSource = abstract || description || "";
 const excerptPreview = ellipsizeText(excerptSource, EXCERPT_LIMIT, {
 	alwaysAppend: true,
 });
+const html = renderPostPreview({
+	id,
+	title,
+	url,
+	pubDate,
+	displayDate,
+	excerpt: excerptPreview,
+	tags,
+});
 ---
 
-<PreactPostPreview
-  id={id}
-  title={title}
-  url={url}
-  pubDate={pubDate}
-  displayDate={displayDate}
-  excerpt={excerptPreview}
-  tags={tags}
-  showLikes={false}
-/>
+<Fragment set:html={html} />

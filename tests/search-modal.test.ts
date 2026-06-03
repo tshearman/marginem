@@ -2,6 +2,11 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SearchItem } from "../src/scripts/search/types";
+import {
+	renderGardenNoteCard,
+	renderNoteCard,
+	renderPostPreview,
+} from "../src/lib/card-html";
 
 type SearchState = { cleanup?: () => void };
 
@@ -118,6 +123,15 @@ describe("search modal script", () => {
 				author: "Author",
 				searchText: "note match alpha",
 				timestamp: 200,
+				html: renderNoteCard({
+					variant: "search",
+					href: "/notes/1",
+					content: "A quick note.",
+					author: "Author",
+					tags: ["notes"],
+					dateLabel: "March 11th, 2024",
+					dateTime: "2024-03-11",
+				}),
 			},
 			{
 				id: "garden-1",
@@ -128,6 +142,13 @@ describe("search modal script", () => {
 				kind: "garden",
 				searchText: "note garden",
 				timestamp: 150,
+				html: renderGardenNoteCard({
+					variant: "search",
+					href: "/garden/entry",
+					title: "Garden Entry",
+					excerpt: "From the garden.",
+					dateLabel: "Updated today",
+				}),
 			},
 			{
 				id: "post-1",
@@ -139,6 +160,15 @@ describe("search modal script", () => {
 				kind: "post",
 				searchText: "note post",
 				timestamp: 100,
+				html: renderPostPreview({
+					id: "post-1",
+					title: "Post Match",
+					url: "/posts/post-match",
+					pubDate: "2023-12-20",
+					displayDate: "December 20th, 2023",
+					excerpt: "Post content.",
+					tags: [],
+				}),
 			},
 		];
 		const fetchMock = mockFetchIndex(searchData);

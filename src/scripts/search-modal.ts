@@ -1,5 +1,3 @@
-import { h, render } from "preact";
-import { SearchResults } from "../components/preact/SearchResults";
 import type { SearchItem } from "./search/types";
 
 // Temporary diagnostics to trace search initialization in build/preview.
@@ -79,7 +77,6 @@ function renderPlaceholder(
 	message: string,
 	className = "search-modal__placeholder",
 ) {
-	render(null, container);
 	container.innerHTML = "";
 	const wrapper = document.createElement("div");
 	wrapper.className = className;
@@ -88,10 +85,8 @@ function renderPlaceholder(
 }
 
 function renderResults(container: HTMLElement, results: SearchItem[]) {
-	// Clear any placeholder content before rendering fresh results.
-	render(null, container);
-	container.innerHTML = "";
-	render(h(SearchResults, { results }), container);
+	// item.html is trusted markup prerendered server-side by /api/search.json.
+	container.innerHTML = results.map((item) => item.html).join("");
 }
 
 let searchRequestId = 0;

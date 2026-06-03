@@ -6,6 +6,12 @@ import { ellipsizeText, normalizeWhitespace } from "../../lib/text";
 import { formatDate } from "../../lib/date";
 import { loadCommonplaceNotes } from "../../lib/commonplace";
 import { withSlugs, type BlogEntry } from "../../lib/content";
+import {
+	renderGardenNoteCard,
+	renderNoteCard,
+	renderPostPreview,
+} from "../../lib/card-html";
+import { KIND_LABELS } from "../../lib/kinds";
 
 export const prerender = true;
 
@@ -22,6 +28,10 @@ type SearchEntry = {
 	author?: string;
 	source?: string;
 	searchText: string;
+	// Prerendered HTML fragment for the search modal. The modal does
+	// `container.innerHTML = matches.map(i => i.html).join('')`, so this
+	// content must be trusted — it's produced here from our own data.
+	html: string;
 };
 
 const stripFormatting = (value = "") =>
@@ -49,15 +59,19 @@ const buildPostEntries = (posts: BlogEntry[]) =>
 			post.data.abstract ??
 			post.data.description ??
 			stripFormatting(post.body ?? "");
+		const snippet = ellipsizeText(snippetSource, 240, { alwaysAppend: true });
+		const displayDate = pubDate ? formatDate(pubDate) : "";
+		const pubIso = pubDate ? pubDate.toISOString() : "";
+		const url = `/posts/${post.slug}/`;
 		return {
 			id: post.slug,
 			kind: "post" as const,
 			title: post.data.title,
-			url: `/posts/${post.slug}/`,
-			snippet: ellipsizeText(snippetSource, 240, { alwaysAppend: true }),
+			url,
+			snippet,
 			tags,
-			displayDate: pubDate ? formatDate(pubDate) : "",
-			pubDate: pubDate ? pubDate.toISOString() : "",
+			displayDate,
+			pubDate: pubIso,
 			timestamp: pubDate ? pubDate.getTime() : 0,
 			searchText: toSearchText([
 				post.data.title,
@@ -66,6 +80,16 @@ const buildPostEntries = (posts: BlogEntry[]) =>
 				post.body ?? "",
 				tags.join(" "),
 			]),
+			html: renderPostPreview({
+				id: post.slug,
+				title: post.data.title,
+				url,
+				pubDate: pubIso,
+				displayDate,
+				excerpt: snippet,
+				tags,
+				kindLabel: KIND_LABELS.writing,
+			}),
 		};
 	});
 
@@ -87,15 +111,19 @@ const buildNoteEntries = (
 			tags,
 			date: noteDate,
 		});
+		const snippet = ellipsizeText(entry.content, 220, { alwaysAppend: true });
+		const displayDate = noteDate ? formatDate(noteDate) : "";
+		const pubIso = noteDate ? noteDate.toISOString() : "";
+		const url = `/commonplace/#${id}`;
 		return {
 			id,
 			kind: "note" as const,
 			title: entry.author ?? "Commonplace note",
-			url: `/commonplace/#${id}`,
-			snippet: ellipsizeText(entry.content, 220, { alwaysAppend: true }),
+			url,
+			snippet,
 			tags,
-			displayDate: noteDate ? formatDate(noteDate) : "",
-			pubDate: noteDate ? noteDate.toISOString() : "",
+			displayDate,
+			pubDate: pubIso,
 			timestamp: noteDate ? noteDate.getTime() : 0,
 			author: entry.author,
 			source: entry.source,
@@ -105,6 +133,17 @@ const buildNoteEntries = (
 				entry.source,
 				tags.join(" "),
 			]),
+			html: renderNoteCard({
+				variant: "search",
+				href: url,
+				content: snippet || entry.author || "",
+				author: entry.author,
+				source: entry.source,
+				tags,
+				dateLabel: displayDate,
+				dateTime: pubIso,
+				kindLabel: KIND_LABELS.note,
+			}),
 		};
 	});
 
@@ -114,15 +153,19 @@ const buildGardenEntries = (
 	gardenNotes.map((note) => {
 		const snippetSource = plainExcerpt(note.content);
 		const tags = note.tags ?? [];
+		const snippet = ellipsizeText(snippetSource, 220, { alwaysAppend: true });
+		const displayDate = formatDate(note.updatedAt);
+		const pubIso = note.updatedAt.toISOString();
+		const url = `/garden/${note.slug}/`;
 		return {
 			id: note.slug,
 			kind: "garden" as const,
 			title: note.title,
-			url: `/garden/${note.slug}/`,
-			snippet: ellipsizeText(snippetSource, 220, { alwaysAppend: true }),
+			url,
+			snippet,
 			tags,
-			displayDate: formatDate(note.updatedAt),
-			pubDate: note.updatedAt.toISOString(),
+			displayDate,
+			pubDate: pubIso,
 			timestamp: note.updatedAt.getTime(),
 			searchText: toSearchText([
 				note.title,
@@ -130,6 +173,15 @@ const buildGardenEntries = (
 				note.content,
 				tags.join(" "),
 			]),
+			html: renderGardenNoteCard({
+				variant: "search",
+				href: url,
+				title: note.title,
+				excerpt: snippet,
+				dateLabel: displayDate,
+				updatedAt: pubIso,
+				kindLabel: KIND_LABELS.garden,
+			}),
 		};
 	});
 
