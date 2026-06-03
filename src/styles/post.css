@@ -18,38 +18,10 @@ body.post-page {
   border-right: 4px solid var(--ink);
 }
 
-body.post-page .site-main {
-  width: 100%;
-  max-width: none;
-  padding: 0;
-  background: var(--paper);
-}
-
-body.post-page .site-footer {
-  margin-top: 4rem;
-  padding: 12px;
-  border-top: 6px solid var(--ink);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  font-family: var(--mono);
-  font-size: var(--fs-2xs);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
 /* When a SubscribeBanner butts up against the footer, drop the top margin —
    the banner already provides its own 6px separator. */
 body.post-page .subscribe-banner + .site-footer {
   margin-top: 0;
-}
-
-body.post-page .site-footer::before {
-  content: "AD MARGINEM";
-}
-body.post-page .site-footer::after {
-  content: "© 2026";
 }
 
 /* ---- ARTICLE FRAME ---- */

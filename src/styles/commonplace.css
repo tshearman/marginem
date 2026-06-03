@@ -17,34 +17,6 @@ body.commonplace-page {
   border-right: 4px solid var(--ink);
 }
 
-body.commonplace-page .site-main {
-  width: 100%;
-  max-width: none;
-  padding: 0;
-  background: var(--paper);
-}
-
-body.commonplace-page .site-footer {
-  margin-top: 4rem;
-  padding: 12px;
-  border-top: 6px solid var(--ink);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  font-family: var(--mono);
-  font-size: var(--fs-2xs);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-body.commonplace-page .site-footer::before {
-  content: "AD MARGINEM";
-}
-body.commonplace-page .site-footer::after {
-  content: "© 2026";
-}
-
 /* ---- PAGE SHELL ---- */
 body.commonplace-page .commonplace-page {
   padding: 24px clamp(16px, 4vw, 48px) 40px;

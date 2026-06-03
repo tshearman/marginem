@@ -17,34 +17,6 @@ body.archive-page {
   border-right: 4px solid var(--ink);
 }
 
-body.archive-page .site-main {
-  width: 100%;
-  max-width: none;
-  padding: 0;
-  background: var(--paper);
-}
-
-body.archive-page .site-footer {
-  margin-top: 4rem;
-  padding: 12px;
-  border-top: 6px solid var(--ink);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  font-family: var(--mono);
-  font-size: var(--fs-2xs);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-body.archive-page .site-footer::before {
-  content: "AD MARGINEM";
-}
-body.archive-page .site-footer::after {
-  content: "© 2026";
-}
-
 /* ---- HERO ---- */
 body.archive-page .archive-hero {
   margin: 0;

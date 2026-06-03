@@ -94,3 +94,58 @@ const {
     border: 0;
   }
 </style>
+
+<style is:global>
+  /* Brutalist chrome shared by all top-level page kinds. Scoped to body
+     classes so 404 / subscribe pages (which set no body class) keep the
+     bare footer from the scoped block above. */
+  body.archive-page .site-main,
+  body.commonplace-page .site-main,
+  body.garden-page .site-main,
+  body.newsletter-page .site-main,
+  body.post-page .site-main {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    background: var(--paper);
+  }
+
+  body.archive-page .site-footer,
+  body.commonplace-page .site-footer,
+  body.garden-page .site-footer,
+  body.newsletter-page .site-footer,
+  body.post-page .site-footer {
+    margin-top: 4rem;
+    padding: 12px;
+    border-top: 6px solid var(--ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: var(--fs-2xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  body.archive-page .site-footer::before,
+  body.commonplace-page .site-footer::before,
+  body.garden-page .site-footer::before,
+  body.newsletter-page .site-footer::before,
+  body.post-page .site-footer::before {
+    content: "AD MARGINEM";
+  }
+
+  body.archive-page .site-footer::after,
+  body.commonplace-page .site-footer::after,
+  body.garden-page .site-footer::after,
+  body.newsletter-page .site-footer::after,
+  body.post-page .site-footer::after {
+    content: "© 2026";
+  }
+
+  /* Newsletter sits flush against its hero banner. */
+  body.newsletter-page .site-footer {
+    margin-top: 0;
+  }
+</style>

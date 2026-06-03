@@ -18,34 +18,6 @@ body.garden-page {
   border-right: 4px solid var(--ink);
 }
 
-body.garden-page .site-main {
-  width: 100%;
-  max-width: none;
-  padding: 0;
-  background: var(--paper);
-}
-
-body.garden-page .site-footer {
-  margin-top: 4rem;
-  padding: 12px;
-  border-top: 6px solid var(--ink);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  font-family: var(--mono);
-  font-size: var(--fs-2xs);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-body.garden-page .site-footer::before {
-  content: "AD MARGINEM";
-}
-body.garden-page .site-footer::after {
-  content: "© 2026";
-}
-
 /* ---- HERO (banner with eyebrow stamp overlay + subtitle strip) ---- */
 body.garden-page .garden-hero {
   margin: 0;
