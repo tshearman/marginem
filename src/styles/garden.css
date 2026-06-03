@@ -1,9 +1,12 @@
 /*
- * Brutalist garden styles. Loaded by the garden landing layout and the
- * garden entry page via the `garden-page` body class. The entry page
- * additionally sets `post-page` so it inherits the article body styles in
- * post.css verbatim — this stylesheet only adds garden-specific bits
- * (hero, card grid, breadcrumbs, backlinks, neighbor graph).
+ * Brutalist garden styles. Loaded by two distinct consumers — GardenLayout
+ * (folder/index views) and pages/garden/[...slug].astro (note view, which
+ * bypasses GardenLayout to compose its own header) — so these rules live
+ * in a shared file rather than a single layout's <style is:global>.
+ *
+ * The note view additionally sets `post-page` so it inherits the article
+ * body styles in post.css verbatim; this file only adds garden-specific
+ * bits (hero, card grid, breadcrumbs, backlinks, neighbor graph).
  */
 
 /* ---- PAGE FRAME (matches commonplace + post) ---- */

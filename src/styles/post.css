@@ -1,9 +1,13 @@
 /*
- * Brutalist post page styles. Loaded only by PostLayout.astro.
- * Selectors are global — they override BaseLayout's neutral chrome so post
- * pages adopt the same brutalist frame, tokens, and type scale as the
- * homepage (see src/styles/home.css). Where possible we reuse those rules
- * verbatim rather than reinventing them.
+ * Brutalist post page styles. Loaded by two consumers — PostLayout (the
+ * blog/newsletter article layout) and pages/garden/[...slug].astro (the
+ * note view, which uses BaseLayout directly + pulls in this file plus
+ * garden.css for the article body styling) — so these rules live in a
+ * shared file rather than a single layout's <style is:global>.
+ *
+ * Selectors are global; they override BaseLayout's neutral chrome so
+ * post pages adopt the same brutalist frame as the homepage. Where
+ * possible we reuse rules from home.css verbatim.
  */
 
 /* ---- PAGE FRAME (matches homepage body) ---- */
