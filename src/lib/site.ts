@@ -12,15 +12,6 @@ export const MAIN_PAGES = {
 		description:
 			"Longer form writing on mathematics, computing, learning, games, and anything else.",
 	},
-	about: {
-		label: "About",
-		href: "/about/",
-		icon: "about",
-		isCompact: true,
-		pageTitle: `About | ${SITE_NAME}`,
-		eyebrow: "About",
-		description: "Notes on the work, the newsletter, and how to reach me.",
-	},
 	commonplace: {
 		label: "Commonplace",
 		href: "/commonplace/",
@@ -68,5 +59,4 @@ export const MAIN_NAV = [
 	MAIN_PAGES.garden,
 	MAIN_PAGES.newsletter,
 	MAIN_PAGES.archive,
-	MAIN_PAGES.about,
 ];

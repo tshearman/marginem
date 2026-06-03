@@ -1,11 +1,12 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PageIntro from "../../components/PageIntro.astro";
+import Banner from "../../components/Banner.astro";
 import ArchiveEntry from "../../components/ArchiveEntry.astro";
 import SubscribeForm from "../../components/SubscribeForm.astro";
 import { getCollection } from "astro:content";
 import { withSlugs } from "../../lib/content";
 import { MAIN_PAGES } from "../../lib/site";
+import "../../styles/newsletter.css";
 
 const newsletters = withSlugs(
 	await getCollection("newsletter", ({ data }) => !data.draft),
@@ -14,59 +15,56 @@ const newsletters = withSlugs(
 
 <BaseLayout
   title={MAIN_PAGES.newsletter.pageTitle}
-  description={MAIN_PAGES.newsletter.label}
+  description={MAIN_PAGES.newsletter.description}
   hero={MAIN_PAGES.newsletter.label}
   showHero={false}
   activePage={MAIN_PAGES.newsletter.label}
+  bodyClass="newsletter-page"
 >
-  <PageIntro
-    eyebrow={MAIN_PAGES.newsletter.eyebrow}
-    title={MAIN_PAGES.newsletter.label}
-    description={MAIN_PAGES.newsletter.description}
-  />
-  <section class="newsletter-archive">
-    <div class="newsletter-archive__list">
-      {
-        newsletters.length ? (
-          newsletters.map((entry) => (
-            <ArchiveEntry
-              title={`Issue ${entry.data.issueNumber}: ${entry.data.title}`}
-              url={`/newsletter/${entry.slug}/`}
-              date={entry.data.pubDate}
-              description={entry.data.description}
-              tags={entry.data.tags}
-            />
-          ))
-        ) : (
-          <p class="newsletter-archive__empty">
-            No newsletters yet. Subscribe to get the first issue.
-          </p>
-        )
-      }
+  <div class="newsletter-hero">
+    <div class="newsletter-hero__banner">
+      <Banner
+        text="NEWSLETTER"
+        textNarrow={"NEWS\nLETTER"}
+        height={140}
+        srLabel={MAIN_PAGES.newsletter.label}
+      />
+      <span class="newsletter-hero__eyebrow">{MAIN_PAGES.newsletter.eyebrow}</span>
     </div>
-    <div class="newsletter-archive__subscribe">
-      <SubscribeForm variant="compact" redirectUrl="/subscribe/confirmed" />
-    </div>
-  </section>
+  </div>
+
+  <div class="newsletter-grid">
+    <section class="newsletter-grid__issues" aria-labelledby="newsletter-archive-label">
+      <h2 id="newsletter-archive-label" class="newsletter-section__label">Back Issues</h2>
+      <p class="newsletter-issues__intro">{MAIN_PAGES.newsletter.description}</p>
+      <div class="newsletter-archive__list">
+        {
+          newsletters.length ? (
+            newsletters.map((entry) => (
+              <ArchiveEntry
+                title={`Issue ${entry.data.issueNumber}: ${entry.data.title}`}
+                url={`/newsletter/${entry.slug}/`}
+                date={entry.data.pubDate}
+                description={entry.data.description}
+                tags={entry.data.tags}
+              />
+            ))
+          ) : (
+            <p class="newsletter-archive__empty">
+              No newsletters yet. Subscribe to get the first issue.
+            </p>
+          )
+        }
+      </div>
+    </section>
+
+    <aside class="newsletter-grid__subscribe" aria-labelledby="newsletter-subscribe-label">
+      <h2 id="newsletter-subscribe-label" class="newsletter-section__label newsletter-section__label--invert">Subscribe</h2>
+      <p class="newsletter-subscribe__intro">
+        Occasional dispatches from the margins &mdash; new essays, notes, and
+        whatever else is drying on the page.
+      </p>
+      <SubscribeForm variant="compact" redirectUrl="/subscribe/confirmed" invert />
+    </aside>
+  </div>
 </BaseLayout>
-
-<style>
-  .newsletter-archive {
-    display: grid;
-    gap: 2.5rem;
-    margin-bottom: 3rem;
-  }
-
-  .newsletter-archive__subscribe h2 {
-    margin: 0 0 1rem;
-  }
-
-  .newsletter-archive__list {
-    display: grid;
-    gap: 1rem;
-  }
-
-  .newsletter-archive__empty {
-    color: rgb(var(--ink-rgb) / 0.7);
-  }
-</style>

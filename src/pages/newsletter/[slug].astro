@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry, render } from "astro:content";
-import NewsletterLayout from "../../layouts/NewsletterLayout.astro";
+import PostLayout from "../../layouts/PostLayout.astro";
+import SubscribeBanner from "../../components/SubscribeBanner.astro";
 import { withSlugs } from "../../lib/content";
 
 export const prerender = true;
@@ -25,9 +26,28 @@ if (!entry) {
 }
 
 const { Content } = await render(entry);
-const frontmatter = entry.data;
+const { title, description, pubDate, tags, issueNumber } = entry.data;
+
+const eyebrow =
+	typeof issueNumber === "number"
+		? `Newsletter · Issue #${issueNumber}`
+		: "Newsletter";
+
+const postFrontmatter = {
+	title,
+	description,
+	pubDate,
+	tags,
+};
 ---
 
-<NewsletterLayout frontmatter={frontmatter} slug={slug} activePage="Newsletter">
+<PostLayout
+  frontmatter={postFrontmatter}
+  activePage="Newsletter"
+  showHero={false}
+  eyebrow={eyebrow}
+  showAbstract={false}
+>
   <Content />
-</NewsletterLayout>
+  <SubscribeBanner slot="after-body" invert />
+</PostLayout>

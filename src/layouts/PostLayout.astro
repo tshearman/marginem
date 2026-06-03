@@ -2,6 +2,7 @@
 import BaseLayout from "./BaseLayout.astro";
 import TagList from "../components/TagList.astro";
 import DateStamp from "../components/DateStamp.astro";
+import { POST_BANNERS } from "../assets/post-banners";
 import { formatDate } from "../lib/date";
 import { SITE_NAME } from "../lib/site";
 import "../styles/post.css";
@@ -13,14 +14,24 @@ interface Frontmatter {
 	abstract?: string;
 	pubDate?: string | Date;
 	tags?: string[];
+	heroImage?: string;
 }
 
 interface Props {
 	frontmatter: Frontmatter;
 	activePage?: string;
+	showHero?: boolean;
+	eyebrow?: string;
+	showAbstract?: boolean;
 }
 
-const { frontmatter: rawFrontmatter, activePage } = Astro.props as Props;
+const {
+	frontmatter: rawFrontmatter,
+	activePage,
+	showHero = true,
+	eyebrow = "Essay",
+	showAbstract = true,
+} = Astro.props as Props;
 const frontmatter = rawFrontmatter ?? {};
 const pubDate =
 	typeof frontmatter.pubDate === "string" || frontmatter.pubDate instanceof Date
@@ -50,20 +61,28 @@ const subtitle =
 		: undefined;
 const description =
 	typeof frontmatter.description === "string" ? frontmatter.description : "";
+// Per-post banner: look up the dithered B&W src by heroImage URL. Posts
+// without a heroImage (or with one not yet processed by `npm run banner:image`)
+// transparently fall back to the default site banner.
+const bannerSrc =
+	typeof frontmatter.heroImage === "string"
+		? POST_BANNERS[frontmatter.heroImage]
+		: undefined;
 ---
 
 <BaseLayout
   title={`${title} | ${SITE_NAME}`}
   description={description}
   hero={title}
-  showHero={true}
+  bannerSrc={bannerSrc}
+  showHero={showHero}
   includeFootnotes={true}
   activePage={activePage}
   bodyClass="post-page"
 >
   <div class="post-shell">
     <section class="paper-title">
-      <p class="paper-title__eyebrow">Essay</p>
+      <p class="paper-title__eyebrow">{eyebrow}</p>
       <h1 class="paper-title__heading">{title}</h1>
       {
         subtitle ? (
@@ -93,7 +112,7 @@ const description =
         ) : null
       }
       {
-        abstractText ? (
+        showAbstract && abstractText ? (
           <section class="paper-abstract">
             <strong class="paper-abstract__heading">Abstract</strong>
             <p class="paper-abstract__body">{abstractText}</p>
@@ -105,4 +124,5 @@ const description =
       <slot />
     </article>
   </div>
+  <slot name="after-body" />
 </BaseLayout>

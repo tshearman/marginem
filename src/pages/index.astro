@@ -6,8 +6,10 @@ import { withSlugs, type BlogEntry } from "../lib/content";
 import { loadCommonplaceNotes } from "../lib/commonplace";
 import { KIND_LABELS } from "../lib/kinds";
 import favicon from "../assets/favicon.png";
+import bannerSrcUrl from "../assets/banners/notebook_banner_c.webp?url";
 import Masthead from "../components/Masthead.astro";
 import Banner from "../components/Banner.astro";
+import SubscribeBanner from "../components/SubscribeBanner.astro";
 import "../styles/home.css";
 
 export const prerender = true;
@@ -80,12 +82,18 @@ const postCount = posts.length;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="icon" href={favicon.src} type="image/png" />
+    <link
+      rel="preload"
+      as="image"
+      href={bannerSrcUrl}
+      type="image/webp"
+      fetchpriority="high"
+    />
   </head>
   <body>
     <Masthead activePage="Writing" />
     <Banner
       text="MARGINEM"
-      textNarrow={"MARG\nINEM"}
       srLabel="Ad Marginem — Notes from the margins"
     />
 
@@ -101,7 +109,7 @@ const postCount = posts.length;
         <p class="stat">
           {postCount} essays<br />+ commonplace &amp; garden<br />1 newsletter
         </p>
-        <p><a class="btn btn-invert" href="#subscribe">Subscribe</a></p>
+        <p><a class="btn btn--invert" href="#subscribe">Subscribe</a></p>
       </div>
 
       {
@@ -148,40 +156,7 @@ const postCount = posts.length;
       </p>
     </section>
 
-    <section class="block" id="subscribe">
-      <h2>Subscribe</h2>
-      <p>
-        Get notified when a new essay or note goes up. Occasional updates,
-        no spam, unsubscribe anytime.
-      </p>
-      <form class="reg-form" action="/api/subscribe" method="post">
-        <div class="reg-cols">
-          <div class="form-row">
-            <label for="subscribe-email">Email</label>
-            <input
-              id="subscribe-email"
-              name="email"
-              type="email"
-              autocomplete="email"
-              inputmode="email"
-              required
-              placeholder="you@example.com"
-            />
-          </div>
-          <div class="form-row">
-            <label for="subscribe-name">What should I call you?</label>
-            <input
-              id="subscribe-name"
-              name="name"
-              type="text"
-              autocomplete="name"
-              placeholder="Optional"
-            />
-          </div>
-        </div>
-        <input type="submit" value="Subscribe" class="btn" />
-      </form>
-    </section>
+    <SubscribeBanner invert />
 
     <footer>
       <span>{SITE_NAME}</span>

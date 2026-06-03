@@ -2,6 +2,7 @@
 @import "./prism-vs.css";
 @import "./typography.css";
 @import "./page-texture.css";
+@import "./buttons.css";
 
 :root {
   color-scheme: light;
@@ -19,13 +20,18 @@
   --bg-subtle: #f8fafc;
   --surface: #ffffff;
 
-  --ink: #0f172a;
-  --ink-rgb: 15 23 42;
+  /* True black — matches the homepage and the Banner. The previous value
+     (#0f172a) was a dark slate-blue and tinted every page that loaded
+     global.css, clashing visibly against the pure-black banner. */
+  --ink: #000;
+  --ink-rgb: 0 0 0;
   --fg: var(--ink);
   --muted: rgb(var(--ink-rgb) / 0.7);
   --muted-soft: rgb(var(--ink-rgb) / 0.6);
   --muted-strong: rgb(var(--ink-rgb) / 0.85);
 
+  /* Syntax-highlighting accents (Prism + decorative use only — links,
+     buttons, and hover states should use --ink / --highlight). */
   --accent: #0ea5e9;
   --accent-2: #10b981;
   --accent-3: #84cc16;
@@ -110,7 +116,7 @@
 
 .footnote-panel__number {
   font-weight: 600;
-  color: var(--accent);
+  color: var(--ink);
 }
 
 .footnote-panel__text {

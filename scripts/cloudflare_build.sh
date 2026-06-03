@@ -19,6 +19,9 @@ case "$BRANCH" in
 		printf '  RESEND_FROM_EMAIL: %s\n' "${RESEND_FROM_EMAIL:-missing}"
 		printf '  RESEND_FROM_NAME: %s\n' "${RESEND_FROM_NAME:-missing}"
 		printf '  NEWSLETTER_SITE_URL: %s\n' "${NEWSLETTER_SITE_URL:-missing}"
+		# Generate per-post dithered banners + the heroImage→asset map before
+		# astro build. Cached entries are skipped on subsequent runs.
+		node scripts/optimize-banner.mjs
 		PAGES_FUNCTIONS=true RUN_CODE_SNIPPETS=false astro build
 		;;
 	*)

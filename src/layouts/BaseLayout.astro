@@ -5,11 +5,16 @@ import Masthead from "../components/Masthead.astro";
 import Banner from "../components/Banner.astro";
 import { SITE_NAME } from "../lib/site";
 import favicon from "../assets/favicon.png";
+import bannerSrcUrl from "../assets/banners/notebook_banner_c.webp?url";
 
 interface BaseLayoutProps {
 	title?: string;
 	description?: string;
 	hero?: string;
+	/** Optional per-page banner image src. Defaults to Banner's own default
+	 *  (the site-wide notebook banner) when omitted. PostLayout uses this
+	 *  to forward a heroImage-derived dithered banner. */
+	bannerSrc?: string;
 	showHero?: boolean;
 	includeFootnotes?: boolean;
 	activePage?: string;
@@ -20,6 +25,7 @@ const {
 	title = SITE_NAME,
 	description = "Explorations in math, code, and visualization",
 	hero = SITE_NAME,
+	bannerSrc,
 	showHero = true,
 	includeFootnotes = false,
 	activePage,
@@ -35,6 +41,13 @@ const {
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="icon" href={favicon.src} type="image/png" />
+    <link
+      rel="preload"
+      as="image"
+      href={bannerSrcUrl}
+      type="image/webp"
+      fetchpriority="high"
+    />
   </head>
   <body class={bodyClass}>
     <Masthead activePage={activePage} />
@@ -42,6 +55,7 @@ const {
       showHero && (
         <Banner
           text={hero.toUpperCase()}
+          src={bannerSrc}
           srLabel={hero}
         />
       )

@@ -11,6 +11,7 @@
 @import "./fonts.css";
 @import "./page-texture.css";
 @import "./type-scale.css";
+@import "./buttons.css";
 
 :root {
   --display: "Arial Black", Helvetica, sans-serif;
@@ -19,7 +20,9 @@
   --paper: #fff; /* card + page background, inverted text */
   --highlight: #ffe600; /* single source for hot-yellow highlight + drop shadow (mirrored in global.css) */
   --accent: var(--highlight); /* button hover */
-  --shadow: var(--highlight); /* drop shadow — also read by banner.ts via getComputedStyle */
+  --shadow: var(
+    --highlight
+  ); /* drop shadow — also read by banner.ts via getComputedStyle */
   --page: #e8e8e8; /* backdrop outside the frame */
 }
 
@@ -192,7 +195,7 @@ footer {
   justify-content: space-between;
   gap: 18px;
   padding: 10px 0;
-  border-bottom: 1px dotted var(--ink);
+  /* border-bottom: 1px dotted var(--ink); */
 }
 .index__body {
   flex: 1;
@@ -234,67 +237,9 @@ footer {
   white-space: nowrap;
 }
 
-/* ---- BUTTONS ---- */
-.btn {
-  display: inline-block;
-  padding: 10px 18px;
-  font-family: var(--mono);
-  font-size: var(--fs-base);
-  font-weight: bold;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: var(--ink);
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  box-shadow: 6px 6px 0 var(--ink);
-  cursor: pointer;
-}
-.btn:hover {
-  background: var(--accent);
-  box-shadow: 3px 3px 0 var(--ink);
-  transform: translate(3px, 3px);
-}
-.btn-invert {
-  color: var(--paper);
-  background: var(--ink);
-  border-color: var(--paper);
-  box-shadow: 6px 6px 0 var(--paper);
-}
-.btn-invert:hover {
-  color: var(--ink);
-  background: var(--accent);
-  box-shadow: 3px 3px 0 var(--paper);
-}
+/* Button styles live in buttons.css and are shared with the rest of the site. */
 
-/* ---- SUBSCRIBE FORM ---- */
-.reg-cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-}
-.form-row {
-  margin: 0 0 12px;
-}
-.reg-form label {
-  display: block;
-  margin: 0 0 4px;
-  font-size: var(--fs-2xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.reg-form input[type="email"],
-.reg-form input[type="text"] {
-  width: 100%;
-  padding: 8px;
-  font-family: var(--mono);
-  font-size: var(--fs-base);
-  background: var(--paper);
-  border: 3px solid var(--ink);
-}
-.reg-form input:focus {
-  outline: 3px solid var(--accent);
-  outline-offset: 0;
-}
+/* Subscribe form lives in SubscribeBanner.astro (also used on long-form pages). */
 
 /* ---- MOBILE ---- */
 @media (max-width: 720px) {
@@ -306,9 +251,6 @@ footer {
   }
   .tall {
     grid-row: auto;
-  }
-  .reg-cols {
-    grid-template-columns: 1fr;
   }
   .index li {
     flex-direction: column;

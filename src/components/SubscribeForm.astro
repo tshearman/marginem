@@ -5,20 +5,22 @@ interface Props {
   idBase?: string;
   variant?: "default" | "compact";
   redirectUrl?: string;
+  invert?: boolean;
 }
 
 const {
   action = "/api/subscribe",
   method = "post",
   idBase = "subscribe",
+  invert = false,
 } = Astro.props as Props;
 
 const emailId = `${idBase}-email`;
 const nameId = `${idBase}-name`;
+const buttonClass = ["btn", invert ? "btn--invert" : null].filter(Boolean).join(" ");
 ---
 
 <div>
-  <!-- <h2>Get notified of updates!</h2> -->
   <form class="subscribe-form" action={action} method={method}>
     <h2>Subscribe for notifications on new posts!</h2>
     <div class="subscribe-form__field">
@@ -43,7 +45,7 @@ const nameId = `${idBase}-name`;
         placeholder="Optional"
       />
     </div>
-    <button type="submit">Subscribe</button>
+    <button type="submit" class={buttonClass}>Subscribe</button>
     <p class="subscribe-form__note">
       Occasional updates, no spam. Unsubscribe anytime.
     </p>
@@ -89,7 +91,7 @@ const nameId = `${idBase}-name`;
     background: var(--bg);
     transition:
       border-color 0.2s ease,
-      /* box-shadow 0.2s ease, */ background 0.2s ease;
+      background 0.2s ease;
   }
 
   .subscribe-form input:focus {
@@ -99,31 +101,8 @@ const nameId = `${idBase}-name`;
     box-shadow: 0 0 0 3px rgb(var(--ink-rgb) / 0.1);
   }
 
-  @media (max-width: 760px) {
-    .subscribe-form input {
-      font-size: var(--fs-md);
-    }
-  }
-
-  .subscribe-form button {
-    justify-self: center;
-    padding: 0.7rem 1.4rem;
-    border-radius: 999px;
-    border: var(--thin-border);
-    background: var(--fg);
-    color: var(--fg-inverse);
-    font-size: var(--fs-base);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition:
-      transform 0.15s ease,
-      background 0.2s ease;
-  }
-
-  .subscribe-form button:focus-visible {
-    outline: 2px solid rgb(var(--ink-rgb) / 0.6);
-    outline-offset: 3px;
+  .subscribe-form .btn {
+    justify-self: start;
   }
 
   .subscribe-form__note {

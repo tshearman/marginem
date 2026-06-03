@@ -27,7 +27,7 @@ body {
    `text-decoration` rather than a background-image trick so descenders on
    g/y/p/q/j break the underline. */
 a {
-  color: var(--accent);
+  color: var(--ink);
   text-decoration-line: underline;
   text-decoration-style: dashed;
   text-decoration-color: var(--thin-border-color);
@@ -38,7 +38,7 @@ a {
 
 a:hover {
   text-decoration-style: solid;
-  text-decoration-color: var(--fg);
+  text-decoration-color: var(--ink);
   text-decoration-thickness: 1.5px;
 }
 

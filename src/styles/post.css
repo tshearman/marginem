@@ -107,6 +107,12 @@ body.post-page .site-footer {
   letter-spacing: 0.04em;
 }
 
+/* When a SubscribeBanner butts up against the footer, drop the top margin —
+   the banner already provides its own 6px separator. */
+body.post-page .subscribe-banner + .site-footer {
+  margin-top: 0;
+}
+
 body.post-page .site-footer::before {
   content: "AD MARGINEM";
 }

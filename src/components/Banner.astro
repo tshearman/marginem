@@ -1,4 +1,7 @@
 ---
+import { DEFAULT_CONFIG } from "../scripts/banner";
+import bannerSrcUrl from "../assets/banners/notebook_banner_c.webp?url";
+
 interface BannerProps {
 	text: string;
 	textNarrow?: string;
@@ -15,18 +18,20 @@ interface BannerProps {
 const {
 	text,
 	textNarrow,
-	src = "/banners/notebook_banner_c.png",
+	src = bannerSrcUrl,
 	height = 300,
-	pixel = 1,
+	pixel = DEFAULT_CONFIG.pixel,
 	invert = true,
 	shadowDx = 5,
 	shadowDy = 5,
 	narrowMax = 720,
 	srLabel,
 } = Astro.props as BannerProps;
+
+const bannerStyle = `--banner-h:${height}px;background-image:url(${src});`;
 ---
 
-<div class="banner" style={`--banner-h:${height}px;background-image:url(${src});`}>
+<div class="banner" style={bannerStyle}>
   <canvas
     data-banner
     data-src={src}
@@ -42,6 +47,22 @@ const {
   <h1 class="sr-only">{srLabel ?? text}</h1>
 </div>
 
+<script is:inline define:vars={{ src }}>
+  // Start fetching + decoding the banner image during HTML parse, before the
+  // deferred banner module loads. The module picks this up from
+  // window.__bannerImgs to skip its own request.
+  (function () {
+    var w = window;
+    var bag = (w.__bannerImgs = w.__bannerImgs || {});
+    if (bag[src]) return;
+    var img = new Image();
+    img.decoding = "async";
+    img.fetchPriority = "high";
+    img.src = src;
+    if (img.decode) img.decode().catch(function () {});
+    bag[src] = img;
+  })();
+</script>
 <script>
   import "../scripts/banner.ts";
 </script>
@@ -52,15 +73,24 @@ const {
     width: min(860px, 100%);
     margin: 0 auto;
     background-color: #000;
-    background-size: cover;
+    /* Fixed natural size keyed to the canvas's CSS width — the canvas, the
+       CSS background, and the image content all live at the same 1:1 scale
+       regardless of viewport. Narrow viewports see a centered crop of the
+       composite, not a downscaled version. */
+    background-size: 860px auto;
     background-position: center;
     background-repeat: no-repeat;
     line-height: 0;
     border-bottom: 6px solid #000;
     min-height: var(--banner-h, 300px);
+    overflow: hidden;
   }
   .banner canvas {
     display: block;
+    /* Canvas adapts to the parent's width — so the title text reflows to fit
+       narrow viewports. The IMAGE content drawn into the canvas uses a fixed
+       scale (see banner.ts), so the image stays at its natural pixel size and
+       narrow viewports show a centered crop of it. */
     width: 100%;
     height: var(--banner-h, 300px);
   }

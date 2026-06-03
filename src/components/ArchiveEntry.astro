@@ -12,6 +12,10 @@ interface Props {
 	abstract?: string;
 	tags?: string[];
 	class?: string;
+	// When set, renders the year below the month/day. Used for archive items
+	// whose own date can disagree with the year they're grouped under (e.g.
+	// commonplace notes grouped by date-added but displaying the source date).
+	showYear?: boolean;
 }
 
 const {
@@ -22,15 +26,20 @@ const {
 	abstract = "",
 	tags = [],
 	class: className = "",
+	showYear = false,
 } = Astro.props as Props;
 
 const dateLabel = formatDate(date, { month: "long", day: "numeric" });
+const yearLabel = showYear
+	? date.toLocaleDateString("en-US", { year: "numeric" })
+	: "";
 const preview = ellipsizeText(abstract || description || "", 220);
 ---
 
 <article class={`archive-entry ${className}`} data-tags={JSON.stringify(tags)}>
   <div class="archive-entry__meta">
     <DateStamp datetime={date} label={dateLabel} />
+    {yearLabel ? <span class="archive-entry__year">{yearLabel}</span> : null}
   </div>
   <div class="archive-entry__body">
     <h3 class="archive-entry__title">
@@ -49,19 +58,25 @@ const preview = ellipsizeText(abstract || description || "", 220);
   </div>
 </article>
 
-<style>
+<style is:global>
+  /* Brutalist archive list row — dotted-rule separators, display-font title,
+     mono meta. Inherits the same look on every brutalist page (newsletter,
+     archive). */
   .archive-entry {
+    position: relative;
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 1.25rem;
-    border-radius: 1rem;
-    background: var(--bg);
-    transition: border-color 0.2s ease;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 14px;
+    padding: 12px 8px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    transition: background-color 0.12s ease;
   }
 
   .archive-entry:hover {
-    border-color: var(--thin-border-color);
+    background: var(--highlight);
   }
 
   .archive-entry.hidden {
@@ -69,16 +84,50 @@ const preview = ellipsizeText(abstract || description || "", 220);
   }
 
   .archive-entry__meta {
-    font-size: var(--fs-base);
+    flex: none;
+    min-width: 5.5rem;
+    font-family: var(--mono);
+    font-size: var(--fs-3xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(var(--ink-rgb) / 0.7);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .archive-entry__meta .date-stamp {
+    font-style: normal;
+    color: inherit;
+  }
+
+  .archive-entry__year {
     display: inline-block;
+    font-family: var(--mono);
+    font-size: var(--fs-3xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: rgb(var(--ink-rgb) / 0.55);
+  }
+
+  .archive-entry__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .archive-entry__title {
     margin: 0;
-    font-size: var(--fs-xl);
+    font-family: var(--display);
+    font-size: var(--fs-md);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
 
   .archive-entry__title a {
@@ -87,34 +136,52 @@ const preview = ellipsizeText(abstract || description || "", 220);
   }
 
   .archive-entry__title a:hover {
-    text-decoration: underline;
+    text-decoration: none;
   }
 
   .archive-entry__excerpt {
-    margin: 0.35rem 0 0;
-    color: rgb(var(--ink-rgb) / 0.8);
+    margin: 0;
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+    color: var(--ink);
   }
 
   .archive-entry__tags {
-    margin-top: 0.5rem;
+    margin-top: 4px;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
+    gap: 6px;
   }
 
-  @media (min-width: 761px) {
+  .archive-entry .tag {
+    border-radius: 0;
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: var(--fs-3xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .archive-entry .tag:hover {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  @media (max-width: 720px) {
     .archive-entry {
-      flex-direction: row;
+      flex-direction: column;
       align-items: flex-start;
-      gap: 1rem;
+      gap: 6px;
     }
-
     .archive-entry__meta {
-      min-width: 7rem;
-    }
-
-    .archive-entry__body {
-      flex: 1;
+      min-width: 0;
     }
   }
 </style>
