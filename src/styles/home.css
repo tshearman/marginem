@@ -8,10 +8,8 @@
  */
 
 /* @import must precede every other rule per CSS spec — keep these at the top. */
-@import "./fonts.css";
-@import "./page-texture.css";
+@import "./primitives.css";
 @import "./type-scale.css";
-@import "./buttons.css";
 
 :root {
   --display: "Arial Black", Helvetica, sans-serif;

@@ -59,9 +59,11 @@ const preview = ellipsizeText(abstract || description || "", 220);
 </article>
 
 <style is:global>
-  /* Brutalist archive list row — dotted-rule separators, display-font title,
-     mono meta. Inherits the same look on every brutalist page (newsletter,
-     archive). */
+  /* `is:global` because archive/newsletter pages render dozens of these in
+     a loop — scoped styles would add a data-astro-cid attribute to every
+     element of every entry, bloating the rendered HTML substantially. The
+     selectors are namespaced under `.archive-entry`, which limits leakage
+     to other components. */
   .archive-entry {
     position: relative;
     display: flex;

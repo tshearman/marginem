@@ -1,8 +1,6 @@
-@import "./fonts.css";
+@import "./primitives.css";
 @import "./prism-vs.css";
 @import "./typography.css";
-@import "./page-texture.css";
-@import "./buttons.css";
 @import "./cards.css";
 
 :root {

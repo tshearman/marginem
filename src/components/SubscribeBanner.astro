@@ -64,6 +64,10 @@ const buttonClass = ["btn", invert ? "btn--invert" : null].filter(Boolean).join(
 </section>
 
 <style is:global>
+  /* `is:global` so per-page overrides (e.g. `body.post-page
+     .subscribe-banner + .site-footer { margin-top: 0 }` in post.css) can
+     target this banner's classes without fighting scoped specificity. The
+     selectors are namespaced under `.subscribe-banner`. */
   .subscribe-banner {
     padding: 18px;
     border-top: 6px solid var(--ink);
