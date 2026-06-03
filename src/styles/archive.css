@@ -24,20 +24,6 @@ body.archive-page .site-main {
   background: var(--paper);
 }
 
-body.archive-page .site-nav {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 6px 12px;
-  background: var(--paper);
-  border-bottom: 6px solid var(--ink);
-  font-family: var(--mono);
-  font-size: var(--fs-2xs);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  gap: 12px;
-}
-
 body.archive-page .site-footer {
   margin-top: 4rem;
   padding: 12px;
