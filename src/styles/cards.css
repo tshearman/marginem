@@ -129,10 +129,6 @@ a.note-card {
   opacity: 1;
 }
 
-.note-content-wrapper {
-  position: relative;
-}
-
 .note-content {
   margin-bottom: 1rem;
 }
