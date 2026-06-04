@@ -1,84 +1,15 @@
 /*
- * Brutalist homepage styles (Ad Marginem).
+ * Homepage-specific layout (Ad Marginem landing page).
  *
- * Loaded only by src/pages/index.astro, which renders its own standalone
- * document and does NOT use BaseLayout/global.css — so although the selectors
- * here are global, this stylesheet only ships on the homepage and cannot leak
- * into the rest of the site.
+ * Loaded by src/pages/index.astro, which uses BaseLayout — so the page frame,
+ * masthead, banner, footer, palette tokens, and shared primitives all come
+ * from global.css / brutalist-page.css. This file only owns the bits that are
+ * unique to the homepage: the section grid, the dark "tall" cell, the
+ * "Still Drying" index list, and the bespoke 6px masthead border.
  */
-
-/* @import must precede every other rule per CSS spec — keep these at the top. */
-@import "./primitives.css";
-@import "./type-scale.css";
-
-:root {
-  --display: "Arial Black", Helvetica, sans-serif;
-  --mono: "iA Writer Duo", "Courier New", Courier, monospace;
-  --ink: #000; /* borders, body text, dark fills */
-  --paper: #fff; /* card + page background, inverted text */
-  --highlight: #ffe600; /* single source for hot-yellow highlight + drop shadow (mirrored in global.css) */
-  --accent: var(--highlight); /* button hover */
-  --shadow: var(
-    --highlight
-  ); /* drop shadow — also read by banner.ts via getComputedStyle */
-  --page: #e8e8e8; /* backdrop outside the frame */
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  max-width: 860px;
-  margin: 0 auto;
-  font-family: var(--mono);
-  line-height: 1.4;
-  color: var(--ink);
-  background: var(--paper);
-  border-left: 4px solid var(--ink);
-  border-right: 4px solid var(--ink);
-}
-
-a {
-  color: var(--ink);
-}
 
 .masthead {
   border-bottom: 6px solid var(--ink);
-}
-
-/* The top meta strip is rendered (and styled) by Masthead.astro using
-   scoped styles — only the page footer needs declaring here. */
-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  font-size: var(--fs-2xs);
-  text-transform: uppercase;
-  border-top: 6px solid var(--ink);
-}
-
-/* ---- BANNER (image masthead with composited title) ---- */
-.banner {
-  background: var(--ink);
-  line-height: 0;
-}
-.banner canvas {
-  display: block;
-  width: 100%;
-}
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 /* ---- GRID ---- */

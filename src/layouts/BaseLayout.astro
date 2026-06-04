@@ -1,11 +1,11 @@
 ---
 import "../styles/global.css";
+import "../styles/brutalist-page.css";
 import "katex/dist/katex.min.css";
 import Masthead from "../components/Masthead.astro";
 import Banner from "../components/Banner.astro";
+import HtmlHead from "../components/HtmlHead.astro";
 import { SITE_NAME } from "../lib/site";
-import favicon from "../assets/favicon.png";
-import bannerSrcUrl from "../assets/banners/notebook_banner_c.webp?url";
 
 interface BaseLayoutProps {
 	title?: string;
@@ -15,6 +15,10 @@ interface BaseLayoutProps {
 	 *  (the site-wide notebook banner) when omitted. PostLayout uses this
 	 *  to forward a heroImage-derived dithered banner. */
 	bannerSrc?: string;
+	/** Screen-reader label for the banner. Defaults to `hero` when omitted —
+	 *  the homepage uses this to expose the full tagline to assistive tech
+	 *  while keeping the painted title short. */
+	bannerSrLabel?: string;
 	showHero?: boolean;
 	includeFootnotes?: boolean;
 	activePage?: string;
@@ -26,6 +30,7 @@ const {
 	description = "Explorations in math, code, and visualization",
 	hero = SITE_NAME,
 	bannerSrc,
+	bannerSrLabel,
 	showHero = true,
 	includeFootnotes = false,
 	activePage,
@@ -36,18 +41,7 @@ const {
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="icon" href={favicon.src} type="image/png" />
-    <link
-      rel="preload"
-      as="image"
-      href={bannerSrcUrl}
-      type="image/webp"
-      fetchpriority="high"
-    />
+    <HtmlHead title={title} description={description} />
   </head>
   <body class={bodyClass}>
     <Masthead activePage={activePage} />
@@ -56,13 +50,17 @@ const {
         <Banner
           text={hero.toUpperCase()}
           src={bannerSrc}
-          srLabel={hero}
+          srLabel={bannerSrLabel ?? hero}
         />
       )
     }
     <main class="site-main">
       <slot />
-      <footer class="site-footer"></footer>
+      <footer class="site-footer">
+        <span>{SITE_NAME}</span>
+        <span>Notes from the margins</span>
+        <span>&copy; 2026</span>
+      </footer>
     </main>
     {
       includeFootnotes ? (
@@ -96,25 +94,17 @@ const {
 </style>
 
 <style is:global>
-  /* Brutalist chrome shared by all top-level page kinds. Scoped to body
-     classes so 404 / subscribe pages (which set no body class) keep the
+  /* Brutalist chrome shared by every restyled page kind. Scoped to the single
+     `brutalist` body class so 404 / subscribe pages (which omit it) keep the
      bare footer from the scoped block above. */
-  body.archive-page .site-main,
-  body.commonplace-page .site-main,
-  body.garden-page .site-main,
-  body.newsletter-page .site-main,
-  body.post-page .site-main {
+  body.brutalist .site-main {
     width: 100%;
     max-width: none;
     padding: 0;
     background: var(--paper);
   }
 
-  body.archive-page .site-footer,
-  body.commonplace-page .site-footer,
-  body.garden-page .site-footer,
-  body.newsletter-page .site-footer,
-  body.post-page .site-footer {
+  body.brutalist .site-footer {
     margin-top: 4rem;
     padding: 12px;
     border-top: 6px solid var(--ink);
@@ -126,22 +116,6 @@ const {
     font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.04em;
-  }
-
-  body.archive-page .site-footer::before,
-  body.commonplace-page .site-footer::before,
-  body.garden-page .site-footer::before,
-  body.newsletter-page .site-footer::before,
-  body.post-page .site-footer::before {
-    content: "AD MARGINEM";
-  }
-
-  body.archive-page .site-footer::after,
-  body.commonplace-page .site-footer::after,
-  body.garden-page .site-footer::after,
-  body.newsletter-page .site-footer::after,
-  body.post-page .site-footer::after {
-    content: "© 2026";
   }
 
   /* Newsletter sits flush against its hero banner. */

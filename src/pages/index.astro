@@ -3,12 +3,10 @@ import { MAIN_PAGES, MAIN_NAV, SITE_NAME, WRITING_PAGE_POST_LIMIT } from "../lib
 import { getCollection } from "astro:content";
 import { formatDate } from "../lib/date";
 import { withSlugs, type BlogEntry } from "../lib/content";
-import { loadCommonplaceNotes } from "../lib/commonplace";
+import { formatAttribution, loadCommonplaceNotes } from "../lib/commonplace";
+import { oneLineSnippet } from "../lib/text";
 import { KIND_LABELS } from "../lib/kinds";
-import favicon from "../assets/favicon.png";
-import bannerSrcUrl from "../assets/banners/notebook_banner_c.webp?url";
-import Masthead from "../components/Masthead.astro";
-import Banner from "../components/Banner.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
 import SubscribeBanner from "../components/SubscribeBanner.astro";
 import "../styles/home.css";
 
@@ -48,18 +46,6 @@ const feed: FeedItem[] = [
 const getAbstract = (post: BlogEntry) =>
 	post.data.abstract ?? post.data.description ?? "";
 
-// One-line snippet of a quote for the homepage index list.
-const snippet = (text: string, max = 160): string => {
-	const collapsed = text.replace(/\s+/g, " ").trim();
-	if (collapsed.length <= max) return collapsed;
-	const cut = collapsed.slice(0, max);
-	const lastSpace = cut.lastIndexOf(" ");
-	return `${cut.slice(0, lastSpace > 0 ? lastSpace : max).trimEnd()}…`;
-};
-
-const attribution = (note: { author?: string; source?: string }): string =>
-	[note.author, note.source].filter(Boolean).join(" — ");
-
 // The six site sections, rendered as an overview grid of brutalist cells.
 const sections = MAIN_NAV.map((page, i) => ({
 	label: page.label,
@@ -74,95 +60,70 @@ const description = MAIN_PAGES.writing.description;
 const postCount = posts.length;
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="icon" href={favicon.src} type="image/png" />
-    <link
-      rel="preload"
-      as="image"
-      href={bannerSrcUrl}
-      type="image/webp"
-      fetchpriority="high"
-    />
-  </head>
-  <body>
-    <Masthead activePage="Writing" />
-    <Banner
-      text="MARGINEM"
-      srLabel="Ad Marginem — Notes from the margins"
-    />
-
-    <div class="grid">
-      <div class="cell tall" id="about">
-        <h2>MATH · CODE · VISUALIZATION</h2>
-        <p class="lead">Essays, experiments, and explorations from the margins.</p>
-        <p>
-          A working notebook on mathematics, computing, learning, and games.
-          Longer-form writing sits beside collected quotations and a live view
-          of a personal Obsidian vault &mdash; theory and marginalia in one place.
-        </p>
-        <p class="stat">
-          {postCount} essays<br />+ commonplace &amp; garden<br />1 newsletter
-        </p>
-        <p><a class="btn btn--invert" href="#subscribe">Subscribe</a></p>
-      </div>
-
-      {
-        sections.map((s) => (
-          <a class="cell cell--link" href={s.href}>
-            <h2>{s.label}</h2>
-            <p class="cell__eyebrow">{s.eyebrow}</p>
-            <p>{s.description}</p>
-          </a>
-        ))
-      }
-
+<BaseLayout
+  title={title}
+  description={description}
+  hero="MARGINEM"
+  bannerSrLabel="Ad Marginem — Notes from the margins"
+  activePage="Writing"
+  bodyClass="brutalist home-page"
+>
+  <div class="grid">
+    <div class="cell tall" id="about">
+      <p class="lead">Essays, experiments, and explorations from the margins.</p>
+      <p>
+        A working notebook on mathematics, computing, learning, and games.
+        Longer-form writing sits beside collected quotations and a live view
+        of a personal Obsidian vault &mdash; theory and marginalia in one place.
+      </p>
+      <p class="stat">
+        {postCount} essays<br />+ commonplace &amp; garden<br />1 newsletter
+      </p>
+      <p><a class="btn btn--invert" href="#subscribe">Subscribe</a></p>
     </div>
 
-    <section class="block" id="still-drying">
-      <h2>Still Drying</h2>
-      <ul class="index">
-        {
-          feed.map((item) =>
-            item.kind === "writing" ? (
-              <li>
-                <span class="index__kind">{KIND_LABELS.writing}</span>
-                <span class="index__body">
-                  <a href={`/posts/${item.post.slug}/`}>{item.post.data.title}</a>
-                  <span class="index__excerpt">{getAbstract(item.post)}</span>
-                </span>
-                <span class="index__date">{formatDate(item.post.data.pubDate)}</span>
-              </li>
-            ) : (
-              <li>
-                <span class="index__kind">{KIND_LABELS.note}</span>
-                <span class="index__body">
-                  <a href={MAIN_PAGES.commonplace.href}>"{snippet(item.note.content)}"</a>
-                  <span class="index__excerpt">{attribution(item.note)}</span>
-                </span>
-                <span class="index__date">{item.note.date ? formatDate(item.note.date) : ""}</span>
-              </li>
-            ),
-          )
-        }
-      </ul>
-      <p class="block__more">
-        <a class="btn" href={MAIN_PAGES.archive.href}>Full Archive</a>
-      </p>
-    </section>
+    {
+      sections.map((s) => (
+        <a class="cell cell--link" href={s.href}>
+          <h2>{s.label}</h2>
+          <p class="cell__eyebrow">{s.eyebrow}</p>
+          <p>{s.description}</p>
+        </a>
+      ))
+    }
+  </div>
 
-    <SubscribeBanner invert />
+  <section class="block" id="still-drying">
+    <h2>Still Drying</h2>
+    <ul class="index">
+      {
+        feed.map((item) =>
+          item.kind === "writing" ? (
+            <li>
+              <span class="index__kind">{KIND_LABELS.writing}</span>
+              <span class="index__body">
+                <a href={`/posts/${item.post.slug}/`}>{item.post.data.title}</a>
+                <span class="index__excerpt">{getAbstract(item.post)}</span>
+              </span>
+              <span class="index__date">{formatDate(item.post.data.pubDate)}</span>
+            </li>
+          ) : (
+            <li>
+              <span class="index__kind">{KIND_LABELS.note}</span>
+              <span class="index__body">
+                <a href={MAIN_PAGES.commonplace.href}>"{oneLineSnippet(item.note.content)}"</a>
+                <span class="index__excerpt">{formatAttribution(item.note)}</span>
+              </span>
+              <span class="index__date">{item.note.date ? formatDate(item.note.date) : ""}</span>
+            </li>
+          ),
+        )
+      }
+    </ul>
+    <p class="block__more">
+      <a class="btn" href={MAIN_PAGES.archive.href}>Full Archive</a>
+    </p>
+  </section>
 
-    <footer>
-      <span>{SITE_NAME}</span>
-      <span>NOTES FROM THE MARGINS</span>
-      <span>&copy; 2026</span>
-    </footer>
-
-  </body>
-</html>
+  <SubscribeBanner invert />
+</BaseLayout>
