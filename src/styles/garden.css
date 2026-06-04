@@ -9,66 +9,10 @@
  * bits (hero, card grid, breadcrumbs, backlinks, neighbor graph).
  */
 
-/* ---- PAGE FRAME (matches commonplace + post) ---- */
-body.garden-page {
-  max-width: 860px;
-  margin: 0 auto;
-  font-family: var(--mono);
-  line-height: 1.4;
-  color: var(--ink);
-  background: var(--paper);
-  border-left: 4px solid var(--ink);
-  border-right: 4px solid var(--ink);
-}
-
-/* ---- HERO (banner with eyebrow stamp overlay + subtitle strip) ---- */
-body.garden-page .garden-hero {
-  margin: 0;
-}
-
-body.garden-page .garden-hero__banner {
-  position: relative;
-}
-
-body.garden-page .garden-hero .banner {
-  width: 100%;
-  border-bottom: 4px solid var(--ink);
-}
-
-body.garden-page .garden-hero__eyebrow {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  padding: 3px 10px;
-  font-family: var(--display);
-  font-size: var(--fs-2xs);
-  font-weight: 900;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--paper);
-  background: var(--ink);
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-body.garden-page .garden-hero__subtitle {
-  margin: 0;
-  padding: 10px 12px;
-  font-family: var(--mono);
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink);
-  background: var(--paper);
-}
-
-/* ---- PAGE SHELL ---- */
-body.garden-page .garden-shell {
-  padding: 24px clamp(16px, 4vw, 48px) 40px;
-}
+/* The brutalist frame, hero, page shell, and count strip come from
+   brutalist-page.css (body.brutalist); this file only adds garden-specific
+   chrome — breadcrumbs, the note-card list, the neighbour graph, and the
+   single-note entry page (which also sets `post-page`). */
 
 /* ---- BREADCRUMBS ---- */
 body.garden-page .garden-entry__breadcrumbs {
@@ -95,36 +39,6 @@ body.garden-page .garden-entry__breadcrumbs a {
 body.garden-page .garden-entry__breadcrumbs a:hover,
 body.garden-page .garden-entry__breadcrumbs a:focus-visible {
   background: var(--paper-accent);
-}
-
-/* ---- COUNT (matches commonplace) ---- */
-body.garden-page .garden-count {
-  margin: 1.25rem 0;
-  padding: 8px 0;
-  border-top: 1px dotted var(--ink);
-  border-bottom: 1px dotted var(--ink);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-body.garden-page .garden-count .count-text {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: var(--fs-2xs);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-
-body.garden-page .garden-count .clear-hint {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: var(--fs-3xs);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgb(var(--ink-rgb) / 0.65);
 }
 
 /* ---- FORCE GRAPH FRAME ---- */
@@ -370,17 +284,3 @@ body.post-page.garden-entry-page .garden-entry__neighbors .force-graph {
   background: transparent;
 }
 
-@media (max-width: 720px) {
-  body.garden-page {
-    border-left: none;
-    border-right: none;
-  }
-  body.garden-page .garden-shell {
-    padding: 18px 14px 32px;
-  }
-  body.garden-page .site-footer {
-    flex-direction: column;
-    gap: 4px;
-    align-items: flex-start;
-  }
-}

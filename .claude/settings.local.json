@@ -3,7 +3,8 @@
     "allow": [
       "Bash(sips -g pixelWidth -g pixelHeight ~/Downloads/notebook_banner_a.png)",
       "Read(//Users/toby/Projects/cocobconcom/img/banners/**)",
-      "Bash(node scripts/optimize-banner.mjs)"
+      "Bash(node scripts/optimize-banner.mjs)",
+      "Bash(npm run *)"
     ]
   }
 }

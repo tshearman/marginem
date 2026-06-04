@@ -85,120 +85,68 @@ function executeJavascriptSnippet(code, filePath) {
 	}
 }
 
-function executePythonSnippet(code) {
-	try {
-		const result = spawnSync(PYTHON_COMMAND, ["-c", code], {
-			encoding: "utf8",
-		});
-		if (result.error) {
-			return { output: String(result.error), success: false };
-		}
-		const chunks = [];
-		if (result.stdout) chunks.push(result.stdout.trim());
-		if (result.stderr) chunks.push(result.stderr.trim());
-		if (result.status !== 0) {
-			chunks.push(`(python exited with code ${result.status ?? "unknown"})`);
-		}
-		const output = chunks.filter(Boolean).join("\n") || "(no output)";
-		return { output, success: result.status === 0 };
-	} catch (error) {
-		return { output: String(error), success: false };
+// Generous safety net against a genuinely hung snippet (infinite loop, blocked
+// on stdin) rather than a tight execution budget — a slow-but-finishing build
+// snippet should still complete. Override per-environment if needed.
+const SNIPPET_TIMEOUT_MS = Number(
+	process.env.REMARK_RUN_CODE_TIMEOUT_MS ?? 120_000,
+);
+const SNIPPET_MAX_BUFFER = 16 * 1024 * 1024;
+const spawnOptions = {
+	encoding: "utf8",
+	timeout: SNIPPET_TIMEOUT_MS,
+	maxBuffer: SNIPPET_MAX_BUFFER,
+};
+
+// Normalise a spawnSync result into { output, success }, distinguishing a
+// timeout (the SNIPPET_TIMEOUT_MS safety net tripped) from an ordinary
+// non-zero exit so the failure message is actionable.
+function formatSpawnResult(result, label) {
+	if (result.error) {
+		const timedOut =
+			result.error.code === "ETIMEDOUT" || result.signal === "SIGTERM";
+		const message = timedOut
+			? `(${label} timed out after ${SNIPPET_TIMEOUT_MS}ms — raise REMARK_RUN_CODE_TIMEOUT_MS if this snippet is legitimately slow)`
+			: String(result.error);
+		return { output: message, success: false };
 	}
+	const chunks = [];
+	if (result.stdout) chunks.push(result.stdout.trim());
+	if (result.stderr) chunks.push(result.stderr.trim());
+	if (result.status !== 0) {
+		chunks.push(`(${label} exited with code ${result.status ?? "unknown"})`);
+	}
+	const output = chunks.filter(Boolean).join("\n") || "(no output)";
+	return { output, success: result.status === 0 };
 }
 
-function executeHaskellSnippet(code, sourcePath, contextPath) {
+// Run a snippet for a file-oriented runtime (Haskell/Lisp/TypeScript). Writes a
+// temp file when no real source path is available and always cleans it up.
+function runWithTempFile({
+	code,
+	sourcePath,
+	contextPath,
+	command,
+	buildArgs,
+	extension,
+	prefix,
+	label,
+}) {
 	let tempDir;
 	let targetPath = sourcePath;
 	try {
 		if (!targetPath) {
-			tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "remark-hs-"));
-			const fileName = contextPath
-				? `${path.basename(contextPath)}.hs`
-				: "snippet.hs";
-			targetPath = path.join(tempDir, fileName);
-			fs.writeFileSync(targetPath, code, "utf8");
-		}
-		const result = spawnSync(HASKELL_COMMAND, [targetPath], {
-			encoding: "utf8",
-		});
-		const chunks = [];
-		if (result.stdout) chunks.push(result.stdout.trim());
-		if (result.stderr) chunks.push(result.stderr.trim());
-		if (result.error) chunks.push(String(result.error));
-		if (result.status !== 0) {
-			chunks.push(`(haskell exited with code ${result.status ?? "unknown"})`);
-		}
-		const output = chunks.filter(Boolean).join("\n") || "(no output)";
-		return { output, success: result.status === 0 };
-	} catch (error) {
-		return { output: String(error), success: false };
-	} finally {
-		if (tempDir) {
-			fs.rmSync(tempDir, { recursive: true, force: true });
-		}
-	}
-}
-
-function executeLispSnippet(code, sourcePath, contextPath) {
-	let tempDir;
-	let targetPath = sourcePath;
-	try {
-		if (!targetPath) {
-			tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "remark-lisp-"));
-			const fileName = contextPath
-				? `${path.basename(contextPath)}.lisp`
-				: "snippet.lisp";
-			targetPath = path.join(tempDir, fileName);
-			fs.writeFileSync(targetPath, code, "utf8");
-		}
-		const result = spawnSync(LISP_COMMAND, ["--script", targetPath], {
-			encoding: "utf8",
-		});
-		const chunks = [];
-		if (result.stdout) chunks.push(result.stdout.trim());
-		if (result.stderr) chunks.push(result.stderr.trim());
-		if (result.error) chunks.push(String(result.error));
-		if (result.status !== 0) {
-			chunks.push(`(lisp exited with code ${result.status ?? "unknown"})`);
-		}
-		const output = chunks.filter(Boolean).join("\n") || "(no output)";
-		return { output, success: result.status === 0 };
-	} catch (error) {
-		return { output: String(error), success: false };
-	} finally {
-		if (tempDir) {
-			fs.rmSync(tempDir, { recursive: true, force: true });
-		}
-	}
-}
-
-function executeTypescriptSnippet(code, sourcePath, contextPath, language) {
-	let tempDir;
-	let targetPath = sourcePath;
-	const extension = language === "tsx" ? ".tsx" : ".ts";
-	try {
-		if (!targetPath) {
-			tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "remark-ts-"));
+			tempDir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
 			const fileName = contextPath
 				? `${path.basename(contextPath)}${extension}`
 				: `snippet${extension}`;
 			targetPath = path.join(tempDir, fileName);
 			fs.writeFileSync(targetPath, code, "utf8");
 		}
-		const result = spawnSync(TYPESCRIPT_COMMAND, [targetPath], {
-			encoding: "utf8",
-		});
-		const chunks = [];
-		if (result.stdout) chunks.push(result.stdout.trim());
-		if (result.stderr) chunks.push(result.stderr.trim());
-		if (result.error) chunks.push(String(result.error));
-		if (result.status !== 0) {
-			chunks.push(
-				`(typescript exited with code ${result.status ?? "unknown"})`,
-			);
-		}
-		const output = chunks.filter(Boolean).join("\n") || "(no output)";
-		return { output, success: result.status === 0 };
+		return formatSpawnResult(
+			spawnSync(command, buildArgs(targetPath), spawnOptions),
+			label,
+		);
 	} catch (error) {
 		return { output: String(error), success: false };
 	} finally {
@@ -206,6 +154,56 @@ function executeTypescriptSnippet(code, sourcePath, contextPath, language) {
 			fs.rmSync(tempDir, { recursive: true, force: true });
 		}
 	}
+}
+
+function executePythonSnippet(code) {
+	try {
+		return formatSpawnResult(
+			spawnSync(PYTHON_COMMAND, ["-c", code], spawnOptions),
+			"python",
+		);
+	} catch (error) {
+		return { output: String(error), success: false };
+	}
+}
+
+function executeHaskellSnippet(code, sourcePath, contextPath) {
+	return runWithTempFile({
+		code,
+		sourcePath,
+		contextPath,
+		command: HASKELL_COMMAND,
+		buildArgs: (target) => [target],
+		extension: ".hs",
+		prefix: "remark-hs-",
+		label: "haskell",
+	});
+}
+
+function executeLispSnippet(code, sourcePath, contextPath) {
+	return runWithTempFile({
+		code,
+		sourcePath,
+		contextPath,
+		command: LISP_COMMAND,
+		buildArgs: (target) => ["--script", target],
+		extension: ".lisp",
+		prefix: "remark-lisp-",
+		label: "lisp",
+	});
+}
+
+function executeTypescriptSnippet(code, sourcePath, contextPath, language) {
+	return runWithTempFile({
+		code,
+		sourcePath,
+		contextPath,
+		command: TYPESCRIPT_COMMAND,
+		buildArgs: (target) => [target],
+		extension: language === "tsx" ? ".tsx" : ".ts",
+		prefix: "remark-ts-",
+		label: "typescript",
+	});
 }
 
 function parseMetaOptions(meta = "") {

@@ -11,7 +11,7 @@ const { activePage } = Astro.props as MastheadProps;
 
 <header class="masthead">
   <div class="meta">
-    <span class="meta__brand">{SITE_NAME}</span>
+    <a class="meta__brand" href="/">{SITE_NAME}</a>
     <nav class="meta__nav" aria-label="Primary">
       {
         MAIN_NAV.map((page, i) => {
@@ -20,9 +20,17 @@ const { activePage } = Astro.props as MastheadProps;
             : false;
           return (
             <>
-              {i > 0 && <span aria-hidden="true"> / </span>}
-              <a href={page.href} class={isActive ? "is-active" : undefined}>
-                {page.label}
+              {i > 0 && <span class="meta__sep" aria-hidden="true"> / </span>}
+              <a
+                href={page.href}
+                class={isActive ? "is-active" : undefined}
+                aria-label={page.label}
+                data-astro-prefetch="viewport"
+              >
+                <span class="meta__label">{page.label}</span>
+                <span class="meta__abbr" aria-hidden="true">
+                  {page.label.slice(0, 2)}
+                </span>
               </a>
             </>
           );
@@ -62,6 +70,13 @@ const { activePage } = Astro.props as MastheadProps;
 
   .meta__brand {
     font-weight: 700;
+    color: var(--masthead-ink);
+    text-decoration: none;
+  }
+
+  .meta__brand:hover,
+  .meta__brand:focus-visible {
+    background: var(--masthead-accent);
   }
 
   .meta__nav {
@@ -87,6 +102,10 @@ const { activePage } = Astro.props as MastheadProps;
     color: var(--masthead-paper);
   }
 
+  .meta__abbr {
+    display: none;
+  }
+
   .meta__search {
     display: flex;
     align-items: center;
@@ -94,12 +113,16 @@ const { activePage } = Astro.props as MastheadProps;
 
   @media (max-width: 720px) {
     .meta {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 6px;
+      gap: 8px;
     }
-    .meta__search {
-      width: 100%;
+    .meta__label {
+      display: none;
+    }
+    .meta__abbr {
+      /* Title-case (Wr/Co/Ga/Ne/Ar) — override the strip's uppercase. */
+      display: inline;
+      text-transform: none;
+      letter-spacing: 0;
     }
   }
 </style>

@@ -18,17 +18,17 @@ const newsletters = withSlugs(
   hero={MAIN_PAGES.newsletter.label}
   showHero={false}
   activePage={MAIN_PAGES.newsletter.label}
-  bodyClass="newsletter-page"
+  bodyClass="brutalist newsletter-page"
 >
-  <div class="newsletter-hero">
-    <div class="newsletter-hero__banner">
+  <div class="page-hero">
+    <div class="page-hero__banner">
       <Banner
         text="NEWSLETTER"
-        textNarrow={"NEWS\nLETTER"}
+        textNarrow={"NEWSL\nETTER"}
         height={140}
         srLabel={MAIN_PAGES.newsletter.label}
       />
-      <span class="newsletter-hero__eyebrow">{MAIN_PAGES.newsletter.eyebrow}</span>
+      <span class="page-hero__eyebrow">{MAIN_PAGES.newsletter.eyebrow}</span>
     </div>
   </div>
 
@@ -70,65 +70,23 @@ const newsletters = withSlugs(
 
 <style is:global>
   /*
-   * Brutalist newsletter index styles. Scoped by `body.newsletter-page`
-   * (set above via BaseLayout's bodyClass). Mirrors the patterns in
-   * commonplace.css and garden.css so the newsletter section adopts the
-   * same frame, hero, and type scale as the rest of the restyled site.
+   * Newsletter-specific styles. The brutalist frame, hero, and footer chrome
+   * come from brutalist-page.css (body.brutalist); this block adds the
+   * vertical flex layout and the two-cell issues/subscribe grid.
    */
 
-  /* ---- PAGE FRAME (matches commonplace + garden) ---- */
-  /* Body is a vertical flex column so the grid can stretch to fill the viewport. */
+  /* Vertical flex column so the grid fills the viewport and the footer pins to
+     the bottom; the rest of the frame comes from brutalist-page.css. */
   body.newsletter-page {
-    max-width: 860px;
-    margin: 0 auto;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    font-family: var(--mono);
-    line-height: 1.4;
-    color: var(--ink);
-    background: var(--paper);
-    border-left: 4px solid var(--ink);
-    border-right: 4px solid var(--ink);
   }
 
-  /* Newsletter pages stretch vertically so the footer pins to the bottom. */
   body.newsletter-page .site-main {
     flex: 1;
     display: flex;
     flex-direction: column;
-  }
-
-  /* ---- HERO (banner with eyebrow stamp overlay + subtitle strip) ---- */
-  body.newsletter-page .newsletter-hero {
-    margin: 0;
-  }
-
-  body.newsletter-page .newsletter-hero__banner {
-    position: relative;
-  }
-
-  body.newsletter-page .newsletter-hero .banner {
-    width: 100%;
-    border-bottom: 4px solid var(--ink);
-  }
-
-  body.newsletter-page .newsletter-hero__eyebrow {
-    position: absolute;
-    top: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-    padding: 3px 10px;
-    font-family: var(--display);
-    font-size: var(--fs-2xs);
-    font-weight: 900;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--paper);
-    background: var(--ink);
-    white-space: nowrap;
-    pointer-events: none;
   }
 
   /* ---- INTRO INSIDE ISSUES CELL ---- */
@@ -292,10 +250,6 @@ const newsletters = withSlugs(
 
   /* ---- MOBILE ---- */
   @media (max-width: 720px) {
-    body.newsletter-page {
-      border-left: none;
-      border-right: none;
-    }
     body.newsletter-page .newsletter-grid {
       grid-template-columns: 1fr;
     }
@@ -308,11 +262,6 @@ const newsletters = withSlugs(
     }
     body.newsletter-page .newsletter-grid > * {
       padding: 14px;
-    }
-    body.newsletter-page .site-footer {
-      flex-direction: column;
-      gap: 4px;
-      align-items: flex-start;
     }
   }
 </style>

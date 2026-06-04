@@ -2,7 +2,6 @@ export interface NoteMeta {
 	content: string;
 	source?: string;
 	author?: string;
-	tags?: string[];
 	date?: Date;
 }
 

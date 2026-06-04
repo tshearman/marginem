@@ -75,21 +75,21 @@ const bannerText = heading.toUpperCase();
   hero={heading}
   showHero={false}
   activePage={activePage}
-  bodyClass="garden-page"
+  bodyClass="brutalist garden-page"
 >
-  <div class="garden-hero">
-    <div class="garden-hero__banner">
+  <div class="page-hero">
+    <div class="page-hero__banner">
       <Banner
         text={bannerText}
         height={140}
         srLabel={heading}
       />
-      <span class="garden-hero__eyebrow">{eyebrow}</span>
+      <span class="page-hero__eyebrow">{eyebrow}</span>
     </div>
-    <p class="garden-hero__subtitle">{intro}</p>
+    <p class="page-hero__subtitle">{intro}</p>
   </div>
 
-  <div class="garden-shell">
+  <div class="page-shell">
     {
       breadcrumbs.length ? (
         <nav class="garden-entry__breadcrumbs" aria-label="Breadcrumb">
@@ -125,11 +125,7 @@ const bannerText = heading.toUpperCase();
             />
           ) : null}
 
-          <FilterableCount
-            contentType="notes"
-            totalCount={notes.length}
-            class="garden-count"
-          />
+          <FilterableCount contentType="notes" totalCount={notes.length} />
           <div class="garden-grid">
             {notes.map((note) => (
               <GardenNotePreview note={note} vaultRoot={vaultRoot} />

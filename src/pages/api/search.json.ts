@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import { loadGardenNotes } from "../../lib/garden";
 import { generateNoteId } from "../../lib/noteUtils";
-import { ellipsizeText, normalizeWhitespace } from "../../lib/text";
+import { ellipsizeText, normalizeWhitespace, plainExcerpt } from "../../lib/text";
 import { formatDate } from "../../lib/date";
 import { loadCommonplaceNotes } from "../../lib/commonplace";
 import { withSlugs, type BlogEntry } from "../../lib/content";
@@ -34,12 +34,6 @@ type SearchEntry = {
 	html: string;
 };
 
-const stripFormatting = (value = "") =>
-	value
-		.replace(/[#>*_`[\]\\]/g, " ")
-		.replace(/\s+/g, " ")
-		.trim();
-
 const toSearchText = (segments: Array<string | undefined>) =>
 	segments
 		.map((segment) =>
@@ -48,9 +42,6 @@ const toSearchText = (segments: Array<string | undefined>) =>
 		.filter(Boolean)
 		.join(" ");
 
-const plainExcerpt = (value = "") =>
-	stripFormatting(value.replace(/!?\[\[[^\]]+\]\]/g, " "));
-
 const buildPostEntries = (posts: BlogEntry[]) =>
 	posts.map((post) => {
 		const tags = post.data.tags ?? [];
@@ -58,7 +49,7 @@ const buildPostEntries = (posts: BlogEntry[]) =>
 		const snippetSource =
 			post.data.abstract ??
 			post.data.description ??
-			stripFormatting(post.body ?? "");
+			plainExcerpt(post.body ?? "");
 		const snippet = ellipsizeText(snippetSource, 240, { alwaysAppend: true });
 		const displayDate = pubDate ? formatDate(pubDate) : "";
 		const pubIso = pubDate ? pubDate.toISOString() : "";
@@ -108,7 +99,6 @@ const buildNoteEntries = (
 		const id = generateNoteId({
 			content: entry.content,
 			author: entry.author,
-			tags,
 			date: noteDate,
 		});
 		const snippet = ellipsizeText(entry.content, 220, { alwaysAppend: true });

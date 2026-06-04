@@ -10,23 +10,9 @@
  * possible we reuse rules from home.css verbatim.
  */
 
-/* ---- PAGE FRAME (matches homepage body) ---- */
-body.post-page {
-  max-width: 860px;
-  margin: 0 auto;
-  font-family: var(--mono);
-  line-height: 1.4;
-  color: var(--ink);
-  background: var(--paper);
-  border-left: 4px solid var(--ink);
-  border-right: 4px solid var(--ink);
-}
-
-/* When a SubscribeBanner butts up against the footer, drop the top margin —
-   the banner already provides its own 6px separator. */
-body.post-page .subscribe-banner + .site-footer {
-  margin-top: 0;
-}
+/* The brutalist page frame (max-width, border, mono type) comes from
+   brutalist-page.css (body.brutalist); post pages set both `brutalist` and
+   `post-page`. This file adds the article-specific chrome below. */
 
 /* ---- ARTICLE FRAME ---- */
 .post-shell {
@@ -440,37 +426,11 @@ body.post-page .subscribe-banner + .site-footer {
   font-size: var(--fs-xs);
 }
 
-/* ---- TAGS inside post pages ---- */
-.paper-title .tag,
-.paper-body .tag {
-  border-radius: 0;
-  border: 2px solid var(--ink);
-  background: var(--paper);
-  font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-size: var(--fs-2xs);
-  color: var(--ink);
-  padding: 1px 6px;
-}
-
-.paper-title .tag:hover,
-.paper-body .tag:hover {
-  background: var(--paper-accent);
-}
+/* Tag chips use the shared brutalist definition in cards.css. */
 
 /* ---- MOBILE ---- */
 @media (max-width: 720px) {
-  body.post-page {
-    border-left: none;
-    border-right: none;
-  }
   .post-shell {
     padding: 18px 14px 32px;
-  }
-  body.post-page .site-footer {
-    flex-direction: column;
-    gap: 4px;
-    align-items: flex-start;
   }
 }

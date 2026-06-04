@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { SITE_NAME } from "../lib/site";
+import Banner from "../components/Banner.astro";
+import { MAIN_PAGES, SITE_NAME } from "../lib/site";
 
 export const prerender = true;
 ---
@@ -9,75 +10,75 @@ export const prerender = true;
   title={`Page not found | ${SITE_NAME}`}
   description="The page you are looking for does not exist."
   hero="Page not found"
-  showHero={true}
+  showHero={false}
   activePage={undefined}
+  bodyClass="brutalist not-found-page"
 >
-  <section class="not-found">
-    <p class="not-found__eyebrow">404</p>
-    <h2 class="not-found__title">That page has wandered off.</h2>
-    <p class="not-found__body">
-      Try the homepage or browse the latest notes to get back on track.
-    </p>
+  <div class="page-hero">
+    <div class="page-hero__banner">
+      <Banner text="404" srLabel="Page not found" />
+      <span class="page-hero__eyebrow">Page not found</span>
+    </div>
+  </div>
+
+  <section class="not-found__banner">
+    <p class="not-found__message">That page has wandered off.</p>
     <div class="not-found__actions">
-      <a class="not-found__link" href="/">Go home</a>
-      <a class="not-found__link not-found__link--ghost" href="/archive/">
-        Browse archive
-      </a>
+      <a class="btn btn--invert" href="/">Home</a>
+      <a class="btn btn--invert" href={MAIN_PAGES.archive.href}>Archive</a>
     </div>
   </section>
 </BaseLayout>
 
-<style>
-  .not-found {
-    margin: 2.5rem auto 4rem;
-    max-width: 44rem;
+<style is:global>
+  /* Reuses the brutalist frame (body.brutalist), the .page-hero banner, and
+     the shared .btn buttons. The rules below add the full-height layout: the
+     content container is black, the centred message sits on it, and the footer
+     is pinned to the bottom of the window on the page's paper background. */
+
+  /* Fill the viewport so the footer rests at the bottom of the window. */
+  body.not-found-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.not-found-page .site-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--ink);
+  }
+
+  /* The message + actions, centred on the black container. */
+  body.not-found-page .not-found__banner {
+    padding: clamp(28px, 6vh, 64px) 18px;
+    margin: 2rem 0;
+    color: var(--paper);
     text-align: center;
   }
 
-  .not-found__eyebrow {
-    margin: 0 0 0.75rem;
-    font-size: var(--fs-sm);
-    letter-spacing: 0.12em;
+  body.not-found-page .site-footer {
+    margin-top: auto;
+    /* Keep the footer on the page's paper background like every other page,
+       even though the content container above it is black for this test. */
+    background: var(--paper);
+  }
+
+  body.not-found-page .not-found__message {
+    margin: 0 0 20px;
+    font-family: var(--display);
+    font-size: var(--fs-2xl);
+    font-weight: 900;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--paper);
   }
 
-  .not-found__title {
-    margin: 0 0 0.75rem;
-    font-size: var(--fs-display-sm);
-    font-weight: 600;
-  }
-
-  .not-found__body {
-    margin: 0 0 1.5rem;
-    font-size: var(--fs-md);
-    line-height: 1.7;
-    color: var(--fg);
-  }
-
-  .not-found__actions {
+  body.not-found-page .not-found__actions {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.75rem;
-  }
-
-  .not-found__link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.55rem 1.15rem;
-    border-radius: 999px;
-    border: var(--thin-border);
-    background: var(--fg);
-    color: var(--fg-inverse);
-    text-decoration: none;
-    font-size: var(--fs-base);
-    letter-spacing: 0.01em;
-  }
-
-  .not-found__link--ghost {
-    background: transparent;
-    color: var(--fg);
+    gap: 16px;
   }
 </style>

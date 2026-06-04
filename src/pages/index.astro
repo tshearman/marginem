@@ -63,9 +63,9 @@ const postCount = posts.length;
 <BaseLayout
   title={title}
   description={description}
-  hero="MARGINEM"
-  bannerSrLabel="Ad Marginem — Notes from the margins"
-  activePage="Writing"
+  hero=`${SITE_NAME}`
+  bannerSrLabel="`${SITE_NAME}` — Notes from the margins"
+  activePage=`${SITE_NAME}`
   bodyClass="brutalist home-page"
 >
   <div class="grid">
@@ -79,12 +79,11 @@ const postCount = posts.length;
       <p class="stat">
         {postCount} essays<br />+ commonplace &amp; garden<br />1 newsletter
       </p>
-      <p><a class="btn btn--invert" href="#subscribe">Subscribe</a></p>
     </div>
 
     {
       sections.map((s) => (
-        <a class="cell cell--link" href={s.href}>
+        <a class="cell cell--link" href={s.href} data-astro-prefetch="viewport">
           <h2>{s.label}</h2>
           <p class="cell__eyebrow">{s.eyebrow}</p>
           <p>{s.description}</p>
@@ -102,7 +101,7 @@ const postCount = posts.length;
             <li>
               <span class="index__kind">{KIND_LABELS.writing}</span>
               <span class="index__body">
-                <a href={`/posts/${item.post.slug}/`}>{item.post.data.title}</a>
+                <a href={`/posts/${item.post.slug}/`} data-astro-prefetch="viewport">{item.post.data.title}</a>
                 <span class="index__excerpt">{getAbstract(item.post)}</span>
               </span>
               <span class="index__date">{formatDate(item.post.data.pubDate)}</span>
@@ -111,7 +110,7 @@ const postCount = posts.length;
             <li>
               <span class="index__kind">{KIND_LABELS.note}</span>
               <span class="index__body">
-                <a href={MAIN_PAGES.commonplace.href}>"{oneLineSnippet(item.note.content)}"</a>
+                <a href={MAIN_PAGES.commonplace.href} data-astro-prefetch="viewport">"{oneLineSnippet(item.note.content)}"</a>
                 <span class="index__excerpt">{formatAttribution(item.note)}</span>
               </span>
               <span class="index__date">{item.note.date ? formatDate(item.note.date) : ""}</span>
@@ -121,7 +120,7 @@ const postCount = posts.length;
       }
     </ul>
     <p class="block__more">
-      <a class="btn" href={MAIN_PAGES.archive.href}>Full Archive</a>
+      <a class="btn" href={MAIN_PAGES.archive.href} data-astro-prefetch="viewport">Full Archive</a>
     </p>
   </section>
 

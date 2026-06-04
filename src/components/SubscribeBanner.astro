@@ -132,7 +132,8 @@ const buttonClass = ["btn", invert ? "btn--invert" : null].filter(Boolean).join(
     width: 100%;
     padding: 8px;
     font-family: var(--mono);
-    font-size: var(--fs-base);
+    /* 16px minimum keeps iOS Safari from zooming on focus. */
+    font-size: var(--fs-md);
     color: var(--ink);
     background: var(--paper);
     border: 3px solid var(--ink);

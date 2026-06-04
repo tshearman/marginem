@@ -1,0 +1,165 @@
+/*
+ * Shared brutalist page chrome — the single source of truth for the frame,
+ * hero (banner + eyebrow stamp + subtitle strip), page shell, tag chips,
+ * tag-filter panel, and count strip used by every restyled section page
+ * (archive, commonplace, newsletter, garden, posts).
+ *
+ * Pages opt in by including `brutalist` in their BaseLayout `bodyClass`; the
+ * BaseLayout footer/site-main chrome keys off the same class. Page-unique
+ * layout (commonplace masonry, archive year groups, the newsletter grid, the
+ * article body) stays in each page's own stylesheet.
+ *
+ * Imported globally by BaseLayout. Every rule is scoped under `body.brutalist`
+ * so pages without the class (404, subscribe) are untouched.
+ */
+
+/* ---- PAGE FRAME ---- */
+body.brutalist {
+  max-width: var(--site-max-width, 860px);
+  margin: 0 auto;
+  font-family: var(--mono);
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--paper);
+  border-left: 4px solid var(--ink);
+  border-right: 4px solid var(--ink);
+}
+
+/* ---- HERO (banner + eyebrow stamp overlay + optional subtitle strip) ---- */
+body.brutalist .page-hero {
+  margin: 0;
+}
+
+body.brutalist .page-hero__banner {
+  position: relative;
+}
+
+body.brutalist .page-hero .banner {
+  width: 100%;
+  border-bottom: 4px solid var(--ink);
+}
+
+body.brutalist .page-hero__eyebrow {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 3px 10px;
+  font-family: var(--display);
+  font-size: var(--fs-2xs);
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+body.brutalist .page-hero__subtitle {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+/* ---- PAGE SHELL ---- */
+body.brutalist .page-shell {
+  padding: 24px clamp(16px, 4vw, 48px) 40px;
+}
+
+/* ---- TAG / CATEGORY FILTER PANEL ---- */
+body.brutalist .tag-filter-container {
+  width: 100%;
+  margin: 1.25rem 0 0;
+}
+
+body.brutalist .category-filter-container {
+  margin-top: 1rem;
+}
+
+body.brutalist .tag-filter-section {
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  text-align: left;
+}
+
+body.brutalist .tag-filter-section h3 {
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 2px 8px;
+  font-family: var(--display);
+  font-size: var(--fs-sm);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+}
+
+body.brutalist .tag-filter-section .tag-list {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+}
+
+/* Tag chip styling itself lives in cards.css (the SSOT for injected card
+   markup); this file only lays out the filter panel that contains them. */
+
+/* ---- COUNT / CLEAR-HINT STRIP ---- */
+body.brutalist .count-section {
+  margin: 1.25rem 0;
+  padding: 8px 0;
+  border-top: 1px dotted var(--ink);
+  border-bottom: 1px dotted var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+body.brutalist .count-section .count-text {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+body.brutalist .count-section .clear-hint {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-3xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.65);
+}
+
+/* When a SubscribeBanner immediately precedes the footer, drop the 4rem
+   gap — the banner already provides its own 6px separator and a paper-
+   colored gap exposing the page-texture backdrop reads as a bug. */
+body.brutalist .subscribe-banner + .site-footer {
+  margin-top: 0;
+}
+
+/* ---- MOBILE ---- */
+@media (max-width: 720px) {
+  body.brutalist {
+    border-left: none;
+    border-right: none;
+  }
+
+  body.brutalist .page-shell {
+    padding: 18px 14px 32px;
+  }
+}

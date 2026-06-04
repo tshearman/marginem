@@ -25,6 +25,7 @@ import {
 	normalizeVaultPath,
 	resolveGardenRoot,
 } from "./obsidianConfig";
+import { normalizeTags, parseDate } from "./frontmatter";
 
 export { resolveGardenRoot as resolveVaultRoot };
 
@@ -51,20 +52,6 @@ const extractTitle = (_content: string, fallback: string) =>
 	fallback.replace(/\.md$/i, "");
 
 const normalizePath = (value: string) => value.split(path.sep).join("/");
-
-const normalizeTags = (value: unknown): string[] => {
-	if (Array.isArray(value)) {
-		return value.filter((item): item is string => typeof item === "string");
-	}
-	if (typeof value === "string") return [value];
-	return [];
-};
-
-const parseDate = (value: unknown): Date | undefined => {
-	if (!value) return undefined;
-	const date = new Date(String(value));
-	return Number.isNaN(date.getTime()) ? undefined : date;
-};
 
 export const loadGardenNotes = async (
 	options: { includeUnpublished?: boolean } = {},

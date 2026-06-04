@@ -6,9 +6,10 @@ import ArchiveEntry from "../../components/ArchiveEntry.astro";
 import TagFilterPanel from "../../components/TagFilterPanel.astro";
 import { getCollection } from "astro:content";
 import { MAIN_PAGES } from "../../lib/site";
-import { loadCommonplaceNotes } from "../../lib/commonplace";
+import { formatAttribution, loadCommonplaceNotes } from "../../lib/commonplace";
 import { loadGardenNotes } from "../../lib/garden";
 import { plainExcerpt } from "../../lib/gardenPageUtils";
+import { oneLineSnippet } from "../../lib/text";
 import { generateNoteId } from "../../lib/noteUtils";
 import { withSlugs } from "../../lib/content";
 
@@ -41,18 +42,6 @@ const [posts, newsletters, commonplaceNotes, gardenNotes] = await Promise.all([
 const postsWithSlugs = withSlugs(posts);
 const newslettersWithSlugs = withSlugs(newsletters);
 
-// One-line snippet of a quote for use as a commonplace row's title.
-const snippet = (text: string, max = 140): string => {
-	const collapsed = text.replace(/\s+/g, " ").trim();
-	if (collapsed.length <= max) return collapsed;
-	const cut = collapsed.slice(0, max);
-	const lastSpace = cut.lastIndexOf(" ");
-	return `${cut.slice(0, lastSpace > 0 ? lastSpace : max).trimEnd()}…`;
-};
-
-const attribution = (note: { author?: string; source?: string }): string =>
-	[note.author, note.source].filter(Boolean).join(" — ");
-
 const archiveItems: ArchiveItem[] = [
 	...postsWithSlugs.map(
 		(post): ArchiveItem => ({
@@ -82,16 +71,15 @@ const archiveItems: ArchiveItem[] = [
 		const noteId = generateNoteId({
 			content: note.content,
 			author: note.author,
-			tags: note.tags,
 			date: note.date,
 		});
 		return {
 			kind: "commonplace",
 			category: MAIN_PAGES.commonplace.label,
 			tags: note.tags ?? [],
-			title: `"${snippet(note.content)}"`,
+			title: `"${oneLineSnippet(note.content, 140)}"`,
 			url: `${MAIN_PAGES.commonplace.href}#${noteId}`,
-			description: attribution(note),
+			description: formatAttribution(note),
 			// Sort/group by the date the note was added to the site; display the
 			// note's stated date (fall back to addedAt if missing).
 			sortDate: note.addedAt,
@@ -167,32 +155,28 @@ const archiveFilterConfig = JSON.stringify({
   hero={MAIN_PAGES.archive.label}
   showHero={false}
   activePage={MAIN_PAGES.archive.label}
-  bodyClass="archive-page"
+  bodyClass="brutalist archive-page"
 >
-  <div class="archive-hero">
-    <div class="archive-hero__banner">
+  <div class="page-hero">
+    <div class="page-hero__banner">
       <Banner
         text="ARCHIVE"
         height={140}
         srLabel={MAIN_PAGES.archive.label}
       />
-      <span class="archive-hero__eyebrow">{MAIN_PAGES.archive.eyebrow}</span>
+      <span class="page-hero__eyebrow">{MAIN_PAGES.archive.eyebrow}</span>
     </div>
-    <p class="archive-hero__subtitle">{MAIN_PAGES.archive.description}</p>
+    <p class="page-hero__subtitle">{MAIN_PAGES.archive.description}</p>
   </div>
 
-  <div class="archive-shell">
+  <div class="page-shell">
   {
     !sortedItems.length ? (
       <p>No entries yet. Check back soon.</p>
     ) : (
       <section class="archive-page" data-filter-config={archiveFilterConfig}>
         <TagFilterPanel tags={allTags} categories={categoryOptions} />
-        <FilterableCount
-          contentType="entries"
-          totalCount={sortedItems.length}
-          class="archive-count"
-        />
+        <FilterableCount contentType="entries" totalCount={sortedItems.length} />
         <div class="archive-years">
           {groupedYears.map(([year, yearEntries]) => (
             <section class="archive-year">
@@ -230,185 +214,16 @@ const archiveFilterConfig = JSON.stringify({
 
 <style is:global>
   /*
-   * Brutalist archive index styles. Scoped by `body.archive-page` (set above
-   * via BaseLayout's bodyClass). Mirrors commonplace/garden/newsletter so the
-   * archive section adopts the same frame, hero, tag-chip, and count patterns.
+   * Archive-specific styles. The brutalist frame, hero, shell, tag panel, and
+   * count strip come from brutalist-page.css (body.brutalist); this block only
+   * adds the inner layout and year-group styling unique to the archive index.
    */
-
-  /* ---- PAGE FRAME ---- */
-  body.archive-page {
-    max-width: 860px;
-    margin: 0 auto;
-    font-family: var(--mono);
-    line-height: 1.4;
-    color: var(--ink);
-    background: var(--paper);
-    border-left: 4px solid var(--ink);
-    border-right: 4px solid var(--ink);
-  }
-
-  /* ---- HERO ---- */
-  body.archive-page .archive-hero {
-    margin: 0;
-  }
-
-  body.archive-page .archive-hero__banner {
-    position: relative;
-  }
-
-  body.archive-page .archive-hero .banner {
-    width: 100%;
-    border-bottom: 4px solid var(--ink);
-  }
-
-  body.archive-page .archive-hero__eyebrow {
-    position: absolute;
-    top: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-    padding: 3px 10px;
-    font-family: var(--display);
-    font-size: var(--fs-2xs);
-    font-weight: 900;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--paper);
-    background: var(--ink);
-    white-space: nowrap;
-    pointer-events: none;
-  }
-
-  body.archive-page .archive-hero__subtitle {
-    margin: 0;
-    padding: 10px 12px;
-    font-family: var(--mono);
-    font-size: var(--fs-xs);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink);
-    background: var(--paper);
-  }
-
-  /* ---- SHELL ---- */
-  body.archive-page .archive-shell {
-    padding: 24px clamp(16px, 4vw, 48px) 40px;
-  }
 
   body.archive-page .archive-page {
     margin: 0;
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
-  }
-
-  /* ---- TAG / CATEGORY FILTER PANELS ---- */
-  body.archive-page .tag-filter-container,
-  body.archive-page .category-filter-container {
-    margin: 0;
-  }
-
-  body.archive-page .category-filter-container {
-    margin-top: 1rem;
-  }
-
-  body.archive-page .tag-filter-section {
-    margin: 0;
-    padding: 0;
-    border-radius: 0;
-    text-align: left;
-  }
-
-  body.archive-page .tag-filter-section h3 {
-    display: inline-block;
-    margin: 0 0 12px;
-    padding: 2px 8px;
-    font-family: var(--display);
-    font-size: var(--fs-sm);
-    font-weight: 900;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--paper) !important;
-    background: var(--ink);
-  }
-
-  body.archive-page .tag-filter-section .tag-list {
-    margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: flex-start;
-  }
-
-  body.archive-page .tag {
-    border-radius: 0;
-    border: 2px solid var(--ink);
-    background: var(--paper);
-    color: var(--ink);
-    font-family: var(--mono);
-    font-weight: 700;
-    font-size: var(--fs-2xs);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    margin: 0;
-    line-height: 1.3;
-    transition:
-      background-color 0.12s ease,
-      color 0.12s ease;
-  }
-
-  body.archive-page .tag--small {
-    font-size: var(--fs-3xs);
-    padding: 1px 6px;
-  }
-
-  body.archive-page .tag:hover,
-  body.archive-page .tag--filter:hover {
-    background: var(--highlight);
-    color: var(--ink);
-  }
-
-  body.archive-page .tag--filter[data-selected="true"] {
-    background: var(--ink);
-    color: var(--paper);
-    border-color: var(--ink);
-  }
-
-  body.archive-page .tag--filter[data-selected="true"]:hover {
-    background: var(--highlight);
-    color: var(--ink);
-  }
-
-  /* ---- COUNT ---- */
-  body.archive-page .archive-count {
-    margin: 0.5rem 0 0;
-    padding: 8px 0;
-    border-top: 1px dotted var(--ink);
-    border-bottom: 1px dotted var(--ink);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  body.archive-page .archive-count .count-text {
-    margin: 0;
-    font-family: var(--mono);
-    font-size: var(--fs-2xs);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-
-  body.archive-page .archive-count .clear-hint {
-    margin: 0;
-    font-family: var(--mono);
-    font-size: var(--fs-3xs);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: rgb(var(--ink-rgb) / 0.65);
   }
 
   /* ---- YEAR GROUPS ---- */
@@ -456,19 +271,4 @@ const archiveFilterConfig = JSON.stringify({
     gap: 6px;
   }
 
-  /* ---- MOBILE ---- */
-  @media (max-width: 720px) {
-    body.archive-page {
-      border-left: none;
-      border-right: none;
-    }
-    body.archive-page .archive-shell {
-      padding: 18px 14px 32px;
-    }
-    body.archive-page .site-footer {
-      flex-direction: column;
-      gap: 4px;
-      align-items: flex-start;
-    }
-  }
 </style>

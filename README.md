@@ -28,9 +28,9 @@ A minimalist, technical blog starter built with [Astro](https://astro.build/) an
    ```bash
    npm install
    ```
-4. Start hacking:
+4. Deploy a local version of the site:
    ```bash
-   npm run dev
+   npm run dev [ -- --host (to host the site so it is locally accessible)]
    ```
 
 ### Without Nix
@@ -50,17 +50,12 @@ A minimalist, technical blog starter built with [Astro](https://astro.build/) an
 
 - Hooks: `npm install` runs `npm run hooks:install` via `postinstall` to enable `pre-commit` lint/test hooks for this clone.
 - Verify hooks: `git config --get core.hooksPath` should return `.githooks`.
-
-## Likes (Feelback)
-
-- Likes are powered by the Feelback hosted API via `astro-feelback` components.
-- Set `PUBLIC_FEELBACK_CONTENT_SET_ID` in your environment (from the Feelback panel) to enable the like button.
-- `src/components/LikeButton.astro` is a thin wrapper around `FeelbackPulse` that generates stable keys for posts and notes.
+-
 
 ## MDX helpers
 
 - Use `<PlotlyChart />`, `<ImageFigure />`, and `<MarginNote />` inside MDX documents for interactive plots, responsive images, and unobtrusive notes.
-- Mark fenced code blocks with ```` ```js run ```` to execute snippets during build time. Output is injected below the block as ```` ```output ```` code for quick inspection.
+- Mark fenced code blocks with ` ```js run ` to execute snippets during build time. Output is injected below the block as ` ```output ` code for quick inspection.
 - Math is rendered via KaTeX; wrap inline math with `$...$` and block math with `$$...$$`.
 
 ## Docker

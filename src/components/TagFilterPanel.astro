@@ -59,40 +59,6 @@ const normalizedCategories = categories
   ) : null
 }
 
-<style>
-  .tag-filter-container {
-    width: 100%;
-  }
+<!-- The filter panel is only rendered on brutalist pages; its frame, label
+     stamp, and chip layout come from brutalist-page.css (body.brutalist). -->
 
-  .category-filter-container {
-    margin-top: 0rem;
-  }
-
-  .tag-filter-section {
-    margin: 0;
-    padding: 1.25rem 1.25rem 0rem;
-    border-radius: 1rem;
-    text-align: center;
-  }
-
-  .tag-filter-section h3 {
-    margin: 0 0 0.65rem;
-    font-size: var(--fs-md);
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: rgb(var(--ink-rgb) / 0.8);
-  }
-
-  .tag-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    justify-content: center;
-  }
-
-  @media (max-width: 760px) {
-    .tag-filter-section {
-      padding: 1rem;
-    }
-  }
-</style>

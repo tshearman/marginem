@@ -26,7 +26,7 @@ const {
 	idOverride,
 	permalinkBase,
 } = Astro.props as Props;
-const noteId = idOverride ?? generateNoteId({ content, author, tags, date });
+const noteId = idOverride ?? generateNoteId({ content, author, date });
 const resolvePermalink = (base: string | undefined, id: string) => {
 	if (!base) return `#${id}`;
 	const trimmed = base.trim();

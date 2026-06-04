@@ -8,7 +8,10 @@
 
   /* Brutalist palette tokens shared with the homepage. */
   --display: "Arial Black", Helvetica, sans-serif;
-  --mono: "iA Writer Duo", "Courier New", Courier, monospace;
+  /* iA Writer Duo + Courier New fallback chain — registered by the
+     experimental.fonts entry in astro.config.mjs and emitted by <Font />
+     in HtmlHead. */
+  --mono: var(--font-ia-writer);
   --paper: #ffffff;
   --page-bg: #e8e8e8;
   --highlight: #ffe600;
@@ -51,7 +54,7 @@
   --overlay: rgb(var(--shadow-rgb) / 0.45);
   --overlay-strong: rgb(var(--shadow-rgb) / 0.65);
 
-  --code-bg: var(--bg_);
+  --code-bg: var(--bg);
   --code-fg: #1b1b1b;
 
   --success: #0f5132;

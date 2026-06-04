@@ -1,0 +1,42 @@
+---
+// Shared <head> contents: charset/viewport, title/description, favicon, font
+// face declarations, and the site-wide banner preload. Used by BaseLayout and
+// the standalone homepage so the document-head boilerplate lives in one place.
+import { Font } from "astro:assets";
+import favicon from "../assets/favicon.png";
+import bannerSrcUrl from "../assets/banners/notebook_banner_c.webp?url";
+import { SITE_NAME } from "../lib/site";
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const {
+	title = SITE_NAME,
+	description = "Explorations in math, code, and visualization",
+} = Astro.props as Props;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="icon" href={favicon.src} type="image/png" />
+<!-- iA Writer Duo @font-face declarations + a preload for the regular face,
+     so layout stabilises before the browser restores scroll on Back.
+     Astro's Fonts API also injects a fallback @font-face whose metrics
+     match Courier New, preventing reflow on font swap. -->
+<!-- Preload only the regular face — italic/bold can swap in via font-display
+     without blocking first paint. -->
+<Font
+  cssVariable="--font-ia-writer"
+  preload={[{ weight: "400", style: "normal" }]}
+/>
+<link
+  rel="preload"
+  as="image"
+  href={bannerSrcUrl}
+  type="image/webp"
+  fetchpriority="high"
+/>

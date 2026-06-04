@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import remarkMath from "remark-math";
@@ -81,8 +81,50 @@ export default defineConfig({
 		],
 		rehypePlugins: [rehypeKatex, [rehypePrism, { showLineNumbers: true }]],
 	},
+	experimental: {
+		/* Astro's Fonts API handles subsetting, hashing, preload-link
+		 * generation, and synthesises a fallback @font-face whose metrics
+		 * match the first named family in `fallbacks` — here, Courier New.
+		 * That replaces the hand-tuned size-adjust / ascent / descent
+		 * overrides we used to keep in fonts.css. */
+		fonts: [
+			{
+				name: "iA Writer Duo",
+				cssVariable: "--font-ia-writer",
+				provider: fontProviders.local(),
+				fallbacks: ["Courier New", "Courier", "monospace"],
+				options: {
+					variants: [
+						{
+							weight: 400,
+							style: "normal",
+							src: ["./assets/fonts/iAWriterDuoS-Regular.woff2"],
+						},
+						{
+							weight: 400,
+							style: "italic",
+							src: ["./assets/fonts/iAWriterDuoS-Italic.woff2"],
+						},
+						{
+							weight: 700,
+							style: "normal",
+							src: ["./assets/fonts/iAWriterDuoS-Bold.woff2"],
+						},
+						{
+							weight: 700,
+							style: "italic",
+							src: ["./assets/fonts/iAWriterDuoS-BoldItalic.woff2"],
+						},
+					],
+				},
+			},
+		],
+	},
 	prefetch: {
-		defaultStrategy: "viewport",
+		// Hover as the safe baseline for any internal link we don't think
+		// about — opt-in `data-astro-prefetch="viewport"` on high-intent
+		// surfaces (masthead nav, archive/listing entries, homepage cards).
+		defaultStrategy: "hover",
 		prefetchAll: true,
 	},
 	vite: {

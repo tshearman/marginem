@@ -1,5 +1,6 @@
 import type { GardenNote } from "./garden";
 import { slugifyObsidianTarget } from "../../plugins/remark-obsidian-links.js";
+import { plainExcerpt as toPlainText } from "./text";
 
 type GraphNode = {
 	id: string;
@@ -15,15 +16,7 @@ type GraphLink = {
 };
 
 export const plainExcerpt = (content: string) => {
-	const withoutObsidianLinks = content.replace(/!?\[\[[^\]]+\]\]/g, " ");
-	const withoutMarkdownLinks = withoutObsidianLinks.replace(
-		/\[([^\]]+)\]\([^)]+\)/g,
-		"$1",
-	);
-	const condensed = withoutMarkdownLinks
-		.replace(/[`#>*]/g, " ")
-		.replace(/\s+/g, " ")
-		.trim();
+	const condensed = toPlainText(content);
 	return condensed.length > 160 ? `${condensed.slice(0, 160)}…` : condensed;
 };
 

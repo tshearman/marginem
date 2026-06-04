@@ -6,8 +6,6 @@ import {
 	forceSimulation,
 	forceX,
 	forceY,
-	scaleOrdinal,
-	schemeTableau10,
 	select,
 } from "d3";
 import type { D3DragEvent, SimulationNodeDatum } from "d3";
@@ -75,23 +73,6 @@ function labelFor(node: GraphNode, labelKey?: string) {
 		: node.id;
 }
 
-function withAlpha(colorValue: string, alpha: number) {
-	if (!colorValue.startsWith("#")) return colorValue;
-	const hex = colorValue.slice(1);
-	const normalized =
-		hex.length === 3
-			? hex
-					.split("")
-					.map((c) => c + c)
-					.join("")
-			: hex;
-	if (normalized.length !== 6) return colorValue;
-	const r = Number.parseInt(normalized.slice(0, 2), 16);
-	const g = Number.parseInt(normalized.slice(2, 4), 16);
-	const b = Number.parseInt(normalized.slice(4, 6), 16);
-	return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 function navigateTo(node: GraphNode) {
 	if (!node.url) return;
 	window.location.assign(node.url);
@@ -146,12 +127,11 @@ function hydrateGraph(el: HTMLElement) {
 			.attr("role", "img")
 			.attr("aria-label", "Force-directed graph");
 
-		const color = scaleOrdinal<string, string>(schemeTableau10);
-
 		const link = svg
 			.append("g")
-			.attr("stroke", "var(--thin-border-color)")
-			.attr("stroke-width", 1.4)
+			.attr("stroke", "var(--ink)")
+			.attr("stroke-opacity", 0.45)
+			.attr("stroke-width", 1.5)
 			.selectAll("line")
 			.data(links)
 			.join("line");
@@ -242,29 +222,23 @@ function hydrateGraph(el: HTMLElement) {
 					),
 			);
 
-		node.append("circle").attr("r", 9).attr("fill", "var(--bg-subtle)");
-
 		node
 			.append("circle")
 			.attr("r", 9)
-			.attr("fill", (d: GraphNode) => {
-				const stroke = color(String(d.group ?? 0));
-				if (d.id.startsWith("folder:")) {
-					return withAlpha(stroke, 1.0);
-				}
-				return "var(--bg-subtle)";
-			})
-			.attr("stroke", (d: GraphNode) => color(String(d.group ?? 0)))
-			.attr("stroke-width", 2);
+			.attr("fill", (d: GraphNode) =>
+				d.id.startsWith("folder:") ? "var(--highlight)" : "var(--paper)",
+			)
+			.attr("stroke", "var(--ink)")
+			.attr("stroke-width", 2.5);
 
 		const showLabels = nodes.length <= 25;
 		const labels = showLabels
 			? svg
 					.append("g")
 					.attr("font-size", "12px")
-					.attr("fill", "rgb(var(--ink-rgb) / 0.8)")
+					.attr("fill", "var(--ink)")
 					.attr("paint-order", "stroke")
-					.attr("stroke", "rgb(var(--white-rgb) / 0.95)")
+					.attr("stroke", "var(--paper)")
 					.attr("stroke-width", 3)
 					.selectAll("text")
 					.data(nodes)

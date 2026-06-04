@@ -8,6 +8,7 @@ import {
 	resolveVaultSubpath,
 } from "./obsidianConfig";
 import { CONTENT_DIR } from "./site";
+import { normalizeTags, parseDate } from "./frontmatter";
 
 export type CommonplaceNote = {
 	content: string;
@@ -24,24 +25,16 @@ export type CommonplaceNote = {
 	relativePath: string;
 };
 
+/** "Author — Source" attribution line for a commonplace note. */
+export const formatAttribution = (note: {
+	author?: string;
+	source?: string;
+}): string => [note.author, note.source].filter(Boolean).join(" — ");
+
 const isMarkdownFile = (fileName: string) => /\.md$/i.test(fileName);
 
 const shouldSkipDir = (dirName: string) =>
 	dirName.startsWith(".") || dirName === "node_modules";
-
-const normalizeTags = (value: unknown): string[] => {
-	if (Array.isArray(value)) {
-		return value.filter((item): item is string => typeof item === "string");
-	}
-	if (typeof value === "string") return [value];
-	return [];
-};
-
-const parseDate = (value: unknown): Date | undefined => {
-	if (!value) return undefined;
-	const date = new Date(String(value));
-	return Number.isNaN(date.getTime()) ? undefined : date;
-};
 
 export const loadCommonplaceNotes = async () => {
 	const config = loadObsidianConfig();
