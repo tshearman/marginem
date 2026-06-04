@@ -2,7 +2,6 @@
 
 html {
   font-size: var(--fs-md);
-  background: var(--bg);
   color: var(--fg);
 }
 
