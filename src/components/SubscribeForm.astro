@@ -20,10 +20,18 @@ const nameId = `${idBase}-name`;
 const buttonClass = ["btn", invert ? "btn--invert" : null]
 	.filter(Boolean)
 	.join(" ");
+
+const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "";
 ---
 
 <div class={invert ? "subscribe-form-wrap subscribe-form-wrap--invert" : "subscribe-form-wrap"}>
-  <form class="subscribe-form" action={action} method={method}>
+  <form
+    class="subscribe-form"
+    action={action}
+    method={method}
+    data-subscribe-form
+    data-turnstile-sitekey={sitekey}
+  >
     <h2 class="subscribe-form__heading">Subscribe for notifications on new posts!</h2>
     <div class="subscribe-form__field">
       <label for={emailId}>Email</label>
@@ -47,12 +55,27 @@ const buttonClass = ["btn", invert ? "btn--invert" : null]
         placeholder="Optional"
       />
     </div>
+    <div class="subscribe-honeypot" aria-hidden="true">
+      <label for={`${idBase}-company`}>Company (leave blank)</label>
+      <input
+        id={`${idBase}-company`}
+        name="company"
+        type="text"
+        tabindex="-1"
+        autocomplete="off"
+      />
+    </div>
+    <div class="cf-turnstile-mount"></div>
     <button type="submit" class={buttonClass}>Subscribe</button>
     <p class="subscribe-form__note">
       Occasional updates, no spam. Unsubscribe anytime.
     </p>
   </form>
 </div>
+
+<script>
+  import "../lib/subscribe-form-client";
+</script>
 
 <!-- Styles live in src/styles/brutalist-page.css so other forms
      (e.g. the unsubscribe form) can reuse .subscribe-form without

@@ -4,6 +4,10 @@
  * the homepage and on long-form pages (newsletter issues, etc.). Self-contained:
  * carries its own scoped styles and relies only on the shared .btn classes
  * from buttons.css. Toggle `invert` for use on dark backgrounds.
+ *
+ * When `linkOnly` is true, the form is replaced with a button linking to
+ * `/subscribe`. Used on the homepage to avoid loading the Turnstile script
+ * for visitors who aren't planning to subscribe.
  */
 interface Props {
 	action?: string;
@@ -12,6 +16,8 @@ interface Props {
 	invert?: boolean;
 	heading?: string;
 	description?: string;
+	linkOnly?: boolean;
+	linkHref?: string;
 }
 
 const {
@@ -21,10 +27,14 @@ const {
 	invert = false,
 	heading = "Subscribe",
 	description = "Get notified when a new essay or note goes up. Occasional updates, no spam, unsubscribe anytime.",
+	linkOnly = false,
+	linkHref = "/subscribe",
 } = Astro.props as Props;
 
 const emailId = `${idBase}-email`;
 const nameId = `${idBase}-name`;
+const formId = `${idBase}-form`;
+const turnstileMountId = `${idBase}-turnstile`;
 const sectionClass = [
 	"subscribe-banner",
 	invert ? "subscribe-banner--invert" : null,
@@ -34,39 +44,67 @@ const sectionClass = [
 const buttonClass = ["btn", invert ? "btn--invert" : null]
 	.filter(Boolean)
 	.join(" ");
+
+const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "";
 ---
 
 <section class={sectionClass} id={idBase}>
   <h2 class="subscribe-banner__heading">{heading}</h2>
   <p class="subscribe-banner__lede">{description}</p>
-  <form class="subscribe-banner__form" action={action} method={method}>
-    <div class="subscribe-banner__cols">
-      <div class="subscribe-banner__row">
-        <label for={emailId}>Email</label>
-        <input
-          id={emailId}
-          name="email"
-          type="email"
-          autocomplete="email"
-          inputmode="email"
-          required
-          placeholder="you@example.com"
-        />
+  {linkOnly ? (
+    <p class="subscribe-banner__cta">
+      <a href={linkHref} class={buttonClass}>Subscribe</a>
+    </p>
+  ) : (
+    <form
+      class="subscribe-banner__form"
+      action={action}
+      method={method}
+      id={formId}
+      data-subscribe-form
+      data-turnstile-sitekey={sitekey}
+    >
+      <div class="subscribe-banner__cols">
+        <div class="subscribe-banner__row">
+          <label for={emailId}>Email</label>
+          <input
+            id={emailId}
+            name="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            required
+            placeholder="you@example.com"
+          />
+        </div>
+        <div class="subscribe-banner__row">
+          <label for={nameId}>What should I call you?</label>
+          <input
+            id={nameId}
+            name="name"
+            type="text"
+            autocomplete="name"
+            placeholder="Optional"
+          />
+        </div>
       </div>
-      <div class="subscribe-banner__row">
-        <label for={nameId}>What should I call you?</label>
+      <div class="subscribe-honeypot" aria-hidden="true">
+        <label for={`${idBase}-company`}>Company (leave blank)</label>
         <input
-          id={nameId}
-          name="name"
+          id={`${idBase}-company`}
+          name="company"
           type="text"
-          autocomplete="name"
-          placeholder="Optional"
+          tabindex="-1"
+          autocomplete="off"
         />
       </div>
-    </div>
-    <input type="submit" value="Subscribe" class={buttonClass} />
-  </form>
+      <div class="cf-turnstile-mount" id={turnstileMountId}></div>
+      <input type="submit" value="Subscribe" class={buttonClass} />
+    </form>
+  )}
 </section>
+
+{!linkOnly && <script>import "../lib/subscribe-form-client";</script>}
 
 <style is:global>
   /* `is:global` so per-page overrides (e.g. `body.post-page
@@ -111,6 +149,10 @@ const buttonClass = ["btn", invert ? "btn--invert" : null]
     line-height: 1.5;
   }
 
+  .subscribe-banner__cta {
+    margin: 0;
+  }
+
   .subscribe-banner__cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -153,6 +195,24 @@ const buttonClass = ["btn", invert ? "btn--invert" : null]
   .subscribe-banner__row input:focus {
     outline: 3px solid var(--highlight);
     outline-offset: 0;
+  }
+
+  /* Honeypot: off-screen, not display:none (some bots skip those). */
+  .subscribe-honeypot {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .cf-turnstile-mount {
+    margin: 0 0 12px;
+  }
+  .cf-turnstile-mount:empty {
+    margin: 0;
   }
 
   @media (max-width: 720px) {

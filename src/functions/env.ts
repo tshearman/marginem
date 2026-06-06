@@ -5,6 +5,7 @@ type Env = {
 	RESEND_FROM_NAME?: string;
 	NEWSLETTER_SITE_URL?: string;
 	SUBSCRIBE_HMAC_SECRET?: string;
+	TURNSTILE_SECRET_KEY?: string;
 };
 
 const getEnvValue = (env: Env, key: keyof Env): string =>

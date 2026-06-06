@@ -236,6 +236,21 @@ body.brutalist .count-section .clear-hint {
   color: rgb(var(--white-rgb) / 0.75);
 }
 
+/* Honeypot: off-screen, not display:none (some bots skip those). */
+.subscribe-honeypot {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cf-turnstile-mount:not(:empty) {
+  margin: 8px 0;
+}
+
 /* ---- FORM PAGES (subscribe/unsubscribe input) ---- */
 /* Pages with a single short form still want footer pinned to the bottom of
    the viewport without going dark. */
