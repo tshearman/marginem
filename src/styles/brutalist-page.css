@@ -155,14 +155,12 @@ body.brutalist .count-section .clear-hint {
   border-radius: 0;
   background: var(--paper);
   color: var(--ink);
-  box-shadow: 6px 6px 0 var(--ink);
 }
 
 .subscribe-form-wrap--invert .subscribe-form {
   background: var(--ink);
   color: var(--paper);
   border-color: var(--paper);
-  box-shadow: 6px 6px 0 var(--paper);
 }
 
 .subscribe-form__heading {
