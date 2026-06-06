@@ -57,7 +57,7 @@ const buildPostEntries = (posts: BlogEntry[]) =>
 		const snippet = ellipsizeText(snippetSource, 240, { alwaysAppend: true });
 		const displayDate = pubDate ? formatDate(pubDate) : "";
 		const pubIso = pubDate ? pubDate.toISOString() : "";
-		const url = `/posts/${post.slug}/`;
+		const url = `/writing/${post.slug}/`;
 		return {
 			id: post.slug,
 			kind: "post" as const,

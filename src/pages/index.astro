@@ -106,7 +106,7 @@ const postCount = posts.length;
             <li>
               <span class="index__kind">{KIND_LABELS.writing}</span>
               <span class="index__body">
-                <a href={`/posts/${item.post.slug}/`} data-astro-prefetch="viewport">{item.post.data.title}</a>
+                <a href={`/writing/${item.post.slug}/`} data-astro-prefetch="viewport">{item.post.data.title}</a>
                 <span class="index__excerpt">{getAbstract(item.post)}</span>
               </span>
               <span class="index__date">{formatDate(item.post.data.pubDate)}</span>

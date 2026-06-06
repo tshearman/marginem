@@ -84,7 +84,7 @@ const writingFilterConfig = JSON.stringify({
                   >
                     <ArchiveEntry
                       title={post.data.title}
-                      url={`/posts/${post.slug}/`}
+                      url={`/writing/${post.slug}/`}
                       date={post.data.pubDate}
                       description={post.data.abstract ?? post.data.description ?? ""}
                       tags={post.data.tags ?? []}

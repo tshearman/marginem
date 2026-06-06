@@ -45,7 +45,7 @@ export async function loadArchiveItems(): Promise<ArchiveItem[]> {
 				category: MAIN_PAGES.writing.label,
 				tags: post.data.tags ?? [],
 				title: post.data.title,
-				url: `/posts/${post.slug}/`,
+				url: `/writing/${post.slug}/`,
 				description: post.data.abstract ?? post.data.description ?? "",
 				sortDate: post.data.pubDate,
 				displayDate: post.data.pubDate,
