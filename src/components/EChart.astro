@@ -12,9 +12,13 @@ interface Props {
 	option: Option;
 	/** Chart height in px. Defaults to the option's `height`, else 320. */
 	height?: number;
+	/** Visual theme. Known: "default" | "newsprint" | "highlight" | "blueprint"
+	 *  | "carbon". See src/scripts/chart-themes.ts. Unknown names fall back to
+	 *  the default (base axis/font theme only). */
+	theme?: string;
 }
 
-const { option, height } = Astro.props as Props;
+const { option, height, theme = "default" } = Astro.props as Props;
 const layoutHeight =
 	typeof option.height === "number" && Number.isFinite(option.height)
 		? (option.height as number)
@@ -32,6 +36,7 @@ const payloadAttr = JSON.stringify(option).replace(/</g, "\\u003c");
     class="echart-chart"
     style={chartStyle}
     data-echart={payloadAttr}
+    data-echart-theme={theme}
   ></div>
 </div>
 <script>

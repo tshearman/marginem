@@ -2,87 +2,48 @@
  * ECharts hydrator.
  *
  * Walks every `[data-echart]` element on the page, parses its JSON `option`
- * payload, applies a theme overlay derived from live CSS custom properties
- * (--ink / --paper), and dynamic-imports the ECharts bundle to call `init` +
- * `setOption`. Tracks each instance so the masthead's `themechange` event can
- * re-tint without rebuilding the chart.
+ * payload, applies the requested theme (see chart-themes.ts) using live CSS
+ * custom property values, and dynamic-imports the ECharts bundle to call
+ * `init` + `setOption`. Tracks each instance so the masthead's `themechange`
+ * event can re-tint without rebuilding the chart, and re-sizes on window
+ * resize.
  *
- * The ECharts module itself is lazy-loaded so the ~300 KB chart bundle only
+ * The ECharts bundle itself is lazy-loaded so the ~540 KB chart code only
  * downloads on pages that actually contain a chart.
  */
+
+import { applyTheme, type ThemeColors } from "./chart-themes.ts";
 
 type EChartsBundle = typeof import("./echarts-bundle.ts");
 type EChartsInstance = ReturnType<EChartsBundle["init"]>;
 
-const DEFAULT_FONT_FAMILY =
-	'"iA Writer Duo", "Courier New", Courier, monospace';
-const DEFAULT_FONT_SIZE = 12;
-
-type ThemeColors = {
-	ink: string;
-	paper: string;
-	grid: string;
-	font: { family: string; size: number; color: string };
-};
+// Fallback only — at runtime we read --font-ia-writer from CSS, which Astro's
+// Fonts API populates with the hashed family name + fallback stack. The plain
+// string "iA Writer Duo" isn't a registered family in the browser; the canvas
+// renderer needs the hashed name to find the loaded face.
+const FONT_FALLBACK = '"Courier New", Courier, monospace';
+const FONT_SIZE = 12;
 
 function readThemeColors(): ThemeColors {
-	const styles = getComputedStyle(document.documentElement);
-	const ink = styles.getPropertyValue("--ink").trim() || "#0f172a";
-	const paper = styles.getPropertyValue("--paper").trim() || "#ffffff";
+	const s = getComputedStyle(document.documentElement);
+	const cssVar = (name: string, fallback: string) =>
+		s.getPropertyValue(name).trim() || fallback;
+	const ink = cssVar("--ink", "#000");
+	const paper = cssVar("--paper", "#fff");
 	const isDark = document.documentElement.dataset.theme === "dark";
 	return {
 		ink,
 		paper,
-		grid: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
-		font: { family: DEFAULT_FONT_FAMILY, size: DEFAULT_FONT_SIZE, color: ink },
+		highlight: cssVar("--highlight", isDark ? "#ff2d8a" : "#ffe600"),
+		accent: cssVar("--accent", "#0ea5e9"),
+		accent2: cssVar("--accent-2", "#10b981"),
+		accent3: cssVar("--accent-3", "#84cc16"),
+		grid: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.10)",
+		font: {
+			family: cssVar("--font-ia-writer", FONT_FALLBACK),
+			size: FONT_SIZE,
+		},
 	};
-}
-
-/** Merge theme-derived colors into an ECharts option without clobbering any
- *  caller-set values. Per-series and per-axis fields the user supplied win. */
-function applyThemeToOption(
-	option: Record<string, unknown>,
-	theme: ThemeColors,
-): Record<string, unknown> {
-	const next = { ...option };
-
-	next.backgroundColor = theme.paper;
-	next.textStyle = {
-		...(next.textStyle as object | undefined),
-		fontFamily: theme.font.family,
-		fontSize: theme.font.size,
-		color: theme.ink,
-	};
-
-	const themeAxis = (axis: unknown): Record<string, unknown> => {
-		const a =
-			typeof axis === "object" && axis !== null
-				? { ...(axis as Record<string, unknown>) }
-				: {};
-		const al = (a.axisLabel ?? {}) as Record<string, unknown>;
-		a.axisLabel = { color: theme.ink, ...al };
-		const aline = (a.axisLine ?? {}) as Record<string, unknown>;
-		const alineStyle = (aline.lineStyle ?? {}) as Record<string, unknown>;
-		a.axisLine = {
-			...aline,
-			lineStyle: { color: theme.ink, ...alineStyle },
-		};
-		const sl = (a.splitLine ?? {}) as Record<string, unknown>;
-		const slStyle = (sl.lineStyle ?? {}) as Record<string, unknown>;
-		a.splitLine = {
-			...sl,
-			lineStyle: { color: theme.grid, ...slStyle },
-		};
-		return a;
-	};
-
-	for (const key of ["xAxis", "yAxis"] as const) {
-		const val = next[key];
-		if (Array.isArray(val)) next[key] = val.map(themeAxis);
-		else if (val !== undefined) next[key] = themeAxis(val);
-	}
-
-	return next;
 }
 
 let echartsPromise: Promise<EChartsBundle> | null = null;
@@ -94,6 +55,7 @@ function loadECharts(): Promise<EChartsBundle> {
 type ChartRecord = {
 	instance: EChartsInstance;
 	baseOption: Record<string, unknown>;
+	themeName: string;
 };
 
 const charts = new Map<HTMLElement, ChartRecord>();
@@ -101,26 +63,28 @@ const charts = new Map<HTMLElement, ChartRecord>();
 async function hydrateChart(el: HTMLElement) {
 	const raw = el.getAttribute("data-echart");
 	if (!raw) return;
+	const themeName = el.getAttribute("data-echart-theme") ?? "default";
 	try {
 		const baseOption = JSON.parse(raw) as Record<string, unknown>;
 		el.removeAttribute("data-echart");
 
 		const { init } = await loadECharts();
 		const instance = init(el, null, { renderer: "canvas" });
-		const themed = applyThemeToOption(baseOption, readThemeColors());
-		instance.setOption(themed);
-		charts.set(el, { instance, baseOption });
+		instance.setOption(applyTheme(baseOption, themeName, readThemeColors()));
+		charts.set(el, { instance, baseOption, themeName });
 	} catch (error) {
 		console.error("Failed to initialize ECharts chart", error);
 	}
 }
 
 function retintAll() {
-	const theme = readThemeColors();
+	const colors = readThemeColors();
 	for (const [, record] of charts) {
-		const themed = applyThemeToOption(record.baseOption, theme);
 		try {
-			record.instance.setOption(themed, { notMerge: true });
+			record.instance.setOption(
+				applyTheme(record.baseOption, record.themeName, colors),
+				{ notMerge: true },
+			);
 		} catch (error) {
 			console.error("Failed to retint ECharts chart", error);
 		}
@@ -144,5 +108,3 @@ if (document.readyState === "loading") {
 } else {
 	init();
 }
-
-export type {};

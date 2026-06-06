@@ -107,10 +107,11 @@ $$
 Below is a minimal ECharts chart rendered via the helper component. Resize the window to confirm responsiveness.
 
 <EChart
+  theme="newsprint"
   option={{
     title: { text: "Weekly traffic with uniques and conversion" },
     grid: { top: 60, left: 48, right: 48, bottom: 60, containLabel: true },
-    legend: { orient: "horizontal", bottom: 0 },
+    legend: { orient: "horizontal", bottom: 8 },
     tooltip: { trigger: "axis" },
     xAxis: {
       type: "category",
@@ -131,29 +132,18 @@ Below is a minimal ECharts chart rendered via the helper component. Resize the w
         name: "Visits",
         type: "bar",
         data: [120, 140, 135, 180, 210, 190, 160],
-        itemStyle: { color: "#0ea5e9", borderColor: "#0284c7", borderWidth: 1 },
-        opacity: 0.85,
-        barGap: "20%",
       },
       {
         name: "Unique users",
         type: "line",
         data: [95, 110, 115, 140, 170, 165, 140],
         smooth: true,
-        showSymbol: true,
-        symbolSize: 8,
-        lineStyle: { color: "#4f008b", width: 3 },
-        itemStyle: { color: "#4f008b" },
-        areaStyle: { color: "rgba(136, 64, 229, 0.15)" },
       },
       {
         name: "Conversion rate",
         type: "line",
         yAxisIndex: 1,
         data: [32, 34, 33, 35, 39, 36, 34],
-        showSymbol: false,
-        lineStyle: { color: "#009f82", width: 3, type: "dashed" },
-        itemStyle: { color: "#009f82" },
       },
     ],
     height: 420,
