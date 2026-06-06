@@ -4,126 +4,17 @@ import Banner from "../../components/Banner.astro";
 import FilterableCount from "../../components/FilterableCount.astro";
 import ArchiveEntry from "../../components/ArchiveEntry.astro";
 import TagFilterPanel from "../../components/TagFilterPanel.astro";
-import { getCollection } from "astro:content";
 import { MAIN_PAGES } from "../../lib/site";
-import { formatAttribution, loadCommonplaceNotes } from "../../lib/commonplace";
-import { loadGardenNotes } from "../../lib/garden";
-import { plainExcerpt } from "../../lib/gardenPageUtils";
-import { oneLineSnippet } from "../../lib/text";
-import { generateNoteId } from "../../lib/noteUtils";
-import { withSlugs } from "../../lib/content";
-
-/**
- * Normalised archive entry: every kind funnels through ArchiveEntry, so the
- * row only needs title/url/description/tags + a sortDate (used for ordering
- * and year grouping) and a displayDate (rendered in the row, may differ —
- * commonplace notes sort by date-added but display their stated date).
- */
-type ArchiveItem = {
-	kind: "blog" | "newsletter" | "commonplace" | "garden";
-	category: string;
-	tags: string[];
-	title: string;
-	url: string;
-	description: string;
-	sortDate?: Date;
-	displayDate?: Date;
-};
+import {
+	groupByYear,
+	loadArchiveItems,
+	sortArchiveItems,
+} from "../../lib/archive";
 
 export const prerender = true;
 
-const [posts, newsletters, commonplaceNotes, gardenNotes] = await Promise.all([
-	getCollection("blog", ({ data }) => !data.draft),
-	getCollection("newsletter", ({ data }) => !data.draft),
-	loadCommonplaceNotes(),
-	loadGardenNotes(),
-]);
-
-const postsWithSlugs = withSlugs(posts);
-const newslettersWithSlugs = withSlugs(newsletters);
-
-const archiveItems: ArchiveItem[] = [
-	...postsWithSlugs.map(
-		(post): ArchiveItem => ({
-			kind: "blog",
-			category: MAIN_PAGES.writing.label,
-			tags: post.data.tags ?? [],
-			title: post.data.title,
-			url: `/posts/${post.slug}/`,
-			description: post.data.abstract ?? post.data.description ?? "",
-			sortDate: post.data.pubDate,
-			displayDate: post.data.pubDate,
-		}),
-	),
-	...newslettersWithSlugs.map(
-		(entry): ArchiveItem => ({
-			kind: "newsletter",
-			category: MAIN_PAGES.newsletter.label,
-			tags: entry.data.tags ?? [],
-			title: `Issue ${entry.data.issueNumber}: ${entry.data.title}`,
-			url: `/newsletter/${entry.slug}/`,
-			description: entry.data.description ?? "",
-			sortDate: entry.data.pubDate,
-			displayDate: entry.data.pubDate,
-		}),
-	),
-	...commonplaceNotes.map((note): ArchiveItem => {
-		const noteId = generateNoteId({
-			content: note.content,
-			author: note.author,
-			date: note.date,
-		});
-		return {
-			kind: "commonplace",
-			category: MAIN_PAGES.commonplace.label,
-			tags: note.tags ?? [],
-			title: `"${oneLineSnippet(note.content, 140)}"`,
-			url: `${MAIN_PAGES.commonplace.href}#${noteId}`,
-			description: formatAttribution(note),
-			// Sort/group by the date the note was added to the site; display the
-			// note's stated date (fall back to addedAt if missing).
-			sortDate: note.addedAt,
-			displayDate: note.date ?? note.addedAt,
-		};
-	}),
-	...gardenNotes.map(
-		(note): ArchiveItem => ({
-			kind: "garden",
-			category: MAIN_PAGES.garden.label,
-			tags: note.tags ?? [],
-			title: note.title,
-			url: `/garden/${note.slug}/`,
-			description: plainExcerpt(note.content),
-			sortDate: note.date ?? note.updatedAt,
-			displayDate: note.date ?? note.updatedAt,
-		}),
-	),
-];
-
-const sortedItems = archiveItems.sort((a, b) => {
-	const aTime = a.sortDate?.getTime();
-	const bTime = b.sortDate?.getTime();
-	if (aTime != null && bTime != null) return bTime - aTime;
-	if (aTime != null) return -1;
-	if (bTime != null) return 1;
-	return a.title.localeCompare(b.title);
-});
-
-type ItemsByYear = Record<string, ArchiveItem[]>;
-const itemsByYear = sortedItems.reduce<ItemsByYear>((acc, item) => {
-	const year = item.sortDate
-		? item.sortDate.getFullYear().toString()
-		: "Undated";
-	if (!acc[year]) acc[year] = [];
-	acc[year].push(item);
-	return acc;
-}, {});
-
-const groupedYears = Object.entries(itemsByYear).sort((a, b) => {
-	if (a[0] === "Undated") return 1;
-	if (b[0] === "Undated") return -1;
-	return Number(b[0]) - Number(a[0]);
-});
+const sortedItems = sortArchiveItems(await loadArchiveItems());
+const groupedYears = groupByYear(sortedItems);
 
 const allTags = [...new Set(sortedItems.flatMap((item) => item.tags))].sort(
 	(a, b) => a.localeCompare(b),

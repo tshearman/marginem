@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PageIntro from "../../components/PageIntro.astro";
+import Banner from "../../components/Banner.astro";
 import { SITE_NAME } from "../../lib/site";
 
 export const prerender = true;
@@ -11,60 +11,56 @@ export const prerender = true;
   description="You are subscribed."
   hero="You're all set"
   showHero={false}
+  bodyClass="brutalist form-page subscribe-confirmed-page"
 >
-  <PageIntro
-    eyebrow="Confirmed"
-    title="Subscription confirmed"
-    description="Thanks for confirming. You're on the list, and future updates will land in your inbox."
-  />
-  <section class="subscribe-cta">
-    <div class="subscribe-cta__actions">
-      <a class="subscribe-cta__button" href="/">Read Recent Posts</a>
-      <a class="subscribe-cta__button" href="/newsletter/">
-        Peruse Previous Newsletters
-      </a>
+  <div class="page-hero">
+    <div class="page-hero__banner">
+      <Banner
+        text="CONFIRMED"
+        height={140}
+        srLabel="Subscription confirmed"
+      />
+      <span class="page-hero__eyebrow">Subscription confirmed</span>
+    </div>
+  </div>
+
+  <section class="confirm-hero">
+    <p class="confirm-hero__message">
+      Thanks for confirming &mdash;<br />you're on the list.
+    </p>
+    <div class="confirm-hero__actions">
+      <a class="btn" href="/">Read recent posts</a>
+      <a class="btn" href="/newsletter/">Previous newsletters</a>
     </div>
   </section>
 </BaseLayout>
 
-<style>
-  .subscribe-cta {
+<style is:global>
+  body.subscribe-confirmed-page .confirm-hero {
+    flex: 1;
+    padding: clamp(40px, 10vh, 120px) clamp(16px, 4vw, 48px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    margin: 5rem auto 0;
-    display: grid;
-    gap: 1.2rem;
   }
 
-  .subscribe-cta__copy {
-    margin: 0;
-    color: rgb(var(--ink-rgb) / 0.72);
+  body.subscribe-confirmed-page .confirm-hero__message {
+    margin: 0 0 40px;
+    font-family: var(--display);
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
 
-  .subscribe-cta__actions {
+  body.subscribe-confirmed-page .confirm-hero__actions {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.85rem;
-  }
-
-  .subscribe-cta__button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem 1.6rem;
-    border-radius: 999px;
-    border: var(--thin-border);
-    background-color: var(--fg);
-    color: var(--fg-inverse);
-  }
-
-  @media (max-width: 640px) {
-    .subscribe-cta__actions {
-      flex-direction: column;
-    }
-
-    .subscribe-cta__button {
-      width: 100%;
-    }
+    gap: 16px;
   }
 </style>

@@ -33,5 +33,4 @@
   --fs-4xl: 2.25rem;
   --fs-display-sm: clamp(1.8rem, 3.5vw, 2.4rem);
   --fs-display-md: clamp(2.2rem, 4vw, 3.1rem);
-  --fs-display-lg: clamp(2.3rem, 5vw, 3.5rem);
 }

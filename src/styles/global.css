@@ -96,14 +96,6 @@
   --code-fg: #d4d4d4;
 }
 
-.eyebrow-text {
-  margin: 0;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: var(--fs-sm);
-  color: var(--muted);
-}
-
 .footnotes {
   font-size: var(--fs-sm);
   border-top: var(--thin-border);

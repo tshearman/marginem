@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PageIntro from "../../components/PageIntro.astro";
+import Banner from "../../components/Banner.astro";
 import { SITE_NAME } from "../../lib/site";
 
 export const prerender = true;
@@ -11,10 +11,69 @@ export const prerender = true;
   description="You have been removed from the list."
   hero="You're unsubscribed"
   showHero={false}
+  bodyClass="brutalist form-page unsubscribe-confirmed-page"
 >
-  <PageIntro
-    eyebrow="Confirmed"
-    title="You're unsubscribed"
-    description="You're no longer on the list. If this was a mistake, you can subscribe again anytime."
-  />
+  <div class="page-hero">
+    <div class="page-hero__banner">
+      <Banner
+        text="UNSUBSCRIBED"
+        textNarrow={"UNSUB\nSCRIBED"}
+        height={140}
+        srLabel="You're unsubscribed"
+      />
+      <span class="page-hero__eyebrow">Unsubscribed</span>
+    </div>
+  </div>
+
+  <section class="confirm-hero">
+    <p class="confirm-hero__message">
+      You're off the list &mdash;<br />no more emails from me.
+    </p>
+    <p class="confirm-hero__note">
+      If this was a mistake, you can resubscribe anytime.
+    </p>
+    <div class="confirm-hero__actions">
+      <a class="btn" href="/">Read recent posts</a>
+      <a class="btn" href="/subscribe/">Subscribe again</a>
+    </div>
+  </section>
 </BaseLayout>
+
+<style is:global>
+  body.unsubscribe-confirmed-page .confirm-hero {
+    flex: 1;
+    padding: clamp(40px, 10vh, 120px) clamp(16px, 4vw, 48px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  body.unsubscribe-confirmed-page .confirm-hero__message {
+    margin: 0 0 20px;
+    font-family: var(--display);
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  body.unsubscribe-confirmed-page .confirm-hero__note {
+    margin: 0 0 40px;
+    max-width: 40ch;
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    line-height: 1.6;
+    color: rgb(var(--ink-rgb) / 0.75);
+  }
+
+  body.unsubscribe-confirmed-page .confirm-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+</style>

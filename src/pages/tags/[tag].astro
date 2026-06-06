@@ -1,32 +1,40 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PostPreview from "../../components/PostPreview.astro";
-import { getCollection } from "astro:content";
-import { formatDate } from "../../lib/date";
+import Banner from "../../components/Banner.astro";
+import FilterableCount from "../../components/FilterableCount.astro";
+import ArchiveEntry from "../../components/ArchiveEntry.astro";
 import { MAIN_PAGES, SITE_NAME } from "../../lib/site";
 import { slugifyTag } from "../../lib/tags";
-import { withSlugs, type BlogEntry } from "../../lib/content";
+import {
+	groupByYear,
+	loadArchiveItems,
+	sortArchiveItems,
+	type ArchiveItem,
+} from "../../lib/archive";
 
 export async function getStaticPaths() {
-	const posts = withSlugs(
-		await getCollection("blog", ({ data }) => !data.draft),
-	);
+	const items = await loadArchiveItems();
 
-	const tagsBySlug = posts.reduce((map, post) => {
-		for (const tag of post.data.tags ?? []) {
+	// Group every archive item by its tag slug — keep last-seen casing for the
+	// display label, accumulate items so each tag page can render the full list.
+	const itemsBySlug = items.reduce((map, item) => {
+		for (const tag of item.tags ?? []) {
 			const slug = slugifyTag(tag);
 			if (!slug) continue;
-			const entry = map.get(slug) ?? { label: tag, posts: [] as BlogEntry[] };
-			entry.posts.push(post as BlogEntry);
-			entry.label = tag; // keep last-seen casing
+			const entry = map.get(slug) ?? {
+				label: tag,
+				items: [] as ArchiveItem[],
+			};
+			entry.items.push(item);
+			entry.label = tag;
 			map.set(slug, entry);
 		}
 		return map;
-	}, new Map<string, { label: string; posts: BlogEntry[] }>());
+	}, new Map<string, { label: string; items: ArchiveItem[] }>());
 
-	return Array.from(tagsBySlug, ([slug, value]) => ({
+	return Array.from(itemsBySlug, ([slug, value]) => ({
 		params: { tag: slug },
-		props: { tag: value.label, slug, posts: value.posts },
+		props: { tag: value.label, items: value.items },
 	}));
 }
 
@@ -34,33 +42,75 @@ export const prerender = true;
 
 interface TagPageProps {
 	tag: string;
-	posts: BlogEntry[];
+	items: ArchiveItem[];
 }
 
-const { tag, posts = [] } = Astro.props as TagPageProps;
+const { tag, items = [] } = Astro.props as TagPageProps;
+
+const sortedItems = sortArchiveItems(items);
+const groupedYears = groupByYear(sortedItems);
+const bannerText = `#${tag}`.toUpperCase();
 ---
 <BaseLayout
   title={`${tag} — ${SITE_NAME}`}
   description={`Entries tagged ${tag}`}
   hero={`#${tag}`}
+  showHero={false}
   activePage={MAIN_PAGES.archive.label}
+  bodyClass="brutalist form-page tag-page archive-page"
 >
-  {posts.length === 0 ? (
-    <p>No entries yet.</p>
-  ) : (
-    posts
-      .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-      .map((post) => (
-        <PostPreview
-          id={post.slug}
-          title={post.data.title}
-          url={`/posts/${post.slug}/`}
-          pubDate={post.data.pubDate?.toISOString?.() ?? ''}
-          displayDate={formatDate(post.data.pubDate)}
-          description={post.data.description ?? ''}
-          abstract={post.data.abstract ?? post.data.description ?? ''}
-          tags={post.data.tags}
-        />
-      ))
-  )}
+  <div class="page-hero">
+    <div class="page-hero__banner">
+      <Banner
+        text={bannerText}
+        height={140}
+        srLabel={`Entries tagged ${tag}`}
+      />
+      <span class="page-hero__eyebrow">Tag</span>
+    </div>
+    <p class="page-hero__subtitle">Entries tagged {tag}</p>
+  </div>
+
+  <div class="page-shell">
+    {sortedItems.length === 0 ? (
+      <p class="tag-page__empty">No entries yet.</p>
+    ) : (
+      <section class="archive-page">
+        <FilterableCount contentType="entries" totalCount={sortedItems.length} />
+        <div class="archive-years">
+          {groupedYears.map(([year, yearEntries]) => (
+            <section class="archive-year">
+              <h2>{year}</h2>
+              <div class="archive-year__entries">
+                {yearEntries.map((entry) => (
+                  <div class="archive-item">
+                    <ArchiveEntry
+                      title={entry.title}
+                      url={entry.url}
+                      date={entry.displayDate ?? entry.sortDate ?? new Date(0)}
+                      description={entry.description}
+                      tags={entry.tags}
+                      showYear={entry.kind === "commonplace"}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
 </BaseLayout>
+
+<style is:global>
+  body.tag-page .tag-page__empty {
+    margin: 0;
+    padding: 16px;
+    border: 3px solid var(--ink);
+    background: var(--paper);
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    color: var(--ink);
+  }
+</style>

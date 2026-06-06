@@ -145,6 +145,116 @@ body.brutalist .count-section .clear-hint {
   color: rgb(var(--ink-rgb) / 0.65);
 }
 
+/* ---- BRUTALIST SUBSCRIBE / UNSUBSCRIBE FORMS ---- */
+/* Shared between SubscribeForm component and the unsubscribe form. Paper
+   variant by default; `.subscribe-form-wrap--invert` flips it for dark cells. */
+.subscribe-form {
+  display: block;
+  padding: 18px;
+  border: 4px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.subscribe-form-wrap--invert .subscribe-form {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--paper);
+  box-shadow: 6px 6px 0 var(--paper);
+}
+
+.subscribe-form__heading {
+  display: inline-block;
+  margin: 0 0 14px;
+  padding: 2px 8px;
+  font-family: var(--display);
+  font-size: var(--fs-sm);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.subscribe-form-wrap--invert .subscribe-form__heading {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.subscribe-form__field {
+  display: block;
+  margin: 0 0 14px;
+}
+
+.subscribe-form label {
+  display: block;
+  margin: 0 0 4px;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: inherit;
+}
+
+.subscribe-form input[type="email"],
+.subscribe-form input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  font-family: var(--mono);
+  /* 16px minimum keeps iOS Safari from zooming on focus. */
+  font-size: var(--fs-md);
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.subscribe-form-wrap--invert .subscribe-form input[type="email"],
+.subscribe-form-wrap--invert .subscribe-form input[type="text"] {
+  border-color: var(--paper);
+}
+
+.subscribe-form input:focus {
+  outline: 3px solid var(--highlight);
+  outline-offset: 0;
+}
+
+.subscribe-form__note {
+  margin: 14px 0 0;
+  font-family: var(--mono);
+  font-size: var(--fs-3xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-rgb) / 0.65);
+}
+
+.subscribe-form-wrap--invert .subscribe-form__note {
+  color: rgb(var(--white-rgb) / 0.75);
+}
+
+/* ---- FORM PAGES (subscribe/unsubscribe input) ---- */
+/* Pages with a single short form still want footer pinned to the bottom of
+   the viewport without going dark. */
+body.form-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body.form-page .site-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+body.brutalist.form-page .site-footer {
+  margin-top: auto;
+}
+
 /* When a SubscribeBanner immediately precedes the footer, drop the 4rem
    gap — the banner already provides its own 6px separator and a paper-
    colored gap exposing the page-texture backdrop reads as a bug. */

@@ -22,9 +22,9 @@ const buttonClass = ["btn", invert ? "btn--invert" : null]
 	.join(" ");
 ---
 
-<div>
+<div class={invert ? "subscribe-form-wrap subscribe-form-wrap--invert" : "subscribe-form-wrap"}>
   <form class="subscribe-form" action={action} method={method}>
-    <h2>Subscribe for notifications on new posts!</h2>
+    <h2 class="subscribe-form__heading">Subscribe for notifications on new posts!</h2>
     <div class="subscribe-form__field">
       <label for={emailId}>Email</label>
       <input
@@ -54,62 +54,6 @@ const buttonClass = ["btn", invert ? "btn--invert" : null]
   </form>
 </div>
 
-<style>
-  .subscribe-form {
-    display: grid;
-    gap: 1.25rem;
-    padding: 1.75rem;
-    border: var(--thin-border);
-    border-radius: 1.25rem;
-    background: var(--bg);
-  }
-
-  .subscribe-form h2 {
-    margin: 0;
-    text-align: center;
-    font-size: var(--fs-xl);
-  }
-
-  .subscribe-form__field {
-    display: grid;
-    gap: 0.4rem;
-  }
-
-  .subscribe-form label {
-    font-size: var(--fs-base);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .subscribe-form input {
-    width: 100%;
-    padding: 0.75rem 0.9rem;
-    border-radius: 0.75rem;
-    border: var(--thin-border);
-    font-size: var(--fs-md);
-    font-family: inherit;
-    color: var(--fg);
-    background: var(--bg);
-    transition:
-      border-color 0.2s ease,
-      background 0.2s ease;
-  }
-
-  .subscribe-form input:focus {
-    outline: none;
-    border-color: rgb(var(--ink-rgb) / 0.6);
-    background: var(--bg);
-    box-shadow: 0 0 0 3px rgb(var(--ink-rgb) / 0.1);
-  }
-
-  .subscribe-form .btn {
-    justify-self: start;
-  }
-
-  .subscribe-form__note {
-    margin: 0;
-    font-size: var(--fs-sm);
-    color: var(--muted);
-  }
-</style>
+<!-- Styles live in src/styles/brutalist-page.css so other forms
+     (e.g. the unsubscribe form) can reuse .subscribe-form without
+     importing this component. -->
