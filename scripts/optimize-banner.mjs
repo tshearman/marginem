@@ -19,6 +19,7 @@
  * URL-changed banners get fetched + dithered.
  */
 
+import crypto from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -28,12 +29,18 @@ import sharp from "sharp";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const BLOG_DIR = path.join(root, "content/blog");
-const POSTS_DIR = path.join(root, "src/assets/banners/posts");
+const BANNERS_DIR = path.join(root, "src/assets/banners");
+const POSTS_DIR = path.join(BANNERS_DIR, "posts");
 const SOURCES_DIR = path.join(POSTS_DIR, "_sources");
+const RAW_OUT_DIR = path.join(BANNERS_DIR, "_optimized");
 const MAP_OUT = path.join(root, "src/assets/post-banners.ts");
 
 const TARGET_W = 1720;
-const TARGET_H = 780; // matches the runtime banner aspect (~2.2:1)
+// 1720 × 800 covers every Banner usage: max CSS width 860 × 2dpr = 1720, max
+// canvas height 300 CSS px × 2dpr = 600 device px visible, plus ~100 px buffer
+// top/bottom. Bumping height invalidates the .url cache (key includes geom).
+const TARGET_H = 800;
+const RAW_INPUT_RE = /\.(webp|png|jpe?g)$/i;
 
 function atkinsonDither(width, height, gray) {
   const buf = new Float32Array(gray.length);
@@ -106,8 +113,7 @@ async function ditherAndEncode(srcBuffer) {
     // Stretch the histogram across the full 0–255 range first…
     .normalise()
     // …then push midtones away from the threshold to get more solid blacks
-    // and whites with dither concentrated at transition zones (the brutalist
-    // stark look rather than soft halftone).
+    // and whites with dither concentrated at transition zones.
     .linear(1.4, -50)
     .grayscale()
     .toColorspace("b-w")
@@ -142,10 +148,13 @@ async function processPost(file) {
   const outPath = path.join(POSTS_DIR, `${slug}.webp`);
   const urlCachePath = path.join(SOURCES_DIR, `${slug}.url`);
 
+  // Cache key includes geometry so changing TARGET_W/TARGET_H invalidates
+  // every existing dithered output without needing to wipe the cache by hand.
+  const cacheKey = `${heroImage}\n${TARGET_W}x${TARGET_H}`;
   const cacheHit =
     existsSync(outPath) &&
     existsSync(urlCachePath) &&
-    (await readFile(urlCachePath, "utf8")).trim() === heroImage;
+    (await readFile(urlCachePath, "utf8")).trim() === cacheKey;
 
   if (cacheHit) {
     console.log(`  ${slug}: cache hit, skipping`);
@@ -161,12 +170,82 @@ async function processPost(file) {
   const outBuf = await ditherAndEncode(srcBuf);
   await mkdir(POSTS_DIR, { recursive: true });
   await writeFile(outPath, outBuf);
-  await writeFile(urlCachePath, `${heroImage}\n`);
+  await writeFile(urlCachePath, `${cacheKey}\n`);
 
   console.log(
     `  ${slug}: wrote ${path.relative(root, outPath)} (${(outBuf.length / 1024).toFixed(1)}KB)`,
   );
   return { slug, heroImage };
+}
+
+/**
+ * Raw banner pipeline (site-wide / aux banners).
+ *
+ * Input:  src/assets/banners/<name>.<ext>   (top-level files, any size)
+ * Output: src/assets/banners/_optimized/<name>.webp  (1720 × 800, alpha stripped)
+ * Cache:  src/assets/banners/_optimized/<name>.hash  (sha1 of source bytes)
+ *
+ * Resize-to-fit width (no enlargement), centered vertical crop to TARGET_H,
+ * flatten onto black (matches the runtime's fillRect before drawImage), and
+ * re-encode webp at build-time-only quality. Consumers import the optimized
+ * path directly (e.g. Banner.astro's default src).
+ */
+async function discoverRawBanners() {
+  if (!existsSync(BANNERS_DIR)) return [];
+  const entries = await readdir(BANNERS_DIR, { withFileTypes: true });
+  return entries
+    .filter((e) => e.isFile() && RAW_INPUT_RE.test(e.name))
+    .map((e) => path.join(BANNERS_DIR, e.name))
+    .sort();
+}
+
+async function processRawBanner(srcPath) {
+  const base = path.basename(srcPath, path.extname(srcPath));
+  const outPath = path.join(RAW_OUT_DIR, `${base}.webp`);
+  const hashPath = path.join(RAW_OUT_DIR, `${base}.hash`);
+
+  const srcBuf = await readFile(srcPath);
+  const hash = crypto.createHash("sha1").update(srcBuf).digest("hex");
+  const cacheKey = `${hash}\n${TARGET_W}x${TARGET_H}`;
+
+  if (existsSync(outPath) && existsSync(hashPath)) {
+    const cached = (await readFile(hashPath, "utf8")).trim();
+    if (cached === cacheKey) {
+      console.log(`  ${base}: cache hit, skipping`);
+      return { base, outPath };
+    }
+  }
+
+  console.log(`  ${base}: optimizing`);
+
+  // Resize-to-fit width first, then read the resized height to compute the
+  // centered vertical crop. One intermediate buffer keeps both passes honest.
+  const resized = await sharp(srcBuf)
+    .resize({ width: TARGET_W, withoutEnlargement: true })
+    .toBuffer({ resolveWithObject: true });
+
+  const cropH = Math.min(TARGET_H, resized.info.height);
+  const cropTop = Math.max(0, Math.round((resized.info.height - cropH) / 2));
+
+  const outBuf = await sharp(resized.data)
+    .extract({
+      left: 0,
+      top: cropTop,
+      width: resized.info.width,
+      height: cropH,
+    })
+    .flatten({ background: "#000" })
+    .webp({ quality: 85, effort: 6 })
+    .toBuffer();
+
+  await mkdir(RAW_OUT_DIR, { recursive: true });
+  await writeFile(outPath, outBuf);
+  await writeFile(hashPath, `${cacheKey}\n`);
+
+  console.log(
+    `  ${base}: wrote ${path.relative(root, outPath)} (${(outBuf.length / 1024).toFixed(1)}KB, was ${(srcBuf.length / 1024).toFixed(1)}KB)`,
+  );
+  return { base, outPath };
 }
 
 async function writeMap(entries) {
@@ -196,6 +275,18 @@ ${mapBody}
 }
 
 const main = async () => {
+  // Raw banner pipeline first — independent of the blog scan and has no map
+  // output; consumers import the optimized path directly.
+  const rawBanners = await discoverRawBanners();
+  console.log(`scanning ${rawBanners.length} raw banner(s)…`);
+  for (const srcPath of rawBanners) {
+    try {
+      await processRawBanner(srcPath);
+    } catch (err) {
+      console.error(`  failed to process ${srcPath}: ${err.message}`);
+    }
+  }
+
   if (!existsSync(BLOG_DIR)) {
     console.warn(`no blog dir found at ${BLOG_DIR} — writing empty map`);
     await writeMap([]);

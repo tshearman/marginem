@@ -1,11 +1,15 @@
 ---
 import { DEFAULT_CONFIG } from "../scripts/banner";
-import bannerSrcUrl from "../assets/banners/notebook_banner_c.webp?url";
+import bannerSrcUrl from "../assets/banners/_optimized/notebook_banner_c.webp?url";
 
 interface BannerProps {
 	text: string;
 	textNarrow?: string;
 	src?: string;
+	/** Banner height in CSS px. Capped at ~400 by the asset pipeline: banners
+	 *  are pre-cropped to 1720 × 800 device px (see scripts/optimize-banner.mjs),
+	 *  which covers up to 400 CSS px at 2× DPR. Beyond that the canvas
+	 *  letterboxes with the background fill. */
 	height?: number;
 	pixel?: number;
 	invert?: boolean;
