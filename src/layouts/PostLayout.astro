@@ -6,6 +6,13 @@ import { POST_BANNERS } from "../assets/post-banners";
 import { formatDate } from "../lib/date";
 import { SITE_NAME } from "../lib/site";
 import "../styles/post.css";
+// KaTeX CSS lives here, not in BaseLayout — math renders in posts and garden
+// notes only, not on homepage/archive/tags/etc. The garden note page mirrors
+// these imports (see src/pages/garden/[...slug].astro). If a third surface
+// ever starts rendering math, mirror them there too. katex.css holds our
+// overrides on top of the vendor sheet.
+import "katex/dist/katex.min.css";
+import "../styles/katex.css";
 
 interface Frontmatter {
 	title?: string;

@@ -6,6 +6,11 @@ import DateStamp from "../../components/DateStamp.astro";
 import { formatDate } from "../../lib/date";
 import "../../styles/post.css";
 import "../../styles/garden.css";
+// Mirror of the KaTeX imports in PostLayout — garden notes go through
+// rehype-katex (see src/lib/garden.ts) and reuse `.paper-body` typography, so
+// they need both the vendor stylesheet and our overrides to render math.
+import "katex/dist/katex.min.css";
+import "../../styles/katex.css";
 import {
 	createGardenLinkResolver,
 	type GardenNote,

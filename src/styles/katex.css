@@ -1,0 +1,28 @@
+/* KaTeX overrides on top of katex/dist/katex.min.css.
+ *
+ * Loaded by PostLayout alongside the vendor stylesheet so the two travel
+ * together — these rules target classes (.katex, .katex-display) that only
+ * exist when KaTeX renders, so they belong on the same routes as the vendor
+ * CSS, not in the global typography sheet.
+ *
+ * Post-body-scoped overrides (color, margin, etc.) live in post.css under
+ * `.paper-body .katex*` — those are correctly scoped to post content.
+ */
+
+.katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.katex-display > .katex {
+  display: inline-block;
+}
+
+/* Slightly reduce KaTeX sizing for a tighter look. em — relative to
+ * surrounding text, intentionally not tokenized. */
+.katex,
+.katex-display {
+  font-size: 0.925em;
+}

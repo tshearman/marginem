@@ -6,6 +6,7 @@
   "scripts": {
     "banner:image": "node scripts/optimize-banner.mjs",
     "fonts:build": "node scripts/subset-fonts.mjs",
+    "predev": "npm run banner:image",
     "prebuild": "npm run banner:image",
     "prebuild:static": "npm run banner:image",
     "build-cloudflare": "bash scripts/cloudflare_build.sh",

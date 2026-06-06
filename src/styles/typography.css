@@ -61,23 +61,6 @@ pre {
   color: var(--code-fg);
 }
 
-.katex-display {
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-.katex-display > .katex {
-  display: inline-block;
-}
-
-/* Slightly reduce KaTeX sizing for a tighter look */
-.katex,
-.katex-display {
-  font-size: 0.925em; /* em — relative to surrounding text, intentionally not tokenized */
-}
-
 code {
   font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
 }

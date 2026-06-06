@@ -38,9 +38,36 @@ const MAP_OUT = path.join(root, "src/assets/post-banners.ts");
 const TARGET_W = 1720;
 // 1720 × 800 covers every Banner usage: max CSS width 860 × 2dpr = 1720, max
 // canvas height 300 CSS px × 2dpr = 600 device px visible, plus ~100 px buffer
-// top/bottom. Bumping height invalidates the .url cache (key includes geom).
+// top/bottom. Bumping any geometry or encode setting auto-invalidates the
+// cache (these all participate in the cache key).
 const TARGET_H = 800;
 const RAW_INPUT_RE = /\.(webp|png|jpe?g)$/i;
+
+// Encode settings. Changing any of these auto-busts the cache for the
+// affected pipeline — they're folded into the cache key string.
+const RAW_QUALITY = 85;
+const RAW_EFFORT = 6;
+const DITHER_QUALITY = 90;
+const DITHER_EFFORT = 6;
+const DITHER_NEAR_LOSSLESS = true;
+
+const RAW_ENCODE_TAG = `webp-q${RAW_QUALITY}-e${RAW_EFFORT}-flatten`;
+const DITHER_ENCODE_TAG = `webp-q${DITHER_QUALITY}-e${DITHER_EFFORT}-nl${DITHER_NEAR_LOSSLESS}`;
+
+// Force a full re-encode on production deploys so the cache can never serve a
+// stale artifact to prod. CF_PAGES is set by Cloudflare Pages' build env.
+// Locally, pass `--banner-rebuild` to npm (e.g. `npm run build --banner-rebuild`)
+// — npm exposes that as `npm_config_banner_rebuild` to the whole script chain,
+// including the prebuild hook. FORCE_BANNER_REBUILD=true is the bare-env
+// fallback for non-npm invocations. Local dev otherwise keeps the cache warm.
+const npmFlag = process.env.npm_config_banner_rebuild;
+const FORCE_REBUILD =
+  Boolean(process.env.CF_PAGES) ||
+  process.env.FORCE_BANNER_REBUILD === "true" ||
+  (npmFlag != null && npmFlag !== "" && npmFlag !== "false");
+if (FORCE_REBUILD) {
+  console.log("Banner pipeline: forced rebuild (cache disabled).");
+}
 
 function atkinsonDither(width, height, gray) {
   const buf = new Float32Array(gray.length);
@@ -125,7 +152,11 @@ async function ditherAndEncode(srcBuffer) {
   return await sharp(dithered, {
     raw: { width: info.width, height: info.height, channels: 1 },
   })
-    .webp({ quality: 90, effort: 6, nearLossless: true })
+    .webp({
+      quality: DITHER_QUALITY,
+      effort: DITHER_EFFORT,
+      nearLossless: DITHER_NEAR_LOSSLESS,
+    })
     .toBuffer();
 }
 
@@ -148,10 +179,11 @@ async function processPost(file) {
   const outPath = path.join(POSTS_DIR, `${slug}.webp`);
   const urlCachePath = path.join(SOURCES_DIR, `${slug}.url`);
 
-  // Cache key includes geometry so changing TARGET_W/TARGET_H invalidates
-  // every existing dithered output without needing to wipe the cache by hand.
-  const cacheKey = `${heroImage}\n${TARGET_W}x${TARGET_H}`;
+  // Cache key includes geometry + encode tag so any change to TARGET_W/H or
+  // the dither encode settings auto-invalidates existing outputs.
+  const cacheKey = `${heroImage}\n${TARGET_W}x${TARGET_H}\n${DITHER_ENCODE_TAG}`;
   const cacheHit =
+    !FORCE_REBUILD &&
     existsSync(outPath) &&
     existsSync(urlCachePath) &&
     (await readFile(urlCachePath, "utf8")).trim() === cacheKey;
@@ -206,9 +238,11 @@ async function processRawBanner(srcPath) {
 
   const srcBuf = await readFile(srcPath);
   const hash = crypto.createHash("sha1").update(srcBuf).digest("hex");
-  const cacheKey = `${hash}\n${TARGET_W}x${TARGET_H}`;
+  // Cache key folds in source bytes, geometry, AND encode params so changing
+  // RAW_QUALITY/RAW_EFFORT auto-invalidates the cached output.
+  const cacheKey = `${hash}\n${TARGET_W}x${TARGET_H}\n${RAW_ENCODE_TAG}`;
 
-  if (existsSync(outPath) && existsSync(hashPath)) {
+  if (!FORCE_REBUILD && existsSync(outPath) && existsSync(hashPath)) {
     const cached = (await readFile(hashPath, "utf8")).trim();
     if (cached === cacheKey) {
       console.log(`  ${base}: cache hit, skipping`);
@@ -235,7 +269,7 @@ async function processRawBanner(srcPath) {
       height: cropH,
     })
     .flatten({ background: "#000" })
-    .webp({ quality: 85, effort: 6 })
+    .webp({ quality: RAW_QUALITY, effort: RAW_EFFORT })
     .toBuffer();
 
   await mkdir(RAW_OUT_DIR, { recursive: true });
