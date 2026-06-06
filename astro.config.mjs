@@ -134,7 +134,9 @@ export default defineConfig({
 		plugins: [
 			watchSnippets(),
 			visualizer({
-				filename: "dist/stats.html",
+				// Outside dist/ so it never gets deployed. `.astro/` is Astro's
+				// existing build cache directory and is already gitignored.
+				filename: ".astro/stats.html",
 				open: false,
 			}),
 		],
