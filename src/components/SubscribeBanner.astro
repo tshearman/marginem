@@ -14,7 +14,6 @@ interface Props {
 	method?: "get" | "post";
 	idBase?: string;
 	invert?: boolean;
-	heading?: string;
 	description?: string;
 	linkOnly?: boolean;
 	linkHref?: string;
@@ -25,7 +24,6 @@ const {
 	method = "post",
 	idBase = "subscribe",
 	invert = false,
-	heading = "Subscribe",
 	description = "Get notified when a new essay or note goes up. Occasional updates, no spam, unsubscribe anytime.",
 	linkOnly = false,
 	linkHref = "/subscribe",
