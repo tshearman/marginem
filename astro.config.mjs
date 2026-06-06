@@ -57,17 +57,17 @@ export default defineConfig({
 	adapter: isPagesFunctions
 		? undefined
 		: cloudflare({
-			platform: "pages",
-			imageService: "compile",
-		}),
+				platform: "pages",
+				imageService: "compile",
+			}),
 	integrations: [mdx()],
 	image: isPagesFunctions
 		? undefined
 		: {
-			service: {
-				entrypoint: "astro/assets/services/compile",
+				service: {
+					entrypoint: "astro/assets/services/compile",
+				},
 			},
-		},
 	markdown: {
 		syntaxHighlight: "prism",
 		prism: {

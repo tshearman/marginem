@@ -39,6 +39,7 @@ body.garden-page .garden-entry__breadcrumbs a {
 body.garden-page .garden-entry__breadcrumbs a:hover,
 body.garden-page .garden-entry__breadcrumbs a:focus-visible {
   background: var(--paper-accent);
+  color: var(--highlight-fg);
 }
 
 /* ---- FORCE GRAPH FRAME ---- */
@@ -79,6 +80,7 @@ body.garden-page .garden-card {
 body.garden-page .garden-card:hover,
 body.garden-page .garden-card:focus-visible {
   background: var(--paper-accent);
+  color: var(--highlight-fg);
 }
 
 body.garden-page .garden-card__row {
@@ -101,8 +103,13 @@ body.garden-page .garden-card h3 {
 }
 
 body.garden-page .garden-card:hover h3,
-body.garden-page .garden-card:focus-visible h3 {
+body.garden-page .garden-card:focus-visible h3,
+body.garden-page .garden-card:hover .garden-card__date,
+body.garden-page .garden-card:focus-visible .garden-card__date,
+body.garden-page .garden-card:hover .garden-card__excerpt,
+body.garden-page .garden-card:focus-visible .garden-card__excerpt {
   text-decoration: none;
+  color: var(--highlight-fg);
 }
 
 body.garden-page .garden-card__date {
@@ -216,6 +223,7 @@ body.post-page.garden-entry-page .garden-entry__breadcrumbs a {
 body.post-page.garden-entry-page .garden-entry__breadcrumbs a:hover,
 body.post-page.garden-entry-page .garden-entry__breadcrumbs a:focus-visible {
   background: var(--paper-accent);
+  color: var(--highlight-fg);
 }
 
 body.post-page.garden-entry-page .garden-entry__content {
@@ -269,6 +277,7 @@ body.post-page.garden-entry-page .garden-entry__backlinks a {
 body.post-page.garden-entry-page .garden-entry__backlinks a:hover,
 body.post-page.garden-entry-page .garden-entry__backlinks a:focus-visible {
   background: var(--paper-accent);
+  color: var(--highlight-fg);
 }
 
 body.post-page.garden-entry-page .garden-entry__neighbors {

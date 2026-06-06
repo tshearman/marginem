@@ -231,7 +231,7 @@ a.note-card {
 .tag--filter:hover,
 .tag--default:hover {
   background: var(--highlight);
-  color: var(--ink);
+  color: var(--highlight-fg);
 }
 
 .tag--filter[data-selected="true"] {
@@ -242,7 +242,7 @@ a.note-card {
 
 .tag--filter[data-selected="true"]:hover {
   background: var(--highlight);
-  color: var(--ink);
+  color: var(--highlight-fg);
 }
 
 a.tag {

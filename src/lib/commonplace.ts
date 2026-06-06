@@ -73,8 +73,7 @@ export const loadCommonplaceNotes = async () => {
 		const stat = fs.statSync(fullPath);
 		// Birthtime is 0 on filesystems that don't track it (e.g. ext4) — fall
 		// back to mtime so the field is always meaningful.
-		const addedAt =
-			stat.birthtime.getTime() > 0 ? stat.birthtime : stat.mtime;
+		const addedAt = stat.birthtime.getTime() > 0 ? stat.birthtime : stat.mtime;
 		notes.push({
 			content: content.trim(),
 			source:

@@ -10,9 +10,7 @@ import { withSlugs } from "../../lib/content";
 
 export const prerender = true;
 
-const posts = withSlugs(
-	await getCollection("blog", ({ data }) => !data.draft),
-);
+const posts = withSlugs(await getCollection("blog", ({ data }) => !data.draft));
 
 const sortedPosts = posts.sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),

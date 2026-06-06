@@ -19,13 +19,13 @@ import phasesImage from "../imgs/phases.png";
 
 Variational principles provide insight into many physical phenomena: mechanics blossomed with the description of an action functional, such that motion is described by a principle of least action. Many fields including materials science, optics, control theory, image analysis and machine learning have benefited from recasting questions in terms of an appropriate "energy functional," and exploring its optimizers or equilibrium states.
 
-In general limits of sequences, and as a direct result minimizers of optimization problems, may not exist. This has been a common theme in mathematics since the time of the Babylonian mathematicians Pythagoras and rational or continued fractions approximations to $\sqrt{2}$. For a fun discussion of continued fractions see [^cadlag-continuedfractions]. Unfortunately our sequence "runs out of the space." Or similarly, consider the sequence of smooth functions
+In general limits of sequences, and as a direct result minimizers of optimization problems, may not exist. This has been a common theme in mathematics since the time of the Babylonian mathematicians Pythagoras and rational or continued fractions approximations to $\sqrt{2}$. For a fun discussion of continued fractions see[^cadlag-continuedfractions]. Unfortunately our sequence "runs out of the space." Or similarly, consider the sequence of smooth functions
 
 $$
 f_{n}(x) = \frac{n}{\sqrt{\pi}} e^{-\left(\frac{x}{n}\right)^2}.
 $$
 
-The "limit" is well known to be the "$\delta$-function," properly interpreted as a distribution on the set of smooth functions or alternatively as a measure. Similarly, minima of variational principles may introduce irregularities, the study of which can be a delicate subject [^darkside].
+The "limit" is well known to be the "$\delta$-function," properly interpreted as a distribution on the set of smooth functions or alternatively as a measure. Similarly, minima of variational principles may introduce irregularities, the study of which can be a delicate subject[^darkside].
 
 Throughout the discussion, we will be considering very general problems of the form:
 
@@ -64,7 +64,7 @@ $$
 I_0[u] = \int f(u(x)) dx.
 $$
 
-The following theorem tells us that *convexity* is really the key to applying the direct method, and the lack of convexity will result in potential difficulties finding solutions [^fonseca-modern-methods].
+The following theorem tells us that *convexity* is really the key to applying the direct method, and the lack of convexity will result in potential difficulties finding solutions[^fonseca-modern-methods].
 
 ### Theorem
 
@@ -152,7 +152,7 @@ I like to think of the process of relaxation as two distinct steps:
 
 We can enlarge the admissable set, but not by too much! To this end, it's often appropriate to ensure that ${\mathcal A}$ is dense in $\tilde{{\mathcal A}}$. Similarly if we adjust the energy too much, then certainly solutions may exist, but the new problem may not provide us with any insight into our true goal, $I_0$. The new energy must be less than the original, but not substantially so. All of this is very vague; I apologize.
 
-Pedregal describes an general approach to relaxation [^pedregalopt] which should be familiar to most readers.
+Pedregal describes an general approach to relaxation[^pedregalopt] which should be familiar to most readers.
 
 Choose a collection of functionals, $\{ I \}$.
 

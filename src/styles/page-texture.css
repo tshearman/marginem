@@ -13,8 +13,8 @@ html {
   background-color: var(--page-bg, var(--page, #e8e8e8));
   background-image: repeating-linear-gradient(
     45deg,
-    rgba(0, 0, 0, 0.12) 0,
-    rgba(0, 0, 0, 0.12) 0.5px,
+    rgb(var(--ink-rgb, 0 0 0) / 0.12) 0,
+    rgb(var(--ink-rgb, 0 0 0) / 0.12) 0.5px,
     transparent 0.5px,
     transparent 12px
   );

@@ -8,4 +8,6 @@ fi
 
 gitleaks protect --staged --redact
 
+node scripts/check-footnote-spaces.mjs
+
 npm run verify

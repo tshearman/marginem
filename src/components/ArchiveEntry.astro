@@ -79,6 +79,17 @@ const preview = ellipsizeText(abstract || description || "", 220);
 
   .archive-entry:hover {
     background: var(--highlight);
+    color: var(--highlight-fg);
+  }
+  /* Children declare their own `color`, so the parent hover color doesn't
+     inherit — restate it for every text descendant that sits over the
+     highlight background. The nested .tag pills keep their own paper bg
+     and are intentionally excluded. */
+  .archive-entry:hover .archive-entry__title,
+  .archive-entry:hover .archive-entry__excerpt,
+  .archive-entry:hover .archive-entry__meta,
+  .archive-entry:hover .archive-entry__year {
+    color: var(--highlight-fg);
   }
 
   .archive-entry.hidden {

@@ -5,6 +5,7 @@
 import { Font } from "astro:assets";
 import favicon from "../assets/favicon.png";
 import bannerSrcUrl from "../assets/banners/notebook_banner_c.webp?url";
+import { HIGHLIGHT_POOL } from "../lib/highlight-pool";
 import { SITE_NAME } from "../lib/site";
 
 interface Props {
@@ -20,6 +21,27 @@ const {
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
+{/* Resolve theme before paint to avoid a flash, and lock in one random
+    highlight for the banner (regardless of theme) via inline custom
+    properties on :root. highlight-hover.ts re-rolls per hover; this
+    pick is what the banner reads and stays put for the page load. */}
+<script is:inline define:vars={{ POOL: HIGHLIGHT_POOL }}>
+  (function () {
+    var root = document.documentElement;
+    try {
+      var stored = localStorage.getItem("theme");
+      var theme =
+        stored ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light");
+      root.dataset.theme = theme;
+    } catch (e) {}
+    var p = POOL[Math.floor(Math.random() * POOL.length)];
+    root.style.setProperty("--highlight", p.highlight);
+    root.style.setProperty("--highlight-fg", p.fg);
+  })();
+</script>
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="icon" href={favicon.src} type="image/png" />

@@ -1,34 +1,39 @@
 ---
 /**
- * Full-width subscribe block — the brutalist banner used at the bottom of
+ * Full-width subscribe block — the banner used at the bottom of
  * the homepage and on long-form pages (newsletter issues, etc.). Self-contained:
  * carries its own scoped styles and relies only on the shared .btn classes
  * from buttons.css. Toggle `invert` for use on dark backgrounds.
  */
 interface Props {
-  action?: string;
-  method?: "get" | "post";
-  idBase?: string;
-  invert?: boolean;
-  heading?: string;
-  description?: string;
+	action?: string;
+	method?: "get" | "post";
+	idBase?: string;
+	invert?: boolean;
+	heading?: string;
+	description?: string;
 }
 
 const {
-  action = "/api/subscribe",
-  method = "post",
-  idBase = "subscribe",
-  invert = false,
-  heading = "Subscribe",
-  description = "Get notified when a new essay or note goes up. Occasional updates, no spam, unsubscribe anytime.",
+	action = "/api/subscribe",
+	method = "post",
+	idBase = "subscribe",
+	invert = false,
+	heading = "Subscribe",
+	description = "Get notified when a new essay or note goes up. Occasional updates, no spam, unsubscribe anytime.",
 } = Astro.props as Props;
 
 const emailId = `${idBase}-email`;
 const nameId = `${idBase}-name`;
-const sectionClass = ["subscribe-banner", invert ? "subscribe-banner--invert" : null]
-  .filter(Boolean)
-  .join(" ");
-const buttonClass = ["btn", invert ? "btn--invert" : null].filter(Boolean).join(" ");
+const sectionClass = [
+	"subscribe-banner",
+	invert ? "subscribe-banner--invert" : null,
+]
+	.filter(Boolean)
+	.join(" ");
+const buttonClass = ["btn", invert ? "btn--invert" : null]
+	.filter(Boolean)
+	.join(" ");
 ---
 
 <section class={sectionClass} id={idBase}>

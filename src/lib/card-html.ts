@@ -35,7 +35,9 @@ const renderDateLabel = (label: string): string => {
 	while (match) {
 		const start = match.index;
 		out += escapeText(label.slice(lastIndex, start));
-		out += `<span>${escapeText(match[1])}<sup>${escapeText(match[2])}</sup></span>`;
+		out += `<span>${escapeText(match[1])}<sup>${escapeText(
+			match[2],
+		)}</sup></span>`;
 		lastIndex = start + match[0].length;
 		match = pattern.exec(label);
 	}
@@ -53,7 +55,9 @@ export const renderDateStamp = (props: DateStampProps): string => {
 	const { datetime, label = "", className } = props;
 	const iso = toIso(datetime);
 	const cls = `date-stamp${className ? ` ${className}` : ""}`;
-	return `<time datetime="${escapeAttr(iso)}" class="${escapeAttr(cls)}">${renderDateLabel(label)}</time>`;
+	return `<time datetime="${escapeAttr(iso)}" class="${escapeAttr(
+		cls,
+	)}">${renderDateLabel(label)}</time>`;
 };
 
 export type TagProps = {
@@ -91,12 +95,24 @@ export const renderTag = (props: TagProps): string => {
 		variant === "filter" && clickable && !(asLink && clickable && url);
 
 	if (shouldRenderFilterButton) {
-		return `<button class="${escapeAttr(classes)}" type="button" data-tag="${escapeAttr(label)}" data-selected="${selectedAttr}" aria-pressed="${selectedAttr}">#${escapeText(label)}</button>`;
+		return `<button class="${escapeAttr(
+			classes,
+		)}" type="button" data-tag="${escapeAttr(
+			label,
+		)}" data-selected="${selectedAttr}" aria-pressed="${selectedAttr}">#${escapeText(
+			label,
+		)}</button>`;
 	}
 	if (clickable && url) {
-		return `<a class="${escapeAttr(classes)}" href="${escapeAttr(url)}" data-tag="${escapeAttr(label)}" data-selected="${selectedAttr}">#${escapeText(label)}</a>`;
+		return `<a class="${escapeAttr(classes)}" href="${escapeAttr(
+			url,
+		)}" data-tag="${escapeAttr(
+			label,
+		)}" data-selected="${selectedAttr}">#${escapeText(label)}</a>`;
 	}
-	return `<span class="${escapeAttr(classes)}" data-tag="${escapeAttr(label)}" data-selected="${selectedAttr}">#${escapeText(label)}</span>`;
+	return `<span class="${escapeAttr(classes)}" data-tag="${escapeAttr(
+		label,
+	)}" data-selected="${selectedAttr}">#${escapeText(label)}</span>`;
 };
 
 export type NoteCardProps = {
@@ -118,8 +134,15 @@ export type NoteCardProps = {
 };
 
 const renderNoteInner = (props: NoteCardProps): string => {
-	const { content, author, source, dateLabel, dateTime, kindLabel, tags = [] } =
-		props;
+	const {
+		content,
+		author,
+		source,
+		dateLabel,
+		dateTime,
+		kindLabel,
+		tags = [],
+	} = props;
 	const attribution = [
 		author ? `<div class="note-author">${escapeText(author)}</div>` : "",
 		source ? `<div class="note-source">${escapeText(source)}</div>` : "",
@@ -130,14 +153,18 @@ const renderNoteInner = (props: NoteCardProps): string => {
 					className: "note-date",
 				})
 			: "",
-		kindLabel ? `<span class="search-kind">${escapeText(kindLabel)}</span>` : "",
+		kindLabel
+			? `<span class="search-kind">${escapeText(kindLabel)}</span>`
+			: "",
 	].join("");
 	const tagsHtml = tags.length
 		? `<div class="note-tags">${tags
 				.map((t) => renderTag({ tag: t, variant: "filter", size: "small" }))
 				.join("")}</div>`
 		: "";
-	return `<div class="note-content-wrapper"><div class="note-content"><blockquote class="note-text">${escapeText(content)}</blockquote><div class="note-attribution">${attribution}</div></div>${tagsHtml}</div>`;
+	return `<div class="note-content-wrapper"><div class="note-content"><blockquote class="note-text">${escapeText(
+		content,
+	)}</blockquote><div class="note-attribution">${attribution}</div></div>${tagsHtml}</div>`;
 };
 
 export const renderNoteCard = (props: NoteCardProps): string => {
@@ -153,19 +180,27 @@ export const renderNoteCard = (props: NoteCardProps): string => {
 	} = props;
 
 	if (variant === "search") {
-		return `<a class="note-card note-card--interactive" href="${escapeAttr(href ?? "")}">${renderNoteInner(props)}</a>`;
+		return `<a class="note-card note-card--interactive" href="${escapeAttr(
+			href ?? "",
+		)}">${renderNoteInner(props)}</a>`;
 	}
 
 	const cls = `note-card${className ? ` ${className}` : ""}`;
 	const permalink = permalinkHref ?? (id ? `#${id}` : undefined);
 	const permalinkAnchor =
 		showPermalink && id && permalink
-			? `<a class="note-card__anchor-link" href="${escapeAttr(permalink)}" aria-label="Permalink to this note">#</a>`
+			? `<a class="note-card__anchor-link" href="${escapeAttr(
+					permalink,
+				)}" aria-label="Permalink to this note">#</a>`
 			: "";
 	const idAttr = id ? ` id="${escapeAttr(id)}"` : "";
 	const styleAttr = style ? ` style="${escapeAttr(style)}"` : "";
 	const dataTagsAttr = dataTags ? ` data-tags="${escapeAttr(dataTags)}"` : "";
-	return `<article class="${escapeAttr(cls)}"${idAttr}${styleAttr}${dataTagsAttr}>${permalinkAnchor}${renderNoteInner(props)}</article>`;
+	return `<article class="${escapeAttr(
+		cls,
+	)}"${idAttr}${styleAttr}${dataTagsAttr}>${permalinkAnchor}${renderNoteInner(
+		props,
+	)}</article>`;
 };
 
 export type PostPreviewProps = {
@@ -203,7 +238,11 @@ export const renderPostPreview = (props: PostPreviewProps): string => {
 	const metaHtml = tags.length
 		? tags.map((t) => renderTag({ tag: t })).join("")
 		: `<span class="post-preview__meta-empty">Research Notes</span>`;
-	return `<article class="post-preview"${idAttr}><div class="post-preview__body"><h3 class="post-preview__title"><a class="post-preview__link" href="${escapeAttr(url)}">${escapeText(title)}</a></h3><div class="post-preview__authors">${dateHtml}${kindHtml}</div><div class="post-preview__section">${excerptHtml}</div><div class="post-preview__meta">${metaHtml}</div></div></article>`;
+	return `<article class="post-preview"${idAttr}><div class="post-preview__body"><h3 class="post-preview__title"><a class="post-preview__link" href="${escapeAttr(
+		url,
+	)}">${escapeText(
+		title,
+	)}</a></h3><div class="post-preview__authors">${dateHtml}${kindHtml}</div><div class="post-preview__section">${excerptHtml}</div><div class="post-preview__meta">${metaHtml}</div></div></article>`;
 };
 
 export type GardenNoteCardProps = {
@@ -242,7 +281,11 @@ export const renderGardenNoteCard = (props: GardenNoteCardProps): string => {
 		const excerptHtml = excerpt
 			? `<p class="garden-search__excerpt">${escapeText(excerpt)}</p>`
 			: "";
-		return `<a class="garden-search" href="${escapeAttr(href)}"><div class="garden-search__header"><h3 class="garden-search__title">${escapeText(title)}</h3>${date}${kind}</div>${excerptHtml}</a>`;
+		return `<a class="garden-search" href="${escapeAttr(
+			href,
+		)}"><div class="garden-search__header"><h3 class="garden-search__title">${escapeText(
+			title,
+		)}</h3>${date}${kind}</div>${excerptHtml}</a>`;
 	}
 
 	const date = dateLabel
@@ -252,5 +295,9 @@ export const renderGardenNoteCard = (props: GardenNoteCardProps): string => {
 				className: "garden-card__date",
 			})
 		: "";
-	return `<a class="garden-card" href="${escapeAttr(href)}"><div class="garden-card__row">${date}<h3>${escapeText(title)}</h3></div><p class="garden-card__excerpt">${escapeText(excerpt)}</p></a>`;
+	return `<a class="garden-card" href="${escapeAttr(
+		href,
+	)}"><div class="garden-card__row">${date}<h3>${escapeText(
+		title,
+	)}</h3></div><p class="garden-card__excerpt">${escapeText(excerpt)}</p></a>`;
 };

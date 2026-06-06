@@ -78,6 +78,7 @@
 }
 .cell--link:hover {
   background: var(--highlight);
+  color: var(--highlight-fg);
 }
 
 /* ---- DARK (TALL) CELL ---- */
@@ -159,6 +160,7 @@
 }
 .index a:hover {
   background: var(--highlight);
+  color: var(--highlight-fg);
 }
 .index__excerpt {
   display: block;

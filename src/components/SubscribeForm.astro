@@ -1,23 +1,25 @@
 ---
 interface Props {
-  action?: string;
-  method?: "get" | "post";
-  idBase?: string;
-  variant?: "default" | "compact";
-  redirectUrl?: string;
-  invert?: boolean;
+	action?: string;
+	method?: "get" | "post";
+	idBase?: string;
+	variant?: "default" | "compact";
+	redirectUrl?: string;
+	invert?: boolean;
 }
 
 const {
-  action = "/api/subscribe",
-  method = "post",
-  idBase = "subscribe",
-  invert = false,
+	action = "/api/subscribe",
+	method = "post",
+	idBase = "subscribe",
+	invert = false,
 } = Astro.props as Props;
 
 const emailId = `${idBase}-email`;
 const nameId = `${idBase}-name`;
-const buttonClass = ["btn", invert ? "btn--invert" : null].filter(Boolean).join(" ");
+const buttonClass = ["btn", invert ? "btn--invert" : null]
+	.filter(Boolean)
+	.join(" ");
 ---
 
 <div>

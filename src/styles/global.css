@@ -15,6 +15,7 @@
   --paper: #ffffff;
   --page-bg: #e8e8e8;
   --highlight: #ffe600;
+  --highlight-fg: var(--ink);
   --paper-shadow: var(--highlight);
   --paper-accent: var(--highlight);
 
@@ -61,6 +62,38 @@
   --danger: #b91c1c;
 
   --site-max-width: 860px;
+}
+
+/* ---- DARK MODE ---------------------------------------------------------
+ * One palette (a near-black brutalist base). --highlight + --highlight-fg
+ * are picked at runtime from src/lib/highlight-pool.ts in both themes:
+ *   - The inline bootstrap in HtmlHead picks one entry per page load and
+ *     pins it on :root via inline style. The banner reads this once.
+ *   - highlight-hover.ts re-rolls per hover/focus by writing inline style
+ *     onto the hovered element, which scopes the override to that subtree
+ *     (the banner keeps its load-time pick).
+ *
+ * The --highlight values below are JS-disabled fallbacks; the bootstrap's
+ * inline-style write overrides them whenever scripting is available.
+ * ----------------------------------------------------------------------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fg-inverse: #000000;
+  --fg-inverse-soft: rgb(0 0 0 / 0.95);
+
+  --paper: #0a0a0a;
+  --page-bg: #000000;
+  --ink: #f0f0f0;
+  --ink-rgb: 240 240 240;
+  --bg: #0a0a0a;
+  --bg-subtle: #161616;
+  --surface: #0a0a0a;
+  --highlight: #ff2d8a;
+  --highlight-fg: #0a0a0a;
+  --paper-shadow: var(--highlight);
+  --paper-accent: var(--highlight);
+  --code-bg: #050505;
+  --code-fg: #d4d4d4;
 }
 
 .eyebrow-text {

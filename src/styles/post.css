@@ -203,6 +203,7 @@
 
 .paper-body a:hover {
   background-color: var(--paper-accent);
+  color: var(--highlight-fg);
   text-decoration: none;
 }
 
@@ -220,7 +221,6 @@
   background: var(--paper);
   border: 3px solid var(--ink);
   border-radius: 0;
-  box-shadow: 6px 6px 0 var(--paper-shadow);
   padding: 14px 16px;
   margin: 18px 0 22px;
   font-size: var(--fs-sm);

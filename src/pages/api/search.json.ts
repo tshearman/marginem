@@ -2,7 +2,11 @@ import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import { loadGardenNotes } from "../../lib/garden";
 import { generateNoteId } from "../../lib/noteUtils";
-import { ellipsizeText, normalizeWhitespace, plainExcerpt } from "../../lib/text";
+import {
+	ellipsizeText,
+	normalizeWhitespace,
+	plainExcerpt,
+} from "../../lib/text";
 import { formatDate } from "../../lib/date";
 import { loadCommonplaceNotes } from "../../lib/commonplace";
 import { withSlugs, type BlogEntry } from "../../lib/content";
