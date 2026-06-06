@@ -277,8 +277,8 @@
   padding-left: 8px;
 }
 
-/* ---- PLOTLY: bare chart, no frame ---- */
-.paper-body .plotly-shell {
+/* ---- ECHARTS: bare chart, no frame ---- */
+.paper-body .echart-shell {
   border: 0;
   border-radius: 0;
   background: transparent;

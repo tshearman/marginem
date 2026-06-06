@@ -1,8 +1,8 @@
 ---
 title: "Feature Playground"
 subtitle: "Runnable code, math, notes, and media"
-description: "A placeholder post that exercises runnable snippets, math, margin notes, responsive figures, and an embedded Plotly chart."
-abstract: "Demonstrates every blog affordance in one place: multi-language run blocks, KaTeX, margin notes/footnotes, images, and Plotly."
+description: "A placeholder post that exercises runnable snippets, math, margin notes, responsive figures, and an embedded ECharts chart."
+abstract: "Demonstrates every blog affordance in one place: multi-language run blocks, KaTeX, margin notes/footnotes, images, and ECharts."
 pubDate: "2024-12-15"
 heroImage: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1600&q=80"
 tags:
@@ -13,7 +13,7 @@ draft: false
 featured: false
 ---
 
-import PlotlyChart from "../../src/components/PlotlyChart.astro";
+import EChart from "../../src/components/EChart.astro";
 import MarginNote from "../../src/components/MarginNote.astro";
 import ImageFigure from "../../src/components/ImageFigure.astro";
 import thermoImage from "../imgs/thermo.png";
@@ -21,7 +21,7 @@ import phasesImage from "../imgs/phases.png";
 
 ## Why this exists
 
-This placeholder gathers every blog feature in one spot so you can sanity-check rendering, runnable code, and layout[^why-now]. It pairs inline math like $e^{i\pi} + 1 = 0$ with margin notes, images, and an interactive Plotly chart for quick visual QA.
+This placeholder gathers every blog feature in one spot so you can sanity-check rendering, runnable code, and layout[^why-now]. It pairs inline math like $e^{i\pi} + 1 = 0$ with margin notes, images, and an interactive ECharts chart for quick visual QA.
 
 <MarginNote title="Quick check">
   Viewing on desktop floats this note into the margin; on mobile it stacks
@@ -102,55 +102,61 @@ $$
   height="320px"
 />
 
-## Plotly sample chart
+## ECharts sample chart
 
-Below is a minimal Plotly chart rendered via the helper component. Resize the window to confirm responsiveness.
+Below is a minimal ECharts chart rendered via the helper component. Resize the window to confirm responsiveness.
 
-<PlotlyChart
-  data={[
-    {
-      x: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      y: [120, 140, 135, 180, 210, 190, 160],
-      type: "bar",
-      name: "Visits",
-      marker: { color: "#0ea5e9", line: { color: "#0284c7", width: 1 } },
-      opacity: 0.85,
+<EChart
+  option={{
+    title: { text: "Weekly traffic with uniques and conversion" },
+    grid: { top: 60, left: 48, right: 48, bottom: 60, containLabel: true },
+    legend: { orient: "horizontal", bottom: 0 },
+    tooltip: { trigger: "axis" },
+    xAxis: {
+      type: "category",
+      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     },
-    {
-      x: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      y: [95, 110, 115, 140, 170, 165, 140],
-      type: "scatter",
-      mode: "lines+markers",
-      name: "Unique users",
-      marker: { color: "#4f008b", size: 8 },
-      line: { shape: "spline", width: 3 },
-      fill: "tozeroy",
-      fillcolor: "rgba(136, 64, 229, 0.15)",
-    },
-    {
-      x: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      y: [0.32, 0.34, 0.33, 0.35, 0.39, 0.36, 0.34],
-      type: "scatter",
-      mode: "lines",
-      name: "Conversion rate",
-      yaxis: "y2",
-      line: { color: "#009f82", dash: "dash", width: 3 },
-    },
-  ]}
-  layout={{
-    title: "Weekly traffic with uniques and conversion",
+    yAxis: [
+      { type: "value", name: "Count" },
+      {
+        type: "value",
+        name: "Conversion",
+        position: "right",
+        axisLabel: { formatter: "{value}%" },
+        min: 0,
+      },
+    ],
+    series: [
+      {
+        name: "Visits",
+        type: "bar",
+        data: [120, 140, 135, 180, 210, 190, 160],
+        itemStyle: { color: "#0ea5e9", borderColor: "#0284c7", borderWidth: 1 },
+        opacity: 0.85,
+        barGap: "20%",
+      },
+      {
+        name: "Unique users",
+        type: "line",
+        data: [95, 110, 115, 140, 170, 165, 140],
+        smooth: true,
+        showSymbol: true,
+        symbolSize: 8,
+        lineStyle: { color: "#4f008b", width: 3 },
+        itemStyle: { color: "#4f008b" },
+        areaStyle: { color: "rgba(136, 64, 229, 0.15)" },
+      },
+      {
+        name: "Conversion rate",
+        type: "line",
+        yAxisIndex: 1,
+        data: [32, 34, 33, 35, 39, 36, 34],
+        showSymbol: false,
+        lineStyle: { color: "#009f82", width: 3, type: "dashed" },
+        itemStyle: { color: "#009f82" },
+      },
+    ],
     height: 420,
-    margin: { t: 60, l: 48, r: 48, b: 60 },
-    bargap: 0.2,
-    yaxis: { title: "Count", zeroline: false, gridcolor: "rgba(0,0,0,0.08)" },
-    yaxis2: {
-      title: "Conversion",
-      overlaying: "y",
-      side: "right",
-      tickformat: ",.0%",
-      rangemode: "tozero",
-    },
-    legend: { orientation: "h", y: -0.2 },
   }}
 />
 
