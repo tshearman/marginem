@@ -1,0 +1,129 @@
+# What the lab runs: applied by the lab's site-deployer in namespace
+# site-marginem (the lab's docs/site-design.md, "The contract" and "Rollout and
+# zero downtime"). For each channel it fetches this file at the commit whose
+# build.yml run succeeded, substitutes exactly four placeholders, and runs
+# kubectl apply -n site-marginem, then rollout status (180 s), undoing and
+# marking the Deployment sites.lab/failed-sha on failure:
+#   NAME      marginem (main) or marginem-preview (dev)
+#   IMAGE     ghcr.io/tshearman/marginem:<40-char sha>
+#   REPLICAS  3 (main) or 1 (dev)
+#   SHA       the commit
+# The pod-template annotation sites.lab/sha (the SHA placeholder) is required:
+# it is how the deployer, and npm run rollback, read what is running, and a
+# rollout undo reverts it with the image. No metadata.namespace (the deployer
+# passes -n). The deployer may create only Deployments, PodDisruptionBudgets,
+# ConfigMaps, Jobs and CronJobs here; the lab owns the NodePort Services,
+# which select app.kubernetes.io/instance and target the port named http.
+#
+# The namespace enforces Pod Security "restricted" and denies all egress. The
+# root filesystem is read-only; nginx's pid and temp files go to the /tmp
+# emptyDir (deploy/Dockerfile).
+#
+# Rolling update: maxUnavailable 0 keeps old pods serving until new ones are
+# Ready; maxSurge 100% starts every new pod at once, so versions overlap for
+# seconds (deploy/nginx.conf serves 404s no-store for that overlap). preStop
+# sleeps 5 s so kube-proxy drops the endpoint before nginx stops.
+#
+# k3s and kubectl read this as YAML 1.1: string scalars that could read as a
+# number or bool are quoted.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "${NAME}"
+  labels:
+    app.kubernetes.io/name: marginem
+    app.kubernetes.io/instance: "${NAME}"
+spec:
+  replicas: ${REPLICAS}
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: marginem
+      app.kubernetes.io/instance: "${NAME}"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: "100%"
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: marginem
+        app.kubernetes.io/instance: "${NAME}"
+      annotations:
+        sites.lab/sha: "${SHA}"
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: marginem
+              app.kubernetes.io/instance: "${NAME}"
+      containers:
+        - name: site
+          image: "${IMAGE}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 5
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: "${NAME}"
+  labels:
+    app.kubernetes.io/name: marginem
+    app.kubernetes.io/instance: "${NAME}"
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: marginem
+      app.kubernetes.io/instance: "${NAME}"
