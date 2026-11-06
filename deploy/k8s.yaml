@@ -3,7 +3,8 @@
 # zero downtime"). For each channel it fetches this file at the commit whose
 # build.yml run succeeded, substitutes exactly four placeholders, and runs
 # kubectl apply -n site-marginem, then rollout status (180 s), undoing and
-# marking the Deployment sites.lab/failed-sha on failure:
+# labelling the Deployment sites.lab/failed-sha=<sha> on failure (a label: a
+# rollout undo replaces the Deployment's annotations, never its labels):
 #   NAME      marginem (main) or marginem-preview (dev)
 #   IMAGE     ghcr.io/tshearman/marginem:<40-char sha>
 #   REPLICAS  3 (main) or 1 (dev)

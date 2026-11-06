@@ -17,11 +17,17 @@
 #   3. git push origin dev:main (a plain push: fast-forward or refused);
 #   4. wait for main's build.yml run, which finds the image already pushed;
 #   5. wait until production's /.release is the sha, or the deployer marks the
-#      sha failed (sites.lab/failed-sha) and its log lines are printed.
+#      sha failed (the Deployment's label sites.lab/failed-sha) and its log
+#      lines are printed.
 #
-# rollback marks the running sha (the pod template's sites.lab/sha, which
+# rollback labels the running sha (the pod template's sites.lab/sha, which
 # rollout undo reverts with the image) failed, then kubectl rollout undo. The
-# deployer leaves a failed sha alone until main moves: fix forward on dev.
+# mark is a label because undo replaces the Deployment's annotations with the
+# old ReplicaSet's but never touches its labels, so it survives the undo; and
+# it goes on first because the deployer polls every 30 s: undo first would
+# leave a moment in which main's sha is neither running nor marked, and the
+# deployer would redeploy it. The deployer leaves a failed sha alone until
+# main moves: fix forward on dev.
 #
 # Needs git, gh (signed in), curl and kubectl with the lab's kubeconfig
 # (`lab kube config` writes ~/.kube/lab.yaml). Bash 3.2-safe.
@@ -64,8 +70,9 @@ kget() { kubectl --request-timeout=15s -n "$NAMESPACE" get "$@"; }
 release_of() {
 	curl --fail --silent --show-error --max-time 10 "$1/.release" | tr -d '[:space:]'
 }
+# The deployer's failure mark: the Deployment's label sites.lab/failed-sha.
 failed_sha_of() {
-	kget deploy "$1" -o jsonpath='{.metadata.annotations.sites\.lab/failed-sha}'
+	kget deploy "$1" -o jsonpath='{.metadata.labels.sites\.lab/failed-sha}'
 }
 # The sha a Deployment runs: its pod template's sites.lab/sha (rollout undo
 # reverts it with the image), else the image tag.
@@ -194,9 +201,10 @@ rollback() {
 		--jq "first(.workflow_runs[] | $RUN_FILTER | .head_sha)") ||
 		die "cannot read main's builds from GitHub"
 
-	# The deployer already holds main's newest build off production (an earlier
-	# rollback, or a failed rollout it undid): another undo would swap back to
-	# that build, and overwriting the mark would let the deployer redeploy it.
+	# The deployer already holds main's newest build off production (the label
+	# names it while something else serves: an earlier rollback, or a failed
+	# rollout it undid): another undo would swap back to that build, and
+	# relabelling the running sha would let the deployer redeploy it.
 	if [[ -n $held && $held == "$desired" && $current != "$held" ]]; then
 		die "production is already held off main's $(short "$held") and serves $(short "$current"); fix forward on dev, then npm run deploy"
 	fi
@@ -207,11 +215,13 @@ rollback() {
 	read -r -p "Roll $SITE back from $(short "$current") to its previous revision? [y/N] " answer || true
 	[[ $answer == [yY] || $answer == [yY][eE][sS] ]] || die "not rolled back"
 
-	step "marking $(short "$current") failed (sites.lab/failed-sha), so the deployer leaves it"
-	kubectl -n "$NAMESPACE" annotate --overwrite deploy "$SITE" "sites.lab/failed-sha=$current"
+	# Label, then undo (header): the label survives the undo, so the deployer
+	# never sees the rollback unmarked.
+	step "labelling $(short "$current") failed (sites.lab/failed-sha), so the deployer leaves it"
+	kubectl -n "$NAMESPACE" label --overwrite deploy "$SITE" "sites.lab/failed-sha=$current"
 	step "kubectl rollout undo deploy/$SITE"
 	kubectl -n "$NAMESPACE" rollout undo deploy "$SITE" ||
-		die "rollout undo failed; $(short "$current") stays marked failed (clear it: kubectl -n $NAMESPACE annotate deploy $SITE sites.lab/failed-sha-)"
+		die "rollout undo failed; $(short "$current") stays marked failed (clear it: kubectl -n $NAMESPACE label deploy $SITE sites.lab/failed-sha-)"
 	kubectl -n "$NAMESPACE" rollout status deploy "$SITE" --timeout=180s
 
 	say "production now serves $(short "$(running_sha_of "$SITE")")"
@@ -248,9 +258,9 @@ status() {
 		fi
 	done
 
-	step "deployments in $NAMESPACE (running sha: the pod template's sites.lab/sha)"
+	step "deployments in $NAMESPACE (running sha: the pod template's sites.lab/sha; failed-sha: the Deployment's label)"
 	for d in "$SITE-preview" "$SITE"; do
-		if out=$(kget deploy "$d" -o jsonpath='{.spec.template.metadata.annotations.sites\.lab/sha}{"|"}{.spec.template.spec.containers[?(@.name=="site")].image}{"|"}{.status.readyReplicas}{"|"}{.spec.replicas}{"|"}{.metadata.annotations.sites\.lab/failed-sha}' 2>&1); then
+		if out=$(kget deploy "$d" -o jsonpath='{.spec.template.metadata.annotations.sites\.lab/sha}{"|"}{.spec.template.spec.containers[?(@.name=="site")].image}{"|"}{.status.readyReplicas}{"|"}{.spec.replicas}{"|"}{.metadata.labels.sites\.lab/failed-sha}' 2>&1); then
 			IFS='|' read -r sha image ready want failed <<<"$out"
 			say "    $d  running ${sha:-${image##*:}}  ready ${ready:-0}/$want  failed-sha ${failed:-none}"
 			say "        image $image"
