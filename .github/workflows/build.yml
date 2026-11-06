@@ -1,0 +1,106 @@
+# Test, build and push the site image: ghcr.io/tshearman/marginem:<full sha>.
+#
+# The lab's site-deployer polls for the newest successful push run of this
+# workflow on dev (-> marginem-preview) and main (-> marginem) and deploys
+# that commit's image with deploy/k8s.yaml; the workflow file name is part of
+# that contract (the lab's docs/site-design.md, "The contract").
+#
+# Build once: when the commit's image is already in ghcr, every later step is
+# skipped and the run succeeds. A fast-forward of main onto a dev commit
+# (npm run deploy) therefore ships the exact image the preview ran.
+#
+# Checks are the ones that need no snippet runtimes (Haskell, SBCL, Python):
+# astro check, Biome lint (at the dev shell's version; Biome is not an npm
+# dependency), Vitest. The build runs with RUN_CODE_SNIPPETS=false, as the
+# Pages build does.
+#
+# Actions are pinned by commit SHA. To bump one:
+#   gh api repos/<owner>/<action>/git/ref/tags/<tag>
+# (for an annotated tag, dereference: gh api repos/<owner>/<action>/git/tags/<sha>).
+name: build
+
+on:
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  # A newer dev push supersedes the old one; a main run always finishes.
+  cancel-in-progress: ${{ github.ref == 'refs/heads/dev' }}
+
+env:
+  IMAGE: ghcr.io/tshearman/marginem
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip when this commit's image already exists
+        id: image
+        run: |
+          if docker manifest inspect "$IMAGE:$GITHUB_SHA" > /dev/null 2>&1; then
+            echo "::notice::$IMAGE:$GITHUB_SHA is already pushed; nothing to build"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.image.outputs.exists != 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        if: steps.image.outputs.exists != 'true'
+        run: npm ci
+
+      - name: astro check
+        if: steps.image.outputs.exists != 'true'
+        run: npm run check
+
+      - name: Biome lint
+        if: steps.image.outputs.exists != 'true'
+        run: npx --yes @biomejs/biome@1.7.3 lint src plugins astro.config.mjs
+
+      - name: Vitest
+        if: steps.image.outputs.exists != 'true'
+        run: npx vitest run
+
+      - name: Build
+        if: steps.image.outputs.exists != 'true'
+        env:
+          RUN_CODE_SNIPPETS: "false"
+        run: |
+          npm run build
+          printf '%s\n' "$GITHUB_SHA" > dist/.release
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        if: steps.image.outputs.exists != 'true'
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        if: steps.image.outputs.exists != 'true'
+        with:
+          # The local checkout, not the action's default git context: dist/
+          # is built above and is not in git.
+          context: .
+          file: deploy/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.IMAGE }}:${{ github.sha }}
+          labels: org.opencontainers.image.revision=${{ github.sha }}
