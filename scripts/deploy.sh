@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Deploy marginem to the lab's k3s (the lab's docs/site-design.md, "The
+# Deploy a site to the lab's k3s (the lab's docs/site-design.md, "The
 # pipeline, from the developer's side"). The lab's site-deployer does the
 # rolling: it deploys the newest successful build.yml run on dev to
-# marginem-preview and on main to marginem. This script only moves main and
-# watches.
+# <site>-preview and on main to <site>. This script only moves main and
+# watches. It is the same file in every site repo; the site it deploys is
+# deploy/site.env (SITE, REPO, optionally DOMAIN).
 #
 #   promote   (npm run deploy)        dev -> main, by fast-forward
 #   rollback  (npm run rollback)      production back to its previous revision
@@ -33,11 +34,16 @@
 # (`lab kube config` writes ~/.kube/lab.yaml). Bash 3.2-safe.
 set -euo pipefail
 
-SITE=marginem
-NAMESPACE=site-marginem
-REPO=tshearman/marginem
-PROD_URL=https://marginem.goblin.farm
-PREVIEW_URL=https://marginem-preview.goblin.farm
+# The site's identity: deploy/site.env, the one per-repo file (this script
+# is the same in every site repo).
+here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=SCRIPTDIR/../deploy/site.env
+. "$here/../deploy/site.env"
+: "${SITE:?deploy/site.env must set SITE}" "${REPO:?deploy/site.env must set REPO}"
+DOMAIN=${DOMAIN:-goblin.farm}
+NAMESPACE=site-$SITE
+PROD_URL=https://$SITE.$DOMAIN
+PREVIEW_URL=https://$SITE-preview.$DOMAIN
 WORKFLOW=build.yml
 export KUBECONFIG=${KUBECONFIG:-$HOME/.kube/lab.yaml}
 

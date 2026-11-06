@@ -58,7 +58,7 @@ Every push to `dev` or `main` runs `.github/workflows/build.yml` on GitHub's run
 | `npm run rollback` | Put production back on its previous release (asks y/N). The deployer leaves it there until `main` moves, so fix forward on `dev` |
 | `npm run deploy:status` | Branch heads, recent builds, what the preview and production serve |
 
-These need `gh` (signed in) and the lab's kubeconfig at `~/.kube/lab.yaml` (`lab kube config` writes it). Merging on GitHub also deploys, but only a fast-forward ships the image the preview ran; a squash or rebase merge is a new commit, built afresh.
+These need `gh` (signed in) and the lab's kubeconfig at `~/.kube/lab.yaml` (`lab kube config` writes it). `scripts/deploy.sh` is the same in every lab site repo; `deploy/site.env` names this one (`SITE`, `REPO`). Merging on GitHub also deploys, but only a fast-forward ships the image the preview ran; a squash or rebase merge is a new commit, built afresh.
 
 One-time, after the first build: make the image public (the lab pulls without credentials). GitHub → Packages → marginem → Package settings → Change visibility → Public.
 
