@@ -6,26 +6,21 @@ import { POST_BANNERS } from "../assets/post-banners";
 import { formatDate } from "../lib/date";
 import { SITE_NAME } from "../lib/site";
 import "../styles/post.css";
-// KaTeX CSS lives here, not in BaseLayout — math renders in posts and garden
-// notes only, not on homepage/archive/tags/etc. The garden note page mirrors
-// these imports (see src/pages/garden/[...slug].astro). If a third surface
-// ever starts rendering math, mirror them there too. katex.css holds our
-// overrides on top of the vendor sheet.
+// KaTeX CSS only ships on routes that render math: here and the garden note
+// page (src/pages/garden/[...slug].astro), which mirrors these imports.
 import "katex/dist/katex.min.css";
 import "../styles/katex.css";
 
-interface Frontmatter {
-	title?: string;
-	subtitle?: string;
-	description?: string;
-	abstract?: string;
-	pubDate?: string | Date;
-	tags?: string[];
-	heroImage?: string;
-}
-
 interface Props {
-	frontmatter: Frontmatter;
+	frontmatter: {
+		title: string;
+		subtitle?: string;
+		description?: string;
+		abstract?: string;
+		pubDate?: Date;
+		tags?: string[];
+		heroImage?: string;
+	};
 	activePage?: string;
 	showHero?: boolean;
 	eyebrow?: string;
@@ -33,48 +28,19 @@ interface Props {
 }
 
 const {
-	frontmatter: rawFrontmatter,
+	frontmatter,
 	activePage,
 	showHero = true,
 	eyebrow = "Essay",
 	showAbstract = true,
-} = Astro.props as Props;
-const frontmatter = rawFrontmatter ?? {};
-const pubDate =
-	typeof frontmatter.pubDate === "string" || frontmatter.pubDate instanceof Date
-		? frontmatter.pubDate
-		: undefined;
-const formattedDate = pubDate
-	? formatDate(pubDate, {
-			month: "long",
-			day: "numeric",
-			year: "numeric",
-		})
-	: "";
-const abstractText =
-	typeof frontmatter.abstract === "string"
-		? frontmatter.abstract
-		: typeof frontmatter.description === "string"
-			? frontmatter.description
-			: "";
-const tags = Array.isArray(frontmatter.tags)
-	? frontmatter.tags.filter((tag): tag is string => typeof tag === "string")
-	: [];
-const title =
-	typeof frontmatter.title === "string" ? frontmatter.title : "Post";
-const subtitle =
-	typeof frontmatter.subtitle === "string" && frontmatter.subtitle.trim().length
-		? frontmatter.subtitle.trim()
-		: undefined;
-const description =
-	typeof frontmatter.description === "string" ? frontmatter.description : "";
-// Per-post banner: look up the dithered B&W src by heroImage URL. Posts
-// without a heroImage (or with one not yet processed by `npm run banner:image`)
-// transparently fall back to the default site banner.
-const bannerSrc =
-	typeof frontmatter.heroImage === "string"
-		? POST_BANNERS[frontmatter.heroImage]
-		: undefined;
+} = Astro.props;
+const { title, subtitle, description, pubDate, tags = [] } = frontmatter;
+const abstractText = frontmatter.abstract ?? description;
+// Posts whose heroImage has been processed by `npm run banner:image` get a
+// dithered banner; everything else falls back to the site banner.
+const bannerSrc = frontmatter.heroImage
+	? POST_BANNERS[frontmatter.heroImage]
+	: undefined;
 ---
 
 <BaseLayout
@@ -83,48 +49,49 @@ const bannerSrc =
   hero={title}
   bannerSrc={bannerSrc}
   showHero={showHero}
-  includeFootnotes={true}
   activePage={activePage}
-  bodyClass="brutalist post-page"
+  bodyClass="post-page"
 >
   <div class="post-shell">
     <section class="paper-title">
       <p class="paper-title__eyebrow">{eyebrow}</p>
       <h1 class="paper-title__heading">{title}</h1>
       {
-        subtitle ? (
+        subtitle?.trim() && (
           <p class="paper-title__subtitle">
             <span class="paper-title__subtitle-rule" aria-hidden="true" />
-            <span class="paper-title__subtitle-text">{subtitle}</span>
+            <span class="paper-title__subtitle-text">{subtitle.trim()}</span>
           </p>
-        ) : null
+        )
       }
       <div class="paper-title__meta">
         {
-          formattedDate && pubDate ? (
-            <DateStamp datetime={pubDate} label={formattedDate} />
-          ) : null
+          pubDate && (
+            <DateStamp
+              datetime={pubDate}
+              label={formatDate(pubDate, {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            />
+          )
         }
       </div>
       {
-        tags.length ? (
+        tags.length > 0 && (
           <div class="paper-title__tags">
-            <TagList
-              tags={tags}
-              align="start"
-              linkToTags
-              variant="default"
-            />
+            <TagList tags={tags} align="start" linkToTags variant="default" />
           </div>
-        ) : null
+        )
       }
       {
-        showAbstract && abstractText ? (
+        showAbstract && abstractText && (
           <section class="paper-abstract">
             <strong class="paper-abstract__heading">Abstract</strong>
             <p class="paper-abstract__body">{abstractText}</p>
           </section>
-        ) : null
+        )
       }
     </section>
     <article class="paper-body">
@@ -133,3 +100,7 @@ const bannerSrc =
   </div>
   <slot name="after-body" />
 </BaseLayout>
+
+<script>
+  import "../scripts/init-footnotes.js";
+</script>

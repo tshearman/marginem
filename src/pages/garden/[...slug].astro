@@ -21,36 +21,23 @@ import {
 	buildFolderGraphData,
 	buildNeighborGraphData,
 	buildBreadcrumbs,
+	collectFolderPaths,
 	getIncomingNeighborSlugs,
 	getOutgoingNeighborSlugs,
 	plainExcerpt,
 } from "../../lib/gardenPageUtils";
 import { slugifyObsidianTarget } from "../../../plugins/remark-obsidian-links.js";
-
-export const prerender = true;
+import { MAIN_PAGES } from "../../lib/site";
 
 export async function getStaticPaths() {
 	const notes = await loadGardenNotes({ includeUnpublished: true });
 	const published = notes.filter((note) => note.published);
-	const folderPaths = new Set<string>();
-
-	for (const note of published) {
-		const parts = note.relativePath.split("/");
-		parts.pop();
-		for (let index = 0; index < parts.length; index += 1) {
-			const folderPath = parts.slice(0, index + 1).join("/");
-			if (folderPath) {
-				folderPaths.add(folderPath);
-			}
-		}
-	}
-
 	const notePaths = published.map((note) => ({
 		params: { slug: note.slug },
 		props: { type: "note", note, notes },
 	}));
 
-	const folderPages = Array.from(folderPaths).map((folderPath) => ({
+	const folderPages = collectFolderPaths(published).map((folderPath) => ({
 		params: { slug: slugifyObsidianTarget(folderPath) },
 		props: { type: "folder", folderPath, notes: published },
 	}));
@@ -134,10 +121,9 @@ const { html } =
 		<BaseLayout
 			title={`${note.title} | Garden`}
 			description="Living note pulled from the Obsidian vault."
-			hero={note.title}
 			showHero={false}
-			activePage="Garden"
-			bodyClass="brutalist post-page garden-entry-page"
+			activePage={MAIN_PAGES.garden.label}
+			bodyClass="post-page garden-entry-page"
 		>
 			<div class="post-shell">
 				<article class="garden-entry">
@@ -210,7 +196,6 @@ const { html } =
 				links: folderGraphLinks,
 				labelKey: "title",
 			}}
-			activePage="Garden"
 		/>
 	)
 }

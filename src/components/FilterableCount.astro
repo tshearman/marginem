@@ -2,41 +2,45 @@
 interface Props {
 	contentType: "posts" | "notes" | "entries";
 	totalCount: number;
-	class?: string;
 }
 
-const { contentType, totalCount, class: className = "" } = Astro.props as Props;
-const countId = `${contentType}Count`;
-const clearHintId = `${contentType}ClearHint`;
+const { contentType, totalCount } = Astro.props;
 ---
-<div class={`count-section ${className}`}>
-  <p class="count-text" id={countId}>
+
+<div class="count-section">
+  <p class="count-text" id={`${contentType}Count`}>
     Showing all {totalCount} {contentType}
   </p>
-  <p class="clear-hint" id={clearHintId} hidden>
+  <p class="clear-hint" id={`${contentType}ClearHint`} hidden>
     Right-click any tag to clear filters
   </p>
 </div>
 
 <style>
   .count-section {
-    margin: 1rem 0 2rem;
+    margin: 1.25rem 0;
+    padding: 8px 0;
+    border-top: 1px dotted var(--ink);
+    border-bottom: 1px dotted var(--ink);
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    color: rgb(var(--ink-rgb) / 0.7);
+    gap: 4px;
+    font-family: var(--mono);
+    text-transform: uppercase;
   }
 
   .count-text {
     margin: 0;
-    font-size: var(--fs-base);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-size: var(--fs-2xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--ink);
   }
 
   .clear-hint {
     margin: 0;
-    font-size: var(--fs-sm);
-    color: rgb(var(--ink-rgb) / 0.55);
+    font-size: var(--fs-3xs);
+    letter-spacing: 0.04em;
+    color: rgb(var(--ink-rgb) / 0.65);
   }
 </style>

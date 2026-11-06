@@ -3,5 +3,3 @@ export const KIND_LABELS = {
 	note: "Note",
 	garden: "Garden",
 } as const;
-
-export type ContentKind = keyof typeof KIND_LABELS;

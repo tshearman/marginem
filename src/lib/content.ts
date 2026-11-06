@@ -1,45 +1,7 @@
-export type WithSlug<T extends { id: string }> = T & {
-	slug: string;
-};
+import type { CollectionEntry } from "astro:content";
 
-export const withSlug = <T extends { id: string }>(entry: T): WithSlug<T> => ({
-	...entry,
-	slug: entry.id,
-});
+/** Mirror each entry's `id` as `slug`, which the pages use for URLs. */
+export const withSlugs = <T extends { id: string }>(entries: readonly T[]) =>
+	entries.map((entry) => ({ ...entry, slug: entry.id }));
 
-export const withSlugs = <T extends { id: string }>(
-	entries: readonly T[],
-): WithSlug<T>[] => entries.map(withSlug);
-
-export type BlogEntry = {
-	id: string;
-	slug: string;
-	data: {
-		title: string;
-		description: string;
-		abstract?: string;
-		pubDate: Date;
-		tags?: string[];
-		heroImage?: string;
-		featured?: boolean;
-		draft?: boolean;
-	};
-	body?: string;
-};
-
-export type NewsletterEntry = {
-	id: string;
-	slug: string;
-	data: {
-		issueNumber: number;
-		title: string;
-		subject?: string;
-		pubDate: Date;
-		tags?: string[];
-		description?: string;
-		draft?: boolean;
-		sent?: boolean;
-		sentAt?: Date;
-	};
-	body?: string;
-};
+export type BlogEntry = CollectionEntry<"blog"> & { slug: string };

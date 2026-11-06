@@ -13,30 +13,12 @@ interface Props {
 	tags?: string[];
 }
 
-const {
-	id,
-	title,
-	url,
-	pubDate = "",
-	displayDate = "",
-	description = "",
-	abstract = "",
-	tags = [],
-} = Astro.props as Props;
-
-const EXCERPT_LIMIT = 340;
-const excerptSource = abstract || description || "";
-const excerptPreview = ellipsizeText(excerptSource, EXCERPT_LIMIT, {
-	alwaysAppend: true,
-});
+const { abstract, description, ...props } = Astro.props as Props;
 const html = renderPostPreview({
-	id,
-	title,
-	url,
-	pubDate,
-	displayDate,
-	excerpt: excerptPreview,
-	tags,
+	...props,
+	excerpt: ellipsizeText(abstract || description || "", 340, {
+		alwaysAppend: true,
+	}),
 });
 ---
 

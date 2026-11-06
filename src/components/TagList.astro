@@ -4,6 +4,7 @@ import Tag from "./Tag.astro";
 interface Props {
 	tags?: string[];
 	align?: "start" | "center" | "end";
+	/** Defaults to linking unless the tags are filter buttons. */
 	linkToTags?: boolean;
 	variant?: "default" | "filter" | "display";
 }
@@ -15,21 +16,15 @@ const {
 	variant = "display",
 } = Astro.props as Props;
 const normalized = tags.filter(Boolean);
-const shouldLinkToTags =
-	typeof linkToTags === "boolean" ? linkToTags : variant !== "filter";
-const alignmentClass =
-	align === "center"
-		? "tag-list--center"
-		: align === "end"
-			? "tag-list--end"
-			: "";
+const asLink = linkToTags ?? variant !== "filter";
+const alignmentClass = align === "start" ? "" : `tag-list--${align}`;
 ---
 
 {
   normalized.length ? (
     <p class={`tag-list ${alignmentClass}`}>
       {normalized.map((tag) => (
-        <Tag tag={tag} variant={variant} asLink={shouldLinkToTags} />
+        <Tag tag={tag} variant={variant} asLink={asLink} />
       ))}
     </p>
   ) : null

@@ -1,32 +1,17 @@
 ---
-import { getCollection, getEntry, render } from "astro:content";
+import { getCollection, render } from "astro:content";
 import PostLayout from "../../layouts/PostLayout.astro";
-import { withSlugs } from "../../lib/content";
-
-export const prerender = true;
+import { MAIN_PAGES } from "../../lib/site";
 
 export async function getStaticPaths() {
-	const posts = withSlugs(
-		await getCollection("blog", ({ data }) => !data.draft),
-	);
-	return posts.map((post) => ({
-		params: { slug: post.slug },
-	}));
+	const posts = await getCollection("blog", ({ data }) => !data.draft);
+	return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 
-const slug = Astro.params.slug;
-if (!slug) {
-	throw new Error("Missing post slug");
-}
-
-const post = await getEntry("blog", slug);
-if (!post) {
-	return Astro.redirect("/404");
-}
-
+const { post } = Astro.props;
 const { Content } = await render(post);
-const frontmatter = post.data;
 ---
-<PostLayout frontmatter={frontmatter} activePage="Writing">
+
+<PostLayout frontmatter={post.data} activePage={MAIN_PAGES.writing.label}>
   <Content />
 </PostLayout>

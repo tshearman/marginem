@@ -3,22 +3,12 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import NoteCard from "../../components/NoteCard.astro";
 import FilterableCount from "../../components/FilterableCount.astro";
 import TagFilterPanel from "../../components/TagFilterPanel.astro";
-import Banner from "../../components/Banner.astro";
 import { generateNoteId } from "../../lib/noteUtils";
 import { MAIN_PAGES } from "../../lib/site";
 import { loadCommonplaceNotes } from "../../lib/commonplace";
 
-export const prerender = true;
-
-const allNotes: Array<{
-	content: string;
-	source?: string;
-	author?: string;
-	tags: string[];
-	date?: Date;
-}> = await loadCommonplaceNotes();
-
-const sortedNotes = allNotes.sort((a, b) => {
+// Newest first by stated date; undated notes go last.
+const sortedNotes = (await loadCommonplaceNotes()).sort((a, b) => {
 	if (!a.date && !b.date) return 0;
 	if (!a.date) return 1;
 	if (!b.date) return -1;
@@ -40,16 +30,15 @@ const notesWithGrid = sortedNotes.map((note) => ({
 		date: note.date,
 	}),
 }));
-const allTags = [
-	...new Set(sortedNotes.flatMap((note) => note.tags || [])),
-].sort((a, b) => a.localeCompare(b));
+const allTags = [...new Set(sortedNotes.flatMap((note) => note.tags))].sort(
+	(a, b) => a.localeCompare(b),
+);
 const commonplaceFilterConfig = JSON.stringify({
 	filterSelector: ".tag-filter-container .tag--filter",
 	countId: "notesCount",
 	hintId: "notesClearHint",
 	itemSelector: ".note-section",
 	itemTagSelector: ".note-card .tag--filter",
-	stateKey: "commonplace-notes",
 	countLabel: "notes",
 });
 ---
@@ -58,22 +47,13 @@ const commonplaceFilterConfig = JSON.stringify({
   title={MAIN_PAGES.commonplace.pageTitle}
   description={MAIN_PAGES.commonplace.description}
   hero={MAIN_PAGES.commonplace.label}
-  showHero={false}
+  heroNarrow={"COMMON\nPLACE"}
+  heroHeight={140}
+  eyebrow={MAIN_PAGES.commonplace.eyebrow}
+  subtitle={MAIN_PAGES.commonplace.description}
   activePage={MAIN_PAGES.commonplace.label}
-  bodyClass="brutalist commonplace-page"
+  bodyClass="commonplace-page"
 >
-  <div class="page-hero">
-    <div class="page-hero__banner">
-      <Banner
-        text="COMMONPLACE"
-        textNarrow={"COMMON\nPLACE"}
-        height={140}
-        srLabel={MAIN_PAGES.commonplace.label}
-      />
-      <span class="page-hero__eyebrow">{MAIN_PAGES.commonplace.eyebrow}</span>
-    </div>
-    <p class="page-hero__subtitle">{MAIN_PAGES.commonplace.description}</p>
-  </div>
   <section
     class="commonplace-page page-shell"
     data-filter-config={commonplaceFilterConfig}
@@ -115,11 +95,7 @@ const commonplaceFilterConfig = JSON.stringify({
 </script>
 
 <style is:global>
-  /*
-   * Commonplace-specific styles. The brutalist frame, hero, shell, tag panel,
-   * and count strip come from brutalist-page.css (body.brutalist); this block
-   * only adds the masonry grid and note-card treatment unique to this page.
-   */
+  /* Masonry grid + note-card treatment unique to this page. */
 
   /* ---- MASONRY GRID ---- */
   body.commonplace-page .notes-masonry {

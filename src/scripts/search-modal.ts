@@ -1,314 +1,159 @@
 import type { SearchItem } from "./search/types";
 
-// Temporary diagnostics to trace search initialization in build/preview.
-const DEBUG =
-	(typeof window !== "undefined" &&
-		(window as typeof window & { __searchDebug?: boolean }).__searchDebug) ??
-	true;
-const log = (...args: unknown[]) => {
-	if (!DEBUG) return;
-	// Use info to surface in most consoles without being noisy.
-	console.info("[search]", ...args);
-};
-
 const SEARCH_INDEX_URL = "/api/search.json";
 const MAX_RESULTS = 20;
+const PROMPT = "Type to search the entire archive.";
 
-type SearchState = {
-	data?: SearchItem[];
-	loadPromise?: Promise<SearchItem[]>;
-	error?: string;
-	cleanup?: (() => void) | null;
-};
+// The index is fetched on first use (opening the modal or typing) and kept
+// for the page's lifetime, newest first. A failed fetch resolves to null and
+// is retried on the next search.
+let index: SearchItem[] | undefined;
+let loading: Promise<SearchItem[] | null> | undefined;
 
-const getGlobalSearchState = () => {
-	if (typeof window === "undefined") return undefined;
-	log("getGlobalSearchState");
-	return (window as typeof window & { __siteSearchState?: SearchState })
-		.__siteSearchState;
-};
-
-const SEARCH_STATE: SearchState = getGlobalSearchState() ?? {};
-if (typeof window !== "undefined") {
-	log("hydrating SEARCH_STATE on window");
-	(
-		window as typeof window & {
-			__siteSearchState?: SearchState;
-		}
-	).__siteSearchState = SEARCH_STATE;
-}
-
-async function fetchSearchIndex() {
-	log("fetchSearchIndex start", SEARCH_INDEX_URL);
-	// Skip caches so deploys pick up fresh search data.
-	const response = await fetch(SEARCH_INDEX_URL, { cache: "no-store" });
-	if (!response.ok) {
-		throw new Error(`Search index responded with ${response.status}`);
-	}
-	const payload = (await response.json()) as SearchItem[];
-	return Array.isArray(payload) ? payload : [];
-}
-
-function loadSearchData(): Promise<SearchItem[]> {
-	if (SEARCH_STATE.data) {
-		return Promise.resolve(SEARCH_STATE.data);
-	}
-	if (!SEARCH_STATE.loadPromise) {
-		SEARCH_STATE.loadPromise = fetchSearchIndex()
-			.then((items) => {
-				SEARCH_STATE.data = items;
-				SEARCH_STATE.error = undefined;
-				return items;
-			})
-			.catch((error) => {
-				console.error("[search] Failed to load search data", error);
-				SEARCH_STATE.error = "Search data failed to load.";
-				return [];
-			})
-			.finally(() => {
-				SEARCH_STATE.loadPromise = undefined;
-			});
-	}
-	return SEARCH_STATE.loadPromise;
-}
-
-function renderPlaceholder(
-	container: HTMLElement,
-	message: string,
-	className = "search-modal__placeholder",
-) {
-	container.innerHTML = "";
-	const wrapper = document.createElement("div");
-	wrapper.className = className;
-	wrapper.textContent = message;
-	container.appendChild(wrapper);
-}
-
-function renderResults(container: HTMLElement, results: SearchItem[]) {
-	// item.html is trusted markup prerendered server-side by /api/search.json.
-	container.innerHTML = results.map((item) => item.html).join("");
-}
-
-let searchRequestId = 0;
-let lastQuery = "";
-
-async function performSearch(query: string) {
-	const container = document.getElementById("search-results");
-	if (!(container instanceof HTMLElement)) return;
-	const trimmed = query.trim();
-	const dataLoaded = Boolean(SEARCH_STATE.data);
-	if (trimmed === lastQuery && dataLoaded) return;
-	lastQuery = trimmed;
-	if (!trimmed) {
-		log("performSearch: empty query");
-		renderPlaceholder(container, "Type to search the entire archive.");
-		return;
-	}
-
-	const currentRequest = ++searchRequestId;
-	const term = trimmed.toLowerCase();
-	if (!SEARCH_STATE.data && !SEARCH_STATE.error) {
-		renderPlaceholder(container, "Loading search index…");
-	}
-
-	const data = await loadSearchData();
-	log("performSearch: data loaded", {
-		request: currentRequest,
-		total: data.length,
-		error: SEARCH_STATE.error,
-	});
-	if (currentRequest !== searchRequestId) {
-		return;
-	}
-
-	if (SEARCH_STATE.error) {
-		renderPlaceholder(
-			container,
-			"Search data failed to load. Please try again later.",
-			"search-modal__empty",
-		);
-		return;
-	}
-
-	const matches = data
-		.filter((item) => item.searchText.includes(term))
-		.sort((a, b) => b.timestamp - a.timestamp)
-		.slice(0, MAX_RESULTS);
-
-	if (!matches.length) {
-		renderPlaceholder(container, "No matches found.", "search-modal__empty");
-		return;
-	}
-
-	renderResults(container, matches);
-}
-
-function openSearch() {
-	const modal = document.getElementById("search-modal");
-	const input = document.getElementById(
-		"search-input",
-	) as HTMLInputElement | null;
-	if (!(modal instanceof HTMLElement) || !input) return;
-	modal.classList.add("is-visible");
-	modal.removeAttribute("hidden");
-	modal.setAttribute("aria-hidden", "false");
-	document.body.classList.add("search-locked");
-	void loadSearchData();
-	requestAnimationFrame(() => {
-		input.focus({ preventScroll: true });
-		input.select();
-	});
-}
-
-function closeSearch() {
-	const modal = document.getElementById("search-modal");
-	const input = document.getElementById(
-		"search-input",
-	) as HTMLInputElement | null;
-	const container = document.getElementById("search-results");
-	if (
-		!(modal instanceof HTMLElement) ||
-		!input ||
-		!(container instanceof HTMLElement)
-	) {
-		return;
-	}
-	if (document.activeElement instanceof HTMLElement) {
-		document.activeElement.blur();
-	}
-	input.blur();
-	modal.classList.remove("is-visible");
-	modal.setAttribute("hidden", "true");
-	modal.setAttribute("aria-hidden", "true");
-	document.body.classList.remove("search-locked");
-	input.value = "";
-	lastQuery = "";
-	renderPlaceholder(container, "Type to search the entire archive.");
+function loadIndex(): Promise<SearchItem[] | null> {
+	if (index) return Promise.resolve(index);
+	// `no-cache` revalidates on every load, so a deploy is picked up at once.
+	loading ??= fetch(SEARCH_INDEX_URL, { cache: "no-cache" })
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error(`Search index responded with ${response.status}`);
+			}
+			return response.json();
+		})
+		.then((items: SearchItem[]) => {
+			index = Array.isArray(items)
+				? items.sort((a, b) => b.timestamp - a.timestamp)
+				: [];
+			return index;
+		})
+		.catch((error) => {
+			console.error("[search] Failed to load search data", error);
+			return null;
+		})
+		.finally(() => {
+			loading = undefined;
+		});
+	return loading;
 }
 
 function setupSearch() {
-	if (SEARCH_STATE.cleanup) {
-		SEARCH_STATE.cleanup();
-		SEARCH_STATE.cleanup = null;
-	}
-
 	const modal = document.getElementById("search-modal");
-	if (modal instanceof HTMLElement && modal.parentElement !== document.body) {
-		document.body.appendChild(modal);
-	}
-
 	const trigger = document.getElementById("search-trigger");
 	const overlay = document.getElementById("search-overlay");
 	const closeButton = document.getElementById("search-close");
-	const input = document.getElementById(
-		"search-input",
-	) as HTMLInputElement | null;
+	const input = document.getElementById("search-input");
 	const results = document.getElementById("search-results");
 	if (
-		!(trigger instanceof HTMLElement) ||
-		!(overlay instanceof HTMLElement) ||
-		!(closeButton instanceof HTMLElement) ||
-		!input ||
-		!(results instanceof HTMLElement)
+		!modal ||
+		!trigger ||
+		!overlay ||
+		!closeButton ||
+		!(input instanceof HTMLInputElement) ||
+		!results
 	) {
-		log("setupSearch: missing elements", {
-			trigger: Boolean(trigger),
-			overlay: Boolean(overlay),
-			closeButton: Boolean(closeButton),
-			input: Boolean(input),
-			results: Boolean(results),
-		});
 		return;
 	}
 
-	log("setupSearch: attaching listeners");
-	void loadSearchData();
+	// Portal to <body> so no ancestor's stacking context can trap the overlay.
+	document.body.appendChild(modal);
 
+	let requestId = 0;
+	let lastQuery = "";
 	let debounce: number | undefined;
 
-	const inputHandler = (event: Event) => {
-		const target = event.target as HTMLInputElement | null;
-		const query = target?.value ?? "";
-		if (debounce) clearTimeout(debounce);
-		debounce = window.setTimeout(() => {
-			void performSearch(query);
-		}, 220);
+	const renderMessage = (
+		message: string,
+		className = "search-modal__placeholder",
+	) => {
+		const div = document.createElement("div");
+		div.className = className;
+		div.textContent = message;
+		results.replaceChildren(div);
 	};
 
-	const keyHandler = (event: KeyboardEvent) => {
+	const search = async (query: string) => {
+		const term = query.trim().toLowerCase();
+		if (term === lastQuery && index) return;
+		lastQuery = term;
+		// Bumped on every call so a slower, older search can't overwrite this one.
+		const id = ++requestId;
+		if (!term) return renderMessage(PROMPT);
+
+		if (!index) renderMessage("Loading search index…");
+		const data = await loadIndex();
+		if (id !== requestId) return;
+		if (!data) {
+			return renderMessage(
+				"Search data failed to load. Please try again later.",
+				"search-modal__empty",
+			);
+		}
+
+		const matches = data
+			.filter((item) => item.searchText.includes(term))
+			.slice(0, MAX_RESULTS);
+		if (!matches.length) {
+			return renderMessage("No matches found.", "search-modal__empty");
+		}
+		// item.html is trusted markup prerendered server-side by /api/search.json.
+		results.innerHTML = matches.map((item) => item.html).join("");
+	};
+
+	const open = () => {
+		modal.hidden = false;
+		document.body.classList.add("search-locked");
+		void loadIndex();
+		// Focus synchronously: iOS only raises the keyboard inside the gesture.
+		input.focus({ preventScroll: true });
+		input.select();
+	};
+
+	const close = () => {
+		if (document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
+		modal.hidden = true;
+		document.body.classList.remove("search-locked");
+		// Invalidate any in-flight search so it can't repaint stale results.
+		requestId++;
+		input.value = "";
+		lastQuery = "";
+		renderMessage(PROMPT);
+	};
+
+	trigger.addEventListener("click", open);
+	overlay.addEventListener("click", close);
+	closeButton.addEventListener("click", close);
+	input.addEventListener("input", () => {
+		clearTimeout(debounce);
+		debounce = window.setTimeout(() => void search(input.value), 220);
+	});
+	results.addEventListener("click", (event) => {
+		if ((event.target as Element | null)?.closest("a[href]")) close();
+	});
+	document.addEventListener("keydown", (event) => {
 		const target = event.target;
-		const isInputTarget =
+		const typing =
 			target instanceof HTMLElement &&
 			(target.tagName === "INPUT" || target.tagName === "TEXTAREA");
-
 		if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
 			event.preventDefault();
-			openSearch();
+			open();
 		} else if (
 			event.key === "/" &&
 			!event.metaKey &&
 			!event.ctrlKey &&
 			!event.altKey &&
-			!isInputTarget
+			!typing
 		) {
 			event.preventDefault();
-			log("keyHandler: slash trigger");
-			openSearch();
-		} else if (event.key === "Escape") {
-			const modalEl = document.getElementById("search-modal");
-			if (modalEl?.classList.contains("is-visible")) {
-				event.preventDefault();
-				log("keyHandler: escape close");
-				closeSearch();
-			}
+			open();
+		} else if (event.key === "Escape" && !modal.hidden) {
+			event.preventDefault();
+			close();
 		}
-	};
-
-	const triggerHandler = () => openSearch();
-	const overlayHandler = () => closeSearch();
-	const closeHandler = () => closeSearch();
-	const resultClickHandler = (event: Event) => {
-		const target = event.target as HTMLElement | null;
-		const link = target?.closest<HTMLAnchorElement>("a[href]");
-		if (!link) return;
-		closeSearch();
-	};
-
-	trigger.addEventListener("click", triggerHandler);
-	overlay.addEventListener("click", overlayHandler);
-	closeButton.addEventListener("click", closeHandler);
-	input.addEventListener("input", inputHandler);
-	results.addEventListener("click", resultClickHandler);
-	document.addEventListener("keydown", keyHandler);
-
-	SEARCH_STATE.cleanup = () => {
-		log("cleanup listeners");
-		trigger.removeEventListener("click", triggerHandler);
-		overlay.removeEventListener("click", overlayHandler);
-		closeButton.removeEventListener("click", closeHandler);
-		input.removeEventListener("input", inputHandler);
-		results.removeEventListener("click", resultClickHandler);
-		document.removeEventListener("keydown", keyHandler);
-	};
+	});
 }
 
-function init() {
-	log("init run; cleanup exists?", Boolean(SEARCH_STATE.cleanup));
-	setupSearch();
-}
-
-const enableSearch = () => {
-	if (typeof document === "undefined") return;
-	log("enableSearch", document.readyState);
-	if (document.readyState === "loading") {
-		document.addEventListener("DOMContentLoaded", init, { once: true });
-	} else {
-		init();
-	}
-	document.addEventListener("astro:page-load", init);
-};
-
-if (typeof window !== "undefined" && typeof document !== "undefined") {
-	log("search script executing in browser");
-	enableSearch();
-}
+// Module scripts run after the document is parsed, so the DOM is ready.
+setupSearch();

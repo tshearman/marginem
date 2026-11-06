@@ -22,7 +22,7 @@ case "$BRANCH" in
 		# Generate per-post dithered banners + the heroImage→asset map before
 		# astro build. Cached entries are skipped on subsequent runs.
 		node scripts/optimize-banner.mjs
-		PAGES_FUNCTIONS=true RUN_CODE_SNIPPETS=false astro build
+		RUN_CODE_SNIPPETS=false astro build
 		;;
 	*)
 		echo "Skipping build for branch '$BRANCH' (only main/dev build)."

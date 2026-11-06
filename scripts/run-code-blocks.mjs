@@ -6,9 +6,7 @@ import remarkParse from "remark-parse";
 import remarkMdx from "remark-mdx";
 import { VFile } from "vfile";
 import remarkMath from "remark-math";
-import remarkGfm from "remark-gfm";
 import remarkRunCode from "../plugins/remark-run-code.js";
-import remarkObsidianLinks from "../plugins/remark-obsidian-links.js";
 
 const projectRoot = path.resolve(new URL("..", import.meta.url).pathname);
 const contentDir = path.join(projectRoot, "content");
@@ -70,10 +68,9 @@ async function main() {
 	const processor = unified()
 		.use(remarkParse)
 		.use(remarkMdx)
+		// remark-math keeps `$\frac{a}{b}$` from parsing as an MDX expression.
 		.use(remarkMath)
-		.use(remarkGfm)
-		.use(remarkRunCode, { continueOnError: true, onResult: handleResult })
-		.use(remarkObsidianLinks);
+		.use(remarkRunCode, { continueOnError: true, onResult: handleResult });
 
 	for (const filePath of mdxFiles) {
 		await runBlocks(filePath, processor);
@@ -90,8 +87,7 @@ async function main() {
 	}
 
 	const durationMs = Math.round(Date.now() - startTime);
-	const averageMs =
-		totalBlocks > 0 ? Math.round(durationMs / totalBlocks) : 0;
+	const averageMs = totalBlocks > 0 ? Math.round(durationMs / totalBlocks) : 0;
 	const timingSuffix =
 		totalBlocks > 0
 			? `in ${durationMs}ms (${averageMs}ms/block)`

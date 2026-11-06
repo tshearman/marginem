@@ -1,16 +1,7 @@
 /*
- * Homepage-specific layout (Ad Marginem landing page).
- *
- * Loaded by src/pages/index.astro, which uses BaseLayout — so the page frame,
- * masthead, banner, footer, palette tokens, and shared primitives all come
- * from global.css / brutalist-page.css. This file only owns the bits that are
- * unique to the homepage: the section grid, the dark "tall" cell, the
- * "Still Drying" index list, and the bespoke 6px masthead border.
+ * Homepage-only layout: the section grid, the inverted "tall" cell, and the
+ * "Still Drying" index list. Everything else comes from global.css.
  */
-
-.masthead {
-  border-bottom: 6px solid var(--ink);
-}
 
 /* ---- GRID ---- */
 .grid {
@@ -64,12 +55,6 @@
   text-transform: uppercase;
   opacity: 0.7;
 }
-.cell__more {
-  display: inline-block;
-  font-weight: bold;
-  font-size: var(--fs-xs);
-  text-transform: uppercase;
-}
 
 /* ---- LINKED CELLS ---- */
 .cell--link {
@@ -87,13 +72,6 @@
   grid-row: span 3;
   color: var(--paper);
   background: var(--ink);
-}
-.tall h2 {
-  color: var(--ink);
-  background: var(--paper);
-}
-.tall a {
-  color: var(--paper);
 }
 .lead {
   margin: 0 0 12px;
@@ -133,7 +111,6 @@
   justify-content: space-between;
   gap: 18px;
   padding: 10px 0;
-  /* border-bottom: 1px dotted var(--ink); */
 }
 .index__body {
   flex: 1;
@@ -143,16 +120,13 @@
   flex: none;
   display: inline-block;
   padding: 2px 6px;
-  font-family: "Arial Black", Helvetica, sans-serif;
+  font-family: var(--display);
   font-size: var(--fs-3xs);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--paper);
   background: var(--ink);
   margin-top: 2px;
-}
-.index li:last-child {
-  border-bottom: none;
 }
 .index a {
   font-weight: bold;
@@ -175,10 +149,6 @@
   text-transform: uppercase;
   white-space: nowrap;
 }
-
-/* Button styles live in buttons.css and are shared with the rest of the site. */
-
-/* Subscribe form lives in SubscribeBanner.astro (also used on long-form pages). */
 
 /* ---- MOBILE ---- */
 @media (max-width: 720px) {

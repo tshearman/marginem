@@ -1,35 +1,22 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import Banner from "../../components/Banner.astro";
 import { SITE_NAME } from "../../lib/site";
-
-export const prerender = true;
 ---
 
 <BaseLayout
   title={`Unsubscribe | ${SITE_NAME}`}
   description="Request to unsubscribe from email updates."
   hero="Unsubscribe"
-  showHero={false}
-  bodyClass="brutalist form-page unsubscribe-page"
+  heroNarrow={"UNSUB\nSCRIBE"}
+  heroHeight={140}
+  eyebrow="Email updates"
+  bodyClass="full-height"
 >
-  <div class="page-hero">
-    <div class="page-hero__banner">
-      <Banner
-        text="UNSUBSCRIBE"
-        textNarrow={"UNSUB\nSCRIBE"}
-        height={140}
-        srLabel="Unsubscribe"
-      />
-      <span class="page-hero__eyebrow">Email updates</span>
-    </div>
-  </div>
-
   <div class="page-shell">
-    <h2 class="unsubscribe-page__heading">
+    <h2 class="page-statement">
       Sorry to see you go &mdash;<br />enter your email below.
     </h2>
-    <form class="subscribe-form unsubscribe-form" data-action="/api/unsubscribe-request">
+    <form class="subscribe-form" action="/api/unsubscribe-request" method="post">
       <div class="subscribe-form__field">
         <label for="unsubscribe-email">Email</label>
         <input
@@ -43,41 +30,6 @@ export const prerender = true;
         />
       </div>
       <button type="submit" class="btn">Unsubscribe</button>
-      <p class="unsubscribe-form__status" role="status"></p>
     </form>
   </div>
-  <script>
-    import "../../scripts/unsubscribe";
-  </script>
 </BaseLayout>
-
-<style is:global>
-  body.unsubscribe-page .unsubscribe-page__heading {
-    margin: clamp(48px, 8vh, 96px) auto 24px;
-    font-family: var(--display);
-    font-size: clamp(1.25rem, 3vw, 2rem);
-    font-weight: 900;
-    line-height: 1.1;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    text-align: center;
-    color: var(--ink);
-  }
-
-  body.unsubscribe-page .unsubscribe-form__status {
-    margin: 14px 0 0;
-    font-family: var(--mono);
-    font-size: var(--fs-3xs);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: rgb(var(--ink-rgb) / 0.65);
-  }
-
-  body.unsubscribe-page .unsubscribe-form__status[data-state="error"] {
-    color: var(--danger);
-  }
-
-  body.unsubscribe-page .unsubscribe-form__status[data-state="success"] {
-    color: var(--success);
-  }
-</style>

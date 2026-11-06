@@ -6,7 +6,6 @@ const buildNote = (
 ): GardenNote => ({
 	content: "",
 	relativePath: "Example.md",
-	sourcePath: "/vault/Example.md",
 	updatedAt: new Date("2024-01-01T00:00:00Z"),
 	published: true,
 	tags: [],
@@ -61,12 +60,12 @@ describe("createGardenLinkResolver", () => {
 			text: "Draft Note",
 			isLink: false,
 		});
-		expect(resolver({ target: "Drafts/Draft Note.md", alias: "Hidden" })).toEqual(
-			{
-				text: "Hidden",
-				isLink: false,
-			},
-		);
+		expect(
+			resolver({ target: "Drafts/Draft Note.md", alias: "Hidden" }),
+		).toEqual({
+			text: "Hidden",
+			isLink: false,
+		});
 	});
 
 	it("returns plain text for unknown targets", () => {

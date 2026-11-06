@@ -1,25 +1,16 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Banner from "../components/Banner.astro";
 import { MAIN_PAGES, SITE_NAME } from "../lib/site";
-
-export const prerender = true;
 ---
 
 <BaseLayout
   title={`Page not found | ${SITE_NAME}`}
   description="The page you are looking for does not exist."
-  hero="Page not found"
-  showHero={false}
-  activePage={undefined}
-  bodyClass="brutalist not-found-page"
+  hero="404"
+  eyebrow="Page not found"
+  bannerSrLabel="Page not found"
+  bodyClass="full-height not-found-page"
 >
-  <div class="page-hero">
-    <div class="page-hero__banner">
-      <Banner text="404" srLabel="Page not found" />
-      <span class="page-hero__eyebrow">Page not found</span>
-    </div>
-  </div>
 
   <section class="not-found__banner">
     <p class="not-found__message">That page has wandered off.</p>
@@ -31,22 +22,9 @@ export const prerender = true;
 </BaseLayout>
 
 <style is:global>
-  /* Reuses the brutalist frame (body.brutalist), the .page-hero banner, and
-     the shared .btn buttons. The rules below add the full-height layout: the
-     content container is black, the centred message sits on it, and the footer
-     is pinned to the bottom of the window on the page's paper background. */
-
-  /* Fill the viewport so the footer rests at the bottom of the window. */
-  body.not-found-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
+  /* `full-height` pins the footer to the bottom of the window; this page fills
+     the space above it with an inverted (ink) panel holding the message. */
   body.not-found-page .site-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
     background: var(--ink);
   }
 
@@ -59,9 +37,6 @@ export const prerender = true;
   }
 
   body.not-found-page .site-footer {
-    margin-top: auto;
-    /* Keep the footer on the page's paper background like every other page,
-       even though the content container above it is black for this test. */
     background: var(--paper);
   }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDate, formatDateLabelHtml } from "../src/lib/date";
+import { formatDate } from "../src/lib/date";
 
 describe("formatDate", () => {
 	it("returns a formatted date with ordinal suffix", () => {
@@ -7,19 +7,17 @@ describe("formatDate", () => {
 		expect(formatDate("2024-03-11")).toBe("March 11th, 2024");
 	});
 
-	it("omits the year when no year option is provided", () => {
+	it("formats frontmatter dates (UTC midnight) on their UTC day", () => {
+		expect(formatDate(new Date("2024-01-02T00:00:00Z"))).toBe(
+			"January 2nd, 2024",
+		);
+	});
+
+	it("omits the year when options are given without a year", () => {
 		expect(formatDate("2024-07-04", { month: "long" })).toBe("July 4th");
 	});
 
 	it("returns empty string for invalid dates", () => {
 		expect(formatDate("not-a-date")).toBe("");
-	});
-});
-
-describe("formatDateLabelHtml", () => {
-	it("wraps ordinal suffixes in sup tags", () => {
-		expect(formatDateLabelHtml("July 4th, 2024")).toBe(
-			"July 4<sup>th</sup>, 2024",
-		);
 	});
 });

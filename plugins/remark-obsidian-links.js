@@ -1,6 +1,6 @@
 import { visit } from "unist-util-visit";
 
-const OBSIDIAN_LINK_PATTERN = /(!)?\[\[([^[\]]+)\]\]/g;
+export const OBSIDIAN_LINK_PATTERN = /(!)?\[\[([^[\]]+)\]\]/g;
 
 export const slugifyObsidianTarget = (value = "") => {
 	const cleaned = value.trim().replace(/\.mdx?$/i, "");
@@ -21,8 +21,9 @@ export const slugifyObsidianTarget = (value = "") => {
 export const slugifyHeading = (value = "") =>
 	slugifyObsidianTarget(value.replace(/^#+/, ""));
 
-const parseMatch = (matchArray) => {
-	const [, embedFlag, targetText = ""] = matchArray;
+/** Split an OBSIDIAN_LINK_PATTERN match: `![[target#heading|alias]]`. */
+export const parseObsidianLink = (match) => {
+	const [, embedFlag, targetText = ""] = match;
 	const [targetAndHeading = "", aliasPart] = targetText.split("|");
 	const [target, heading] = targetAndHeading.split("#");
 	return {
@@ -33,115 +34,71 @@ const parseMatch = (matchArray) => {
 	};
 };
 
-export default function remarkObsidianLinks(options = {}) {
-	const { linkPrefix = "/garden", resolveLink } = options;
-	const normalizedPrefix = linkPrefix.replace(/\/+$/, "");
-	const isExternalOrAbsolute = (url = "") =>
-		url.startsWith("#") ||
-		url.startsWith("/") ||
-		url.startsWith("http://") ||
-		url.startsWith("https://") ||
-		url.startsWith("mailto:") ||
-		url.startsWith("tel:");
+/** Markdown link URLs that point outside the vault (or within the page). */
+export const isExternalOrAbsolute = (url = "") =>
+	/^(#|\/|https?:\/\/|mailto:|tel:)/.test(url);
 
+const gardenUrl = (slug, heading) =>
+	`/garden/${slug}/${heading ? `#${slugifyHeading(heading)}` : ""}`;
+
+/**
+ * Turn `[[wikilinks]]` and relative `[text](Note.md)` links into garden links.
+ * `resolveLink({ target, alias, heading, isEmbed })` returns
+ * `{ text, isLink, slug? }`; without it (blog posts) wikilinks become plain
+ * text and markdown links are left alone.
+ */
+export default function remarkObsidianLinks({ resolveLink } = {}) {
 	return (tree) => {
 		visit(tree, "text", (node, index, parent) => {
-			if (!parent || typeof node.value !== "string") return;
-			const value = node.value;
+			if (!parent) return;
+			const { value } = node;
 			const newNodes = [];
 			let lastIndex = 0;
 
 			for (const match of value.matchAll(OBSIDIAN_LINK_PATTERN)) {
-				const matchStart = match.index ?? 0;
-				if (matchStart > lastIndex) {
+				if (match.index > lastIndex) {
 					newNodes.push({
 						type: "text",
-						value: value.slice(lastIndex, matchStart),
+						value: value.slice(lastIndex, match.index),
 					});
 				}
+				lastIndex = match.index + match[0].length;
 
-				const parsed = parseMatch(match);
-				const resolution = resolveLink?.(parsed);
-				const customText =
-					typeof resolution === "object" && resolution
-						? resolution.text
-						: undefined;
-				const slugOrUrl =
-					typeof resolution === "string"
-						? resolution
-						: resolution?.slug ?? resolution?.url;
-				const linkText =
-					customText || parsed.alias || parsed.target || slugOrUrl;
-				const isLink =
-					typeof resolution === "object" && resolution
-						? resolution.isLink ?? Boolean(slugOrUrl)
-						: Boolean(slugOrUrl);
-
-				if (!isLink || !slugOrUrl) {
-					newNodes.push({
-						type: "text",
-						value: linkText || "",
-					});
-					lastIndex = matchStart + match[0].length;
-					continue;
-				}
-
-				const anchor = parsed.heading
-					? `#${slugifyHeading(parsed.heading)}`
-					: "";
-				const url =
-					slugOrUrl.startsWith("/") || slugOrUrl.startsWith("http")
-						? `${slugOrUrl}${anchor}`
-						: `${normalizedPrefix}/${slugOrUrl}/${anchor}`;
-
-				newNodes.push({
-					type: "link",
-					url,
-					data: { hProperties: { "data-obsidian-link": true } },
-					children: [{ type: "text", value: linkText }],
-				});
-
-				lastIndex = matchStart + match[0].length;
+				const link = parseObsidianLink(match);
+				const resolution = resolveLink?.(link);
+				const text = resolution?.text || link.alias || link.target;
+				newNodes.push(
+					resolution?.isLink && resolution.slug
+						? {
+								type: "link",
+								url: gardenUrl(resolution.slug, link.heading),
+								data: { hProperties: { "data-obsidian-link": true } },
+								children: [{ type: "text", value: text }],
+							}
+						: { type: "text", value: text },
+				);
 			}
 
 			if (!newNodes.length) return;
 			if (lastIndex < value.length) {
-				newNodes.push({
-					type: "text",
-					value: value.slice(lastIndex),
-				});
+				newNodes.push({ type: "text", value: value.slice(lastIndex) });
 			}
-
 			parent.children.splice(index, 1, ...newNodes);
+			return index + newNodes.length;
 		});
 
+		if (!resolveLink) return;
 		visit(tree, "link", (node) => {
-			if (!node || typeof node.url !== "string") return;
 			if (isExternalOrAbsolute(node.url)) return;
-			if (!resolveLink) return;
-
-			const [rawTarget, rawHeading] = node.url.split("#");
-			const normalizedTarget = rawTarget.replace(/\.mdx?$/i, "");
-			const resolution = resolveLink({ target: normalizedTarget });
-			const slugOrUrl =
-				typeof resolution === "string"
-					? resolution
-					: resolution?.slug ?? resolution?.url;
-			const isLink =
-				typeof resolution === "object" && resolution
-					? resolution.isLink ?? Boolean(slugOrUrl)
-					: Boolean(slugOrUrl);
-
-			if (!isLink || !slugOrUrl) return;
-
-			const anchor = rawHeading ? `#${slugifyHeading(rawHeading)}` : "";
-			node.url =
-				slugOrUrl.startsWith("/") || slugOrUrl.startsWith("http")
-					? `${slugOrUrl}${anchor}`
-					: `${normalizedPrefix}/${slugOrUrl}/${anchor}`;
+			const [target, heading] = node.url.split("#");
+			const resolution = resolveLink({
+				target: target.replace(/\.mdx?$/i, ""),
+			});
+			if (!resolution?.isLink || !resolution.slug) return;
+			node.url = gardenUrl(resolution.slug, heading);
 			node.data = node.data || {};
 			node.data.hProperties = {
-				...(node.data.hProperties || {}),
+				...node.data.hProperties,
 				"data-obsidian-link": true,
 			};
 		});

@@ -1,38 +1,24 @@
 ---
 interface Props {
-	action?: string;
-	method?: "get" | "post";
 	idBase?: string;
-	variant?: "default" | "compact";
-	redirectUrl?: string;
 	invert?: boolean;
 }
 
-const {
-	action = "/api/subscribe",
-	method = "post",
-	idBase = "subscribe",
-	invert = false,
-} = Astro.props as Props;
+const { idBase = "subscribe", invert = false } = Astro.props;
 
 const emailId = `${idBase}-email`;
 const nameId = `${idBase}-name`;
-const buttonClass = ["btn", invert ? "btn--invert" : null]
-	.filter(Boolean)
-	.join(" ");
-
 const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "";
 ---
 
 <div class={invert ? "subscribe-form-wrap subscribe-form-wrap--invert" : "subscribe-form-wrap"}>
   <form
     class="subscribe-form"
-    action={action}
-    method={method}
+    action="/api/subscribe"
+    method="post"
     data-subscribe-form
     data-turnstile-sitekey={sitekey}
   >
-    <h2 class="subscribe-form__heading">Subscribe for notifications on new posts!</h2>
     <div class="subscribe-form__field">
       <label for={emailId}>Email</label>
       <input
@@ -52,6 +38,7 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "";
         name="name"
         type="text"
         autocomplete="name"
+        maxlength="100"
         placeholder="Optional"
       />
     </div>
@@ -66,7 +53,7 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "";
       />
     </div>
     <div class="cf-turnstile-mount"></div>
-    <button type="submit" class={buttonClass}>Subscribe</button>
+    <button type="submit" class={invert ? "btn btn--invert" : "btn"}>Subscribe</button>
     <p class="subscribe-form__note">
       Occasional updates, no spam. Unsubscribe anytime.
     </p>

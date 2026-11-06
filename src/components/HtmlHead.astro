@@ -1,7 +1,6 @@
 ---
-// Shared <head> contents: charset/viewport, title/description, favicon, font
-// face declarations, and the site-wide banner preload. Used by BaseLayout and
-// the standalone homepage so the document-head boilerplate lives in one place.
+// Shared <head> contents: charset/viewport, theme bootstrap, title/description,
+// favicon, fonts, and the site-wide banner preload. Used by BaseLayout.
 import { Font } from "astro:assets";
 import favicon from "../assets/favicon.png";
 import bannerSrcUrl from "../assets/banners/_optimized/notebook_banner_c.webp?url";
@@ -11,46 +10,92 @@ import { SITE_NAME } from "../lib/site";
 interface Props {
 	title?: string;
 	description?: string;
+	/** Banner image to preload; defaults to the site-wide banner. */
+	bannerSrc?: string;
 }
 
 const {
 	title = SITE_NAME,
 	description = "Explorations in math, code, and visualization",
-} = Astro.props as Props;
+	bannerSrc,
+} = Astro.props;
 ---
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
-{/* Resolve theme before paint to avoid a flash, and lock in one random
-    highlight for the banner (regardless of theme) via inline custom
-    properties on :root. highlight-hover.ts re-rolls per hover; this
-    pick is what the banner reads and stays put for the page load. */}
+{/* Canvas colour + color-scheme, inlined so the very first frame of every
+    page is already in the right theme. Without this the browser paints its
+    default white canvas until the external stylesheet arrives, which shows
+    as a white flash between pages in dark mode. */}
+<style is:inline>
+  html { color-scheme: light; background-color: #e8e8e8; }
+  html[data-theme="dark"] { color-scheme: dark; background-color: #000; }
+</style>
+{/* Theme: resolved before first paint (stored choice, else OS preference).
+    All theme state lives here: the Masthead toggle is handled by a delegated
+    click listener, and `themechange` fires on document whenever the theme
+    changes so canvases (banner, charts) can repaint.
+
+    Also pins one random highlight on :root for the page load. The banner
+    reads it; highlight-hover.ts re-rolls per hovered element. */}
 <script is:inline define:vars={{ POOL: HIGHLIGHT_POOL }}>
   (function () {
     var root = document.documentElement;
-    try {
-      var stored = localStorage.getItem("theme");
-      var theme =
-        stored ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light");
+    var darkQuery = matchMedia("(prefers-color-scheme: dark)");
+
+    function resolve() {
+      var stored = null;
+      try {
+        stored = localStorage.getItem("theme");
+      } catch (e) {}
+      return stored || (darkQuery.matches ? "dark" : "light");
+    }
+
+    function apply(theme) {
+      if (root.dataset.theme === theme) return;
       root.dataset.theme = theme;
-    } catch (e) {}
-    var p = POOL[Math.floor(Math.random() * POOL.length)];
-    root.style.setProperty("--highlight", p.highlight);
-    root.style.setProperty("--highlight-fg", p.fg);
+      document.dispatchEvent(
+        new CustomEvent("themechange", { detail: { theme: theme } }),
+      );
+    }
+
+    apply(resolve());
+
+    document.addEventListener("click", function (event) {
+      var target = event.target;
+      if (!(target instanceof Element) || !target.closest("[data-theme-toggle]"))
+        return;
+      var next = root.dataset.theme === "dark" ? "light" : "dark";
+      try {
+        localStorage.setItem("theme", next);
+      } catch (e) {}
+      apply(next);
+    });
+
+    // Re-sync when the theme may have changed behind this page's back: a
+    // back/forward-cache restore after toggling elsewhere, another tab, or
+    // an OS switch while no explicit choice is stored.
+    addEventListener("pageshow", function (event) {
+      if (event.persisted) apply(resolve());
+    });
+    addEventListener("storage", function (event) {
+      if (event.key === "theme") apply(resolve());
+    });
+    darkQuery.addEventListener("change", function () {
+      apply(resolve());
+    });
+
+    var pick = POOL[Math.floor(Math.random() * POOL.length)];
+    root.style.setProperty("--highlight", pick.highlight);
+    root.style.setProperty("--highlight-fg", pick.fg);
   })();
 </script>
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="icon" href={favicon.src} type="image/png" />
-<!-- iA Writer Duo @font-face declarations + a preload for the regular face,
-     so layout stabilises before the browser restores scroll on Back.
-     Astro's Fonts API also injects a fallback @font-face whose metrics
-     match Courier New, preventing reflow on font swap. -->
-<!-- Preload only the regular face — italic/bold can swap in via font-display
-     without blocking first paint. -->
+{/* Preload only the regular face; italic/bold swap in via font-display.
+    The Fonts API also emits a metric-matched Courier New fallback, so the
+    swap doesn't reflow. */}
 <Font
   cssVariable="--font-ia-writer"
   preload={[{ weight: "400", style: "normal" }]}
@@ -58,7 +103,7 @@ const {
 <link
   rel="preload"
   as="image"
-  href={bannerSrcUrl}
+  href={bannerSrc ?? bannerSrcUrl}
   type="image/webp"
   fetchpriority="high"
 />

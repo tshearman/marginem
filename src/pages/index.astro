@@ -15,8 +15,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import SubscribeBanner from "../components/SubscribeBanner.astro";
 import "../styles/home.css";
 
-export const prerender = true;
-
 const posts = withSlugs(
 	await getCollection("blog", ({ data }) => !data.draft),
 ).sort(
@@ -51,7 +49,7 @@ const feed: FeedItem[] = [
 const getAbstract = (post: BlogEntry) =>
 	post.data.abstract ?? post.data.description ?? "";
 
-// The six site sections, rendered as an overview grid of brutalist cells.
+// The site sections, rendered as an overview grid of cells.
 const sections = MAIN_NAV.map((page, i) => ({
 	label: page.label,
 	href: page.href,
@@ -68,10 +66,8 @@ const postCount = posts.length;
 <BaseLayout
   title={title}
   description={description}
-  hero=`${SITE_NAME}`
-  bannerSrLabel="`${SITE_NAME}` — Notes from the margins"
-  activePage=`${SITE_NAME}`
-  bodyClass="brutalist home-page"
+  bannerSrLabel={`${SITE_NAME} — Notes from the margins`}
+  bodyClass="home-page"
 >
   <div class="grid">
     <div class="cell tall" id="about">

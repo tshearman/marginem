@@ -1,12 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseFrontmatter } from "@astrojs/markdown-remark";
-import {
-	loadObsidianConfig,
-	normalizeVaultPath,
-	resolveLocalVaultRoot,
-	resolveVaultSubpath,
-} from "./obsidianConfig";
+import { loadObsidianConfig, resolveLocalVaultRoot } from "./obsidianConfig";
 import { CONTENT_DIR } from "./site";
 import { normalizeTags, parseDate } from "./frontmatter";
 
@@ -21,8 +16,6 @@ export type CommonplaceNote = {
 	 *  mtime on filesystems that don't track birth dates. Used as the
 	 *  "added to commonplace" ordering signal. */
 	addedAt: Date;
-	sourcePath: string;
-	relativePath: string;
 };
 
 /** "Author — Source" attribution line for a commonplace note. */
@@ -31,86 +24,52 @@ export const formatAttribution = (note: {
 	source?: string;
 }): string => [note.author, note.source].filter(Boolean).join(" — ");
 
-const isMarkdownFile = (fileName: string) => /\.md$/i.test(fileName);
+const optionalString = (value: unknown) =>
+	typeof value === "string" ? value : undefined;
 
-const shouldSkipDir = (dirName: string) =>
-	dirName.startsWith(".") || dirName === "node_modules";
-
+/** Read every commonplace note from the live vault, or from content/commonplace. */
 export const loadCommonplaceNotes = async () => {
-	const config = loadObsidianConfig();
 	const localVault = resolveLocalVaultRoot();
-	const syncedCommonplaceRoot = path.resolve(
-		process.cwd(),
-		CONTENT_DIR,
-		"commonplace",
-	);
-	const sampleCommonplaceRoot = path.resolve(
-		process.cwd(),
-		"data/obsidian-vault-sample/commonplace",
-	);
 	const commonplaceRoot = localVault
-		? resolveVaultSubpath(
-				localVault,
-				normalizeVaultPath(config.commonplacePath),
-			)
-		: fs.existsSync(syncedCommonplaceRoot)
-			? syncedCommonplaceRoot
-			: sampleCommonplaceRoot;
+		? path.resolve(localVault, loadObsidianConfig().commonplacePath)
+		: path.resolve(CONTENT_DIR, "commonplace");
 
 	if (!fs.existsSync(commonplaceRoot)) return [] as CommonplaceNote[];
 
 	const notes: CommonplaceNote[] = [];
 	const ingestFile = (fullPath: string) => {
-		if (!isMarkdownFile(fullPath)) return;
-		const rawContent = fs.readFileSync(fullPath, "utf8");
-		const { frontmatter, content } = parseFrontmatter(rawContent, {
-			frontmatter: "remove",
-		});
-		if (frontmatter?.published === false) return;
-		const relativePath = localVault
-			? path.relative(localVault, fullPath)
-			: path.relative(syncedCommonplaceRoot, fullPath);
+		if (!/\.md$/i.test(fullPath)) return;
+		const { frontmatter, content } = parseFrontmatter(
+			fs.readFileSync(fullPath, "utf8"),
+			{ frontmatter: "remove" },
+		);
+		if (frontmatter.published === false) return;
 		const stat = fs.statSync(fullPath);
-		// Birthtime is 0 on filesystems that don't track it (e.g. ext4) — fall
-		// back to mtime so the field is always meaningful.
-		const addedAt = stat.birthtime.getTime() > 0 ? stat.birthtime : stat.mtime;
 		notes.push({
 			content: content.trim(),
-			source:
-				typeof frontmatter?.source === "string"
-					? frontmatter.source
-					: undefined,
-			author:
-				typeof frontmatter?.author === "string"
-					? frontmatter.author
-					: undefined,
-			tags: normalizeTags(frontmatter?.tags),
-			date: parseDate(frontmatter?.date),
-			addedAt,
-			sourcePath: fullPath,
-			relativePath,
+			source: optionalString(frontmatter.source),
+			author: optionalString(frontmatter.author),
+			tags: normalizeTags(frontmatter.tags),
+			date: parseDate(frontmatter.date),
+			// Birthtime is 0 on filesystems that don't track it (e.g. ext4).
+			addedAt: stat.birthtime.getTime() > 0 ? stat.birthtime : stat.mtime,
 		});
 	};
 
-	const stats = fs.statSync(commonplaceRoot);
-	if (stats.isFile()) {
-		ingestFile(commonplaceRoot);
-		return notes;
-	}
-
 	const visitDir = (dir: string) => {
-		const entries = fs.readdirSync(dir, { withFileTypes: true });
-		for (const entry of entries) {
+		for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
 			const fullPath = path.join(dir, entry.name);
 			if (entry.isDirectory()) {
-				if (!shouldSkipDir(entry.name)) visitDir(fullPath);
-				continue;
+				if (!entry.name.startsWith(".") && entry.name !== "node_modules") {
+					visitDir(fullPath);
+				}
+			} else if (entry.isFile()) {
+				ingestFile(fullPath);
 			}
-			if (!entry.isFile()) continue;
-			ingestFile(fullPath);
 		}
 	};
 
-	visitDir(commonplaceRoot);
+	if (fs.statSync(commonplaceRoot).isFile()) ingestFile(commonplaceRoot);
+	else visitDir(commonplaceRoot);
 	return notes;
 };

@@ -1,0 +1,91 @@
+---
+// Year-grouped list of archive rows, shared by the Writing, Archive and Tag
+// pages. Anything passed as children (tag filter panel, count strip) renders
+// above the list. With `filterConfig`, filterable-content.js wires up
+// tag/category filtering using the data-* attributes on each row.
+import ArchiveEntry from "./ArchiveEntry.astro";
+import { groupByYear, type ArchiveItem } from "../lib/archive";
+
+interface Props {
+	/** Newest first. */
+	items: ArchiveItem[];
+	filterConfig?: Record<string, unknown>;
+}
+
+const { items, filterConfig } = Astro.props;
+---
+
+<section
+  class="archive-list"
+  data-filter-config={filterConfig && JSON.stringify(filterConfig)}
+>
+  <slot />
+  <div class="archive-list__years">
+    {
+      groupByYear(items).map(([year, entries]) => (
+        <section class="archive-year">
+          <h2>{year}</h2>
+          <div>
+            {entries.map((entry) => (
+              <div
+                class="archive-item"
+                data-tags={JSON.stringify(entry.tags)}
+                data-categories={JSON.stringify([entry.category])}
+              >
+                <ArchiveEntry
+                  title={entry.title}
+                  url={entry.url}
+                  date={entry.displayDate}
+                  description={entry.description}
+                  tags={entry.tags}
+                  showYear={entry.kind === "commonplace"}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</section>
+
+<style is:global>
+  /* Global (like ArchiveEntry) so dozens of rows don't each carry a scoping
+     attribute; the class names are specific enough not to leak. */
+  .archive-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .archive-list__years {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 0.5rem;
+  }
+
+  .archive-year {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .archive-year[hidden],
+  .archive-item.hidden {
+    display: none;
+  }
+
+  .archive-year h2 {
+    align-self: flex-start;
+    margin: 0;
+    padding: 2px 10px;
+    font-family: var(--display);
+    font-size: var(--fs-md);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--ink);
+  }
+</style>

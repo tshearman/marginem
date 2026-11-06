@@ -1,63 +1,41 @@
 ---
 /**
- * Full-width subscribe block — the banner used at the bottom of
- * the homepage and on long-form pages (newsletter issues, etc.). Self-contained:
- * carries its own scoped styles and relies only on the shared .btn classes
- * from buttons.css. Toggle `invert` for use on dark backgrounds.
+ * Full-width subscribe block for the bottom of the homepage and long-form
+ * pages (newsletter issues, etc.). Uses the shared .btn classes and the
+ * honeypot / Turnstile-mount styles from brutalist-page.css. Toggle `invert`
+ * for dark backgrounds.
  *
- * When `linkOnly` is true, the form is replaced with a button linking to
- * `/subscribe`. Used on the homepage to avoid loading the Turnstile script
- * for visitors who aren't planning to subscribe.
+ * `linkOnly` swaps the form for a link to /subscribe, so the homepage never
+ * loads the Turnstile script.
  */
 interface Props {
-	action?: string;
-	method?: "get" | "post";
 	idBase?: string;
 	invert?: boolean;
-	description?: string;
 	linkOnly?: boolean;
-	linkHref?: string;
 }
 
-const {
-	action = "/api/subscribe",
-	method = "post",
-	idBase = "subscribe",
-	invert = false,
-	description = "Get notified when a new essay or note goes up. Occasional updates, no spam, unsubscribe anytime.",
-	linkOnly = false,
-	linkHref = "/subscribe",
-} = Astro.props as Props;
+const { idBase = "subscribe", invert = false, linkOnly = false } = Astro.props;
 
 const emailId = `${idBase}-email`;
 const nameId = `${idBase}-name`;
-const formId = `${idBase}-form`;
-const turnstileMountId = `${idBase}-turnstile`;
-const sectionClass = [
-	"subscribe-banner",
-	invert ? "subscribe-banner--invert" : null,
-]
-	.filter(Boolean)
-	.join(" ");
-const buttonClass = ["btn", invert ? "btn--invert" : null]
-	.filter(Boolean)
-	.join(" ");
-
+const buttonClass = invert ? "btn btn--invert" : "btn";
 const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "";
 ---
 
-<section class={sectionClass} id={idBase}>
-  <p class="subscribe-banner__lede">{description}</p>
+<section class={invert ? "subscribe-banner subscribe-banner--invert" : "subscribe-banner"} id={idBase}>
+  <p class="subscribe-banner__lede">
+    Get notified when a new essay or note goes up. Occasional updates, no spam,
+    unsubscribe anytime.
+  </p>
   {linkOnly ? (
     <p class="subscribe-banner__cta">
-      <a href={linkHref} class={buttonClass}>Subscribe</a>
+      <a href="/subscribe" class={buttonClass}>Subscribe</a>
     </p>
   ) : (
     <form
       class="subscribe-banner__form"
-      action={action}
-      method={method}
-      id={formId}
+      action="/api/subscribe"
+      method="post"
       data-subscribe-form
       data-turnstile-sitekey={sitekey}
     >
@@ -81,6 +59,7 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "";
             name="name"
             type="text"
             autocomplete="name"
+            maxlength="100"
             placeholder="Optional"
           />
         </div>
@@ -95,7 +74,7 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "";
           autocomplete="off"
         />
       </div>
-      <div class="cf-turnstile-mount" id={turnstileMountId}></div>
+      <div class="cf-turnstile-mount"></div>
       <input type="submit" value="Subscribe" class={buttonClass} />
     </form>
   )}
@@ -104,10 +83,9 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "";
 {!linkOnly && <script>import "../lib/subscribe-form-client";</script>}
 
 <style is:global>
-  /* `is:global` so per-page overrides (e.g. `body.post-page
-     .subscribe-banner + .site-footer { margin-top: 0 }` in post.css) can
-     target this banner's classes without fighting scoped specificity. The
-     selectors are namespaced under `.subscribe-banner`. */
+  /* `is:global` so page-level rules (e.g. `.subscribe-banner + .site-footer`
+     in brutalist-page.css) can target these classes without fighting scoped
+     specificity. Selectors are namespaced under `.subscribe-banner`. */
   .subscribe-banner {
     padding: 18px;
     border-top: 6px solid var(--ink);
@@ -119,24 +97,6 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "";
     background: var(--ink);
     color: var(--paper);
     border-top-color: var(--paper);
-  }
-
-  .subscribe-banner__heading {
-    display: inline-block;
-    margin: 0 0 14px;
-    padding: 2px 8px;
-    font-family: var(--display);
-    font-size: var(--fs-sm);
-    font-weight: 900;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--paper);
-    background: var(--ink);
-  }
-
-  .subscribe-banner--invert .subscribe-banner__heading {
-    color: var(--ink);
-    background: var(--paper);
   }
 
   .subscribe-banner__lede {
@@ -192,24 +152,6 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "";
   .subscribe-banner__row input:focus {
     outline: 3px solid var(--highlight);
     outline-offset: 0;
-  }
-
-  /* Honeypot: off-screen, not display:none (some bots skip those). */
-  .subscribe-honeypot {
-    position: absolute;
-    left: -9999px;
-    top: -9999px;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .cf-turnstile-mount {
-    margin: 0 0 12px;
-  }
-  .cf-turnstile-mount:empty {
-    margin: 0;
   }
 
   @media (max-width: 720px) {

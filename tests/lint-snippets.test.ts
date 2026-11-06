@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
 	extractCodeBlocks,
 	normalizeLanguage,
-	parseMeta,
 } from "../scripts/lint-snippets.mjs";
 
 describe("normalizeLanguage", () => {
@@ -16,17 +15,6 @@ describe("normalizeLanguage", () => {
 	});
 });
 
-describe("parseMeta", () => {
-	it("parses quoted and unquoted metadata attributes", () => {
-		const options = parseMeta('run="true" src=\'./code.ts\' note=sample');
-		expect(options).toEqual({
-			run: "true",
-			src: "./code.ts",
-			note: "sample",
-		});
-	});
-});
-
 describe("extractCodeBlocks", () => {
 	it("returns metadata about fenced code blocks", () => {
 		const source = [
@@ -36,7 +24,7 @@ describe("extractCodeBlocks", () => {
 			"console.log('hello');",
 			"```",
 			"",
-			"```python title=\"Example\"",
+			'```python title="Example"',
 			"print('hi')",
 			"```",
 		].join("\n");

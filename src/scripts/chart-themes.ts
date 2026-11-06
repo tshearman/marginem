@@ -15,9 +15,6 @@ export type ThemeColors = {
 	ink: string;
 	paper: string;
 	highlight: string;
-	accent: string;
-	accent2: string;
-	accent3: string;
 	grid: string;
 	font: { family: string; size: number };
 };
@@ -94,7 +91,7 @@ const restyleAxes = (
  *  that do NOT inherit from the global `option.textStyle`. To keep every label
  *  in iA Writer Duo we have to inject `fontFamily` into each component.
  */
-export function applyBaseTheme(option: Option, c: ThemeColors): Option {
+function applyBaseTheme(option: Option, c: ThemeColors): Option {
 	const family = c.font.family;
 	const next = restyleAxes(option, c.ink, c.grid, family);
 	next.backgroundColor = c.paper;
@@ -134,8 +131,8 @@ export function applyBaseTheme(option: Option, c: ThemeColors): Option {
 	// Tooltip: ECharts defaults to a hard-coded white background regardless of
 	// theme, so light-mode ink-on-white works but dark-mode ink-on-white is
 	// unreadable. Pin it to the chart's paper/ink pair so it tracks dark/light.
-	// `extraCssText` adds a hard offset shadow in the site's brutalist style —
-	// the same `--paper-shadow` (= --highlight) idiom used on the banner / cards.
+	// `extraCssText` adds a hard offset shadow in the --highlight colour, like
+	// the banner title.
 	const tooltipIn = (next.tooltip ?? {}) as Record<string, unknown>;
 	next.tooltip = {
 		backgroundColor: c.paper,
@@ -154,14 +151,14 @@ export function applyBaseTheme(option: Option, c: ThemeColors): Option {
 	return next;
 }
 
-export type ChartTheme = (option: Option, c: ThemeColors) => Option;
+type ChartTheme = (option: Option, c: ThemeColors) => Option;
 
 /**
  * THEMES
  * Each takes the base-themed option and adds its own series + axis treatment.
  * Series indexing assumes the playground chart: 0=bar, 1=primary line, 2=secondary line.
  */
-export const THEMES: Record<string, ChartTheme> = {
+const THEMES: Record<string, ChartTheme> = {
 	// --- Default: keep base theme; series use ECharts' palette / payload colors.
 	default: (opt) => opt,
 

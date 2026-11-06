@@ -1,8 +1,7 @@
-const defaultOptions: Intl.DateTimeFormatOptions = {
-	month: "long",
-	day: "numeric",
-	year: "numeric",
-};
+// Dates are formatted in UTC: frontmatter dates parse to UTC midnight, so
+// local-time formatting would shift them a day west of Greenwich (and make
+// local builds disagree with Cloudflare's UTC builds).
+
 const getOrdinalSuffix = (value: number) => {
 	const remainder = value % 100;
 	if (remainder >= 11 && remainder <= 13) return "th";
@@ -18,39 +17,23 @@ const getOrdinalSuffix = (value: number) => {
 	}
 };
 
-export const formatDateLabelHtml = (value: string) =>
-	value.replace(/(\d{1,2})(st|nd|rd|th)/g, "$1<sup>$2</sup>");
-
+/** "January 2nd, 2024". Passing options without `year` omits the year. */
 export const formatDate = (
 	value: Date | string,
 	options?: Intl.DateTimeFormatOptions,
 ) => {
-	const toDate = (input: Date | string) => {
-		if (input instanceof Date) return input;
-		const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input);
-		if (isoMatch) {
-			const [, year, month, day] = isoMatch.map(Number);
-			return new Date(year, month - 1, day);
-		}
-		return new Date(input);
-	};
+	const ymd =
+		typeof value === "string" ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(value) : null;
+	const date = ymd
+		? new Date(Date.UTC(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3])))
+		: new Date(value);
+	if (Number.isNaN(date.valueOf())) return "";
 
-	const date = toDate(value);
-	if (!(date instanceof Date) || Number.isNaN(date.valueOf())) {
-		return "";
-	}
-	const includeYear = options ? Boolean(options.year) : true;
-	const monthOption = options?.month ?? defaultOptions.month;
-	const monthLabel = new Intl.DateTimeFormat("en", {
-		month: monthOption,
-	}).format(date);
-	const dayNumber = date.getDate();
-	const dayLabel = `${dayNumber}${getOrdinalSuffix(dayNumber)}`;
-	if (!includeYear) {
-		return `${monthLabel} ${dayLabel}`;
-	}
-	const yearLabel = new Intl.DateTimeFormat("en", {
-		year: options?.year ?? "numeric",
-	}).format(date);
-	return `${monthLabel} ${dayLabel}, ${yearLabel}`;
+	const format = (opts: Intl.DateTimeFormatOptions) =>
+		new Intl.DateTimeFormat("en", { ...opts, timeZone: "UTC" }).format(date);
+	const month = format({ month: options?.month ?? "long" });
+	const day = date.getUTCDate();
+	const label = `${month} ${day}${getOrdinalSuffix(day)}`;
+	if (options && !options.year) return label;
+	return `${label}, ${format({ year: options?.year ?? "numeric" })}`;
 };

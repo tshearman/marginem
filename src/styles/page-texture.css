@@ -1,23 +1,14 @@
 /*
- * Page backdrop texture.
- *
- * Single source of truth for the subtle dot-grid that sits behind the
- * framed content on every page. Imported by both global.css (BaseLayout)
- * and home.css (standalone homepage document) so the look is unified.
- *
- * Expects either --page-bg or --page to be defined upstream; falls back
- * to a neutral gray otherwise.
+ * Diagonal hatch behind the framed page. The solid canvas colour underneath
+ * is set by the inline <style> in HtmlHead.astro (so it paints before any
+ * stylesheet loads); this only adds the texture once CSS arrives.
  */
-
 html {
-  background-color: var(--page-bg, var(--page, #e8e8e8));
   background-image: repeating-linear-gradient(
     45deg,
-    rgb(var(--ink-rgb, 0 0 0) / 0.12) 0,
-    rgb(var(--ink-rgb, 0 0 0) / 0.12) 0.5px,
+    rgb(var(--ink-rgb) / 0.12) 0,
+    rgb(var(--ink-rgb) / 0.12) 0.5px,
     transparent 0.5px,
     transparent 12px
   );
-  background-size: auto;
-  background-position: 0 0;
 }

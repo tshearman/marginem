@@ -1,31 +1,19 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import Banner from "../../components/Banner.astro";
 import { SITE_NAME } from "../../lib/site";
-
-export const prerender = true;
 ---
 
 <BaseLayout
   title={`Subscription confirmed | ${SITE_NAME}`}
   description="You are subscribed."
-  hero="You're all set"
-  showHero={false}
-  bodyClass="brutalist form-page subscribe-confirmed-page"
+  hero="Confirmed"
+  heroHeight={140}
+  eyebrow="Subscription confirmed"
+  bannerSrLabel="Subscription confirmed"
+  bodyClass="full-height"
 >
-  <div class="page-hero">
-    <div class="page-hero__banner">
-      <Banner
-        text="CONFIRMED"
-        height={140}
-        srLabel="Subscription confirmed"
-      />
-      <span class="page-hero__eyebrow">Subscription confirmed</span>
-    </div>
-  </div>
-
   <section class="confirm-hero">
-    <p class="confirm-hero__message">
+    <p class="page-statement">
       Thanks for confirming &mdash;<br />you're on the list.
     </p>
     <div class="confirm-hero__actions">
@@ -34,33 +22,3 @@ export const prerender = true;
     </div>
   </section>
 </BaseLayout>
-
-<style is:global>
-  body.subscribe-confirmed-page .confirm-hero {
-    flex: 1;
-    padding: clamp(40px, 10vh, 120px) clamp(16px, 4vw, 48px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
-
-  body.subscribe-confirmed-page .confirm-hero__message {
-    margin: 0 0 40px;
-    font-family: var(--display);
-    font-size: clamp(1.25rem, 3vw, 2rem);
-    font-weight: 900;
-    line-height: 1.1;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-
-  body.subscribe-confirmed-page .confirm-hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 16px;
-  }
-</style>

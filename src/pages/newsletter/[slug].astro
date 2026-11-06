@@ -1,51 +1,25 @@
 ---
-import { getCollection, getEntry, render } from "astro:content";
+import { getCollection, render } from "astro:content";
 import PostLayout from "../../layouts/PostLayout.astro";
 import SubscribeBanner from "../../components/SubscribeBanner.astro";
-import { withSlugs } from "../../lib/content";
-
-export const prerender = true;
 
 export async function getStaticPaths() {
-	const entries = withSlugs(
-		await getCollection("newsletter", ({ data }) => !data.draft),
-	);
+	const entries = await getCollection("newsletter", ({ data }) => !data.draft);
 	return entries.map((entry) => ({
-		params: { slug: entry.slug },
+		params: { slug: entry.id },
+		props: { entry },
 	}));
 }
 
-const slug = Astro.params.slug;
-if (!slug) {
-	throw new Error("Missing newsletter slug");
-}
-
-const entry = await getEntry("newsletter", slug);
-if (!entry) {
-	return Astro.redirect("/404");
-}
-
+const { entry } = Astro.props;
 const { Content } = await render(entry);
-const { title, description, pubDate, tags, issueNumber } = entry.data;
-
-const eyebrow =
-	typeof issueNumber === "number"
-		? `Newsletter · Issue #${issueNumber}`
-		: "Newsletter";
-
-const postFrontmatter = {
-	title,
-	description,
-	pubDate,
-	tags,
-};
 ---
 
 <PostLayout
-  frontmatter={postFrontmatter}
+  frontmatter={entry.data}
   activePage="Newsletter"
   showHero={false}
-  eyebrow={eyebrow}
+  eyebrow={`Newsletter · Issue #${entry.data.issueNumber}`}
   showAbstract={false}
 >
   <Content />

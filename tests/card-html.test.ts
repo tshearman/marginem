@@ -27,12 +27,11 @@ describe("renderNoteCard escaping", () => {
 		expect(html).toContain("Source &lt;em&gt;x&lt;/em&gt;");
 	});
 
-	it("escapes attribute-bound values (style, id, data-tags)", () => {
+	it("escapes attribute-bound values (id, class)", () => {
 		const html = renderNoteCard({
 			content: "ok",
 			id: 'x" onmouseover="evil()',
-			style: 'color:red" onclick="evil()',
-			dataTags: '["a"]" data-x="y',
+			className: 'c" onclick="evil()',
 		});
 		expect(html).not.toContain('onmouseover="evil()"');
 		expect(html).not.toContain('onclick="evil()"');
@@ -45,7 +44,7 @@ describe("renderNoteCard escaping", () => {
 			href: '/x"><img src=x>',
 			content: "hi",
 		});
-		expect(html.startsWith("<a class=\"note-card note-card--interactive\"")).toBe(
+		expect(html.startsWith('<a class="note-card note-card--interactive"')).toBe(
 			true,
 		);
 		expect(html).not.toContain("<img src=x>");
@@ -70,6 +69,12 @@ describe("renderTag", () => {
 		expect(html.startsWith("<button")).toBe(true);
 		expect(html).toContain('data-tag="math"');
 		expect(html).toContain('aria-pressed="false"');
+	});
+
+	it("renders a filter tag as a link when asLink is set", () => {
+		const html = renderTag({ tag: "math", variant: "filter", asLink: true });
+		expect(html.startsWith("<a")).toBe(true);
+		expect(html).toContain('href="/tags/math/"');
 	});
 });
 
@@ -104,5 +109,13 @@ describe("renderDateStamp", () => {
 		expect(html).toContain("<span>2<sup>nd</sup></span>");
 		expect(html).toContain("&lt;Jan&gt;");
 		expect(html).toContain('datetime="2024-01-02T00:00:00.000Z"');
+	});
+
+	it("keeps a string datetime as-is and appends the class", () => {
+		expect(
+			renderDateStamp({ datetime: "2024-05-01", className: "custom-date" }),
+		).toBe(
+			'<time datetime="2024-05-01" class="date-stamp custom-date"></time>',
+		);
 	});
 });

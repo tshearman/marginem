@@ -1,16 +1,12 @@
 ---
 import { renderTag } from "../lib/card-html";
 
-type Props = {
+interface Props {
 	tag?: string;
-	href?: string;
 	variant?: "default" | "filter" | "display";
 	size?: "small" | "medium" | "large";
-	selected?: boolean;
-	clickable?: boolean;
 	asLink?: boolean;
-	className?: string;
-};
+}
 
 const html = renderTag(Astro.props as Props);
 ---

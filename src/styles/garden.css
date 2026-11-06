@@ -1,21 +1,12 @@
 /*
- * Brutalist garden styles. Loaded by two distinct consumers — GardenLayout
- * (folder/index views) and pages/garden/[...slug].astro (note view, which
- * bypasses GardenLayout to compose its own header) — so these rules live
- * in a shared file rather than a single layout's <style is:global>.
- *
- * The note view additionally sets `post-page` so it inherits the article
- * body styles in post.css verbatim; this file only adds garden-specific
- * bits (hero, card grid, breadcrumbs, backlinks, neighbor graph).
+ * Garden styles, shared by GardenLayout (index + folder pages, body class
+ * `garden-page`) and pages/garden/[...slug].astro (single note, body class
+ * `post-page garden-entry-page`, which also loads post.css for the article
+ * body).
  */
 
-/* The brutalist frame, hero, page shell, and count strip come from
-   brutalist-page.css (body.brutalist); this file only adds garden-specific
-   chrome — breadcrumbs, the note-card list, the neighbour graph, and the
-   single-note entry page (which also sets `post-page`). */
-
 /* ---- BREADCRUMBS ---- */
-body.garden-page .garden-entry__breadcrumbs {
+.garden-entry__breadcrumbs {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -29,29 +20,17 @@ body.garden-page .garden-entry__breadcrumbs {
   color: var(--ink);
 }
 
-body.garden-page .garden-entry__breadcrumbs a {
+.garden-entry__breadcrumbs a {
   color: var(--ink);
   text-decoration: none;
   padding: 1px 4px;
   border-bottom: 1.5px solid var(--ink);
 }
 
-body.garden-page .garden-entry__breadcrumbs a:hover,
-body.garden-page .garden-entry__breadcrumbs a:focus-visible {
-  background: var(--paper-accent);
+.garden-entry__breadcrumbs a:hover,
+.garden-entry__breadcrumbs a:focus-visible {
+  background: var(--highlight);
   color: var(--highlight-fg);
-}
-
-/* ---- FORCE GRAPH FRAME ---- */
-body.garden-page .garden-content > :first-child {
-  margin-top: 0;
-}
-
-body.garden-page .garden-content .force-graph {
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  background: transparent;
 }
 
 /* ---- NOTE LIST (one per row, full width of shell) ---- */
@@ -79,7 +58,7 @@ body.garden-page .garden-card {
 
 body.garden-page .garden-card:hover,
 body.garden-page .garden-card:focus-visible {
-  background: var(--paper-accent);
+  background: var(--highlight);
   color: var(--highlight-fg);
 }
 
@@ -148,29 +127,27 @@ body.garden-page .garden-empty {
 
 body.garden-page .garden-empty code {
   font-family: var(--mono);
-  background: var(--paper-shadow);
+  background: var(--highlight);
   border: 1.5px solid var(--ink);
   padding: 0 4px;
   font-size: 0.95em;
 }
 
 /* ---- ENTRY (single note) PAGE ---- */
-/* Entry pages add `post-page` to bodyClass to inherit all article styles
-   from post.css. The bits below extend that with garden-specific chrome. */
 
-body.post-page.garden-entry-page .garden-entry {
+body.garden-entry-page .garden-entry {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-body.post-page.garden-entry-page .garden-entry__header {
+body.garden-entry-page .garden-entry__header {
   margin: 0 0 1.5rem;
   padding-bottom: 18px;
   border-bottom: 6px solid var(--ink);
 }
 
-body.post-page.garden-entry-page .garden-entry__eyebrow {
+body.garden-entry-page .garden-entry__eyebrow {
   display: inline-block;
   margin: 0 0 12px;
   padding: 2px 8px;
@@ -183,12 +160,12 @@ body.post-page.garden-entry-page .garden-entry__eyebrow {
   background: var(--ink);
 }
 
-body.post-page.garden-entry-page .garden-entry__eyebrow .date-stamp {
+body.garden-entry-page .garden-entry__eyebrow .date-stamp {
   font-style: normal;
   color: var(--paper);
 }
 
-body.post-page.garden-entry-page .garden-entry__title {
+body.garden-entry-page .garden-entry__title {
   margin: 0 0 12px;
   font-family: var(--display);
   font-size: var(--fs-display-sm);
@@ -199,41 +176,11 @@ body.post-page.garden-entry-page .garden-entry__title {
   color: var(--ink);
 }
 
-body.post-page.garden-entry-page .garden-entry__breadcrumbs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
+body.garden-entry-page .garden-entry__breadcrumbs {
   margin: 0;
-  font-family: var(--mono);
-  font-size: var(--fs-2xs);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink);
 }
 
-body.post-page.garden-entry-page .garden-entry__breadcrumbs a {
-  color: var(--ink);
-  text-decoration: none;
-  padding: 1px 4px;
-  border-bottom: 1.5px solid var(--ink);
-}
-
-body.post-page.garden-entry-page .garden-entry__breadcrumbs a:hover,
-body.post-page.garden-entry-page .garden-entry__breadcrumbs a:focus-visible {
-  background: var(--paper-accent);
-  color: var(--highlight-fg);
-}
-
-body.post-page.garden-entry-page .garden-entry__content {
-  font-family: var(--mono);
-  font-size: var(--fs-base);
-  line-height: 1.75;
-  color: var(--ink);
-}
-
-body.post-page.garden-entry-page .garden-entry__backlinks {
+body.garden-entry-page .garden-entry__backlinks {
   margin-top: 2rem;
   padding-top: 16px;
   border-top: 6px solid var(--ink);
@@ -242,7 +189,7 @@ body.post-page.garden-entry-page .garden-entry__backlinks {
   gap: 12px;
 }
 
-body.post-page.garden-entry-page .garden-entry__backlinks h2 {
+body.garden-entry-page .garden-entry__backlinks h2 {
   display: inline-block;
   margin: 0;
   padding: 2px 8px;
@@ -256,7 +203,7 @@ body.post-page.garden-entry-page .garden-entry__backlinks h2 {
   align-self: flex-start;
 }
 
-body.post-page.garden-entry-page .garden-entry__backlinks ul {
+body.garden-entry-page .garden-entry__backlinks ul {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -264,7 +211,7 @@ body.post-page.garden-entry-page .garden-entry__backlinks ul {
   gap: 8px;
 }
 
-body.post-page.garden-entry-page .garden-entry__backlinks a {
+body.garden-entry-page .garden-entry__backlinks a {
   font-family: var(--mono);
   font-size: var(--fs-sm);
   font-weight: 700;
@@ -274,22 +221,15 @@ body.post-page.garden-entry-page .garden-entry__backlinks a {
   padding: 1px 2px;
 }
 
-body.post-page.garden-entry-page .garden-entry__backlinks a:hover,
-body.post-page.garden-entry-page .garden-entry__backlinks a:focus-visible {
-  background: var(--paper-accent);
+body.garden-entry-page .garden-entry__backlinks a:hover,
+body.garden-entry-page .garden-entry__backlinks a:focus-visible {
+  background: var(--highlight);
   color: var(--highlight-fg);
 }
 
-body.post-page.garden-entry-page .garden-entry__neighbors {
+body.garden-entry-page .garden-entry__neighbors {
   margin-top: 2rem;
   padding-top: 16px;
   border-top: 6px solid var(--ink);
-}
-
-body.post-page.garden-entry-page .garden-entry__neighbors .force-graph {
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  background: transparent;
 }
 

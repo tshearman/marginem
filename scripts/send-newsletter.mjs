@@ -14,12 +14,8 @@ import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import CleanCSS from "clean-css";
-import { SITE_NAME } from "src/lib/site";
 
-const BASE_REQUIRED_ENV = [
-	"RESEND_API_KEY",
-	"RESEND_FROM_EMAIL",
-];
+const BASE_REQUIRED_ENV = ["RESEND_API_KEY", "RESEND_FROM_EMAIL"];
 
 const usage = () => {
 	console.log(
@@ -53,12 +49,8 @@ const parseArgs = (argv) => {
 			options.prod = true;
 			continue;
 		}
-		if (arg.startsWith("--slug=")) {
-			options.input = arg.split("=").slice(1).join("=");
-			continue;
-		}
-		if (arg.startsWith("--file=")) {
-			options.input = arg.split("=").slice(1).join("=");
+		if (arg.startsWith("--slug=") || arg.startsWith("--file=")) {
+			options.input = arg.slice(arg.indexOf("=") + 1);
 			continue;
 		}
 		if (!options.input && !arg.startsWith("--")) {
@@ -92,13 +84,7 @@ const resolveNewsletterPath = (input) => {
 	if (input.endsWith(".mdx") || input.endsWith(".md")) {
 		return path.resolve(process.cwd(), input);
 	}
-	return path.resolve(
-		process.cwd(),
-		"src",
-		"content",
-		"newsletter",
-		`${input}.mdx`,
-	);
+	return path.resolve(process.cwd(), "content", "newsletter", `${input}.mdx`);
 };
 
 const parseFrontmatter = (contents) => {
@@ -116,7 +102,10 @@ const parseFrontmatter = (contents) => {
 		if (!entry) continue;
 		const key = entry[1];
 		let value = entry[2].trim();
-		if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
+		if (
+			(value.startsWith('"') && value.endsWith('"')) ||
+			(value.startsWith("'") && value.endsWith("'"))
+		) {
 			value = value.slice(1, -1);
 		}
 		if (value === "true" || value === "false") {
@@ -157,9 +146,7 @@ const parseTagValue = (value) => {
 
 const parseFrontmatterTags = (frontmatterBody) => {
 	if (!frontmatterBody) return [];
-	const blockMatch = frontmatterBody.match(
-		/^tags:\s*\n((?:[ \t]*-\s*.+\n)+)/m,
-	);
+	const blockMatch = frontmatterBody.match(/^tags:\s*\n((?:[ \t]*-\s*.+\n)+)/m);
 	if (blockMatch?.[1]) {
 		return blockMatch[1]
 			.split("\n")
@@ -176,7 +163,7 @@ const formatYamlValue = (value) => {
 	if (typeof value === "number") return String(value);
 	const stringValue = String(value);
 	if (/[:#\n\r\t]/.test(stringValue) || stringValue.includes(" ")) {
-		return `"${stringValue.replace(/\"/g, "\\\"")}"`;
+		return `"${stringValue.replace(/\"/g, '\\"')}"`;
 	}
 	return stringValue;
 };
@@ -234,8 +221,12 @@ const buildEmailSchema = () => {
 	const globalAttrs = new Set(attributes["*"] ?? []);
 	globalAttrs.add("style");
 	attributes["*"] = Array.from(globalAttrs);
-	attributes.meta = Array.from(new Set([...(attributes.meta ?? []), "charset", "content", "name"]));
-	attributes.a = Array.from(new Set([...(attributes.a ?? []), "href", "title", "target", "rel"]));
+	attributes.meta = Array.from(
+		new Set([...(attributes.meta ?? []), "charset", "content", "name"]),
+	);
+	attributes.a = Array.from(
+		new Set([...(attributes.a ?? []), "href", "title", "target", "rel"]),
+	);
 	attributes.img = Array.from(
 		new Set([...(attributes.img ?? []), "src", "alt", "width", "height"]),
 	);
@@ -283,7 +274,9 @@ const minifyCss = (css) => new CleanCSS({ level: 2 }).minify(css).styles;
 
 const loadEmailCss = async () => {
 	const stylesDir = path.join(process.cwd(), "src", "styles");
-	const typographyCss = await loadCssFile(path.join(stylesDir, "typography.css"));
+	const typographyCss = await loadCssFile(
+		path.join(stylesDir, "typography.css"),
+	);
 	const emailCss = await loadCssFile(path.join(stylesDir, "email.css"));
 	return minifyCss(`${typographyCss}\n${emailCss}`);
 };
@@ -313,30 +306,37 @@ const buildEmailTemplate = ({
         <p class="email-eyebrow">Newsletter</p>
         <h1>${title}</h1>
 		<h2>
-			${Number.isInteger(issueNumber) ? `<span>Issue ${issueNumber}</span>` : ""}
+			${
+				Number.isInteger(issueNumber) ? `<span>Issue ${issueNumber}</span>` : ""
+			}
 		</h2>
 		<div class="email-meta">
             ${dateLabel ? `<span class="email-date">${dateLabel}</span>` : ""}
 		</div>
         ${description ? `<p class="email-lede">${description}</p>` : ""}
         <div class="email-meta">
-          ${issueUrl ? `<span><a class="email-link" href="${issueUrl}">Read in browser</a></span>` : ""}
+          ${
+						issueUrl
+							? `<span><a class="email-link" href="${issueUrl}">Read in browser</a></span>`
+							: ""
+					}
         </div>
-        ${tags?.length
-			? `<div class="email-tags">${tags
-				.map(
-					(tag) =>
-						`<a class="email-tag" href="${tag.url}">#${tag.label}</a>`,
-				)
-				.join("")}</div>`
-			: ""
-		}
+        ${
+					tags?.length
+						? `<div class="email-tags">${tags
+								.map(
+									(tag) =>
+										`<a class="email-tag" href="${tag.url}">#${tag.label}</a>`,
+								)
+								.join("")}</div>`
+						: ""
+				}
         <div class="email-body">
           ${bodyHtml}
         </div>
         <div class="email-footer">
-          <p style="box-sizing: border-box;">This email is sent with a one-click unsubscribe to manage your subscription within your email client.</p>
-          ${siteUrl ? `<p>You may also directly manage your subscription: <a href="${siteUrl}/unsubscribe">${siteUrl}/unsubscribe</a></p>` : ""}
+          <p>This email is sent with a one-click unsubscribe to manage your subscription within your email client.</p>
+          <p>You may also directly manage your subscription: <a href="${siteUrl}/unsubscribe">${siteUrl}/unsubscribe</a></p>
         </div>
       </div>
     </div>
@@ -424,7 +424,9 @@ const sendBroadcast = async ({ name, subject, html, text, audienceId }) => {
 	);
 	if (!sendResponse.ok) {
 		const body = await sendResponse.text();
-		throw new Error(`Resend broadcast send failed: ${sendResponse.status} ${body}`);
+		throw new Error(
+			`Resend broadcast send failed: ${sendResponse.status} ${body}`,
+		);
 	}
 	return { id: broadcastId };
 };
@@ -450,11 +452,7 @@ const fetchBroadcastStatus = async (broadcastId) => {
 const confirmBroadcastStatus = async (broadcastId) => {
 	const retries = 3;
 	for (let attempt = 1; attempt <= retries; attempt += 1) {
-		if (attempt > 1) {
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-		} else {
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-		}
+		await new Promise((resolve) => setTimeout(resolve, 2000));
 		try {
 			const status = await fetchBroadcastStatus(broadcastId);
 			console.log(`Broadcast status: ${status?.status ?? "unknown"}`);
@@ -503,13 +501,13 @@ const main = async () => {
 		return;
 	}
 
-	const slug = input.endsWith(".mdx") || input.endsWith(".md")
-		? path.basename(input, path.extname(input))
-		: input;
-	const siteUrl = (process.env.NEWSLETTER_SITE_URL || process.env.SITE_URL).replace(
-		/\/$/,
-		"",
-	);
+	const slug =
+		input.endsWith(".mdx") || input.endsWith(".md")
+			? path.basename(input, path.extname(input))
+			: input;
+	const siteUrl = (
+		process.env.NEWSLETTER_SITE_URL || process.env.SITE_URL
+	).replace(/\/$/, "");
 	const rawTags = parseFrontmatterTags(frontmatterBody);
 	const tags = rawTags
 		.map((tag) => {
@@ -520,19 +518,17 @@ const main = async () => {
 	const issueUrl = `${siteUrl}/newsletter/${slug}/`;
 	const bodyHtml = await renderMdxBody(body);
 	const css = await loadEmailCss();
-	const parsedIssueNumber =
-		typeof data.issueNumber === "number"
-			? data.issueNumber
-			: typeof data.issueNumber === "string" && data.issueNumber.trim() !== ""
-				? Number(data.issueNumber)
-				: null;
-	const emailTitle = String(
-		data.title || `Newsletter from ${process.env.SUBSCRIBE_SITE_NAME || SITE_NAME}`,
-	);
+	// parseFrontmatter yields strings (and booleans), so parse the number here.
+	const issueNumber = data.issueNumber ? Number(data.issueNumber) : null;
+	const hasIssueNumber = Number.isInteger(issueNumber);
+	const title = typeof data.title === "string" ? data.title.trim() : "";
+	if (!title) {
+		throw new Error("Newsletter is missing a title.");
+	}
 	const rawHtml = buildEmailTemplate({
-		title: emailTitle,
+		title,
 		description: typeof data.description === "string" ? data.description : "",
-		issueNumber: Number.isFinite(parsedIssueNumber) ? parsedIssueNumber : null,
+		issueNumber: hasIssueNumber ? issueNumber : null,
 		dateLabel: formatEmailDate(data.pubDate),
 		bodyHtml,
 		issueUrl,
@@ -541,20 +537,20 @@ const main = async () => {
 		css,
 	});
 	const html = await sanitizeEmailHtml(rewriteRelativeUrls(rawHtml, siteUrl));
-	const subject = typeof data.title === "string" && data.title.trim()
-		? data.title.trim()
-		: `Newsletter from ${process.env.SUBSCRIBE_SITE_NAME || SITE_NAME}`;
-	const text = `${subject}\n\nRead online: ${issueUrl}\n\nUnsubscribe: ${siteUrl ? `${siteUrl}/unsubscribe` : "Manage your subscription via the unsubscribe link in your email client."}`;
-	const name = Number.isFinite(parsedIssueNumber)
-		? `Issue ${parsedIssueNumber} - ${subject}`
-		: subject;
+	// `subject` is an optional frontmatter override (see content.config.ts).
+	const subject =
+		typeof data.subject === "string" && data.subject.trim()
+			? data.subject.trim()
+			: title;
+	const text = `${subject}\n\nRead online: ${issueUrl}\n\nUnsubscribe: ${siteUrl}/unsubscribe`;
+	const name = hasIssueNumber ? `Issue ${issueNumber} - ${subject}` : subject;
 
 	console.log("Newsletter metadata:");
 	console.log(`- slug: ${slug}`);
-	console.log(`- title: ${emailTitle}`);
+	console.log(`- title: ${title}`);
 	console.log(`- subject: ${subject}`);
 	console.log(`- broadcast name: ${name}`);
-	console.log(`- issue number: ${Number.isFinite(parsedIssueNumber) ? parsedIssueNumber : "n/a"}`);
+	console.log(`- issue number: ${hasIssueNumber ? issueNumber : "n/a"}`);
 	console.log(`- issue url: ${issueUrl}`);
 	console.log(`- publish date: ${formatEmailDate(data.pubDate) || "n/a"}`);
 	console.log(`- publish: ${publish ? "yes" : "no"}`);
@@ -578,21 +574,19 @@ const main = async () => {
 		return;
 	}
 
-	const result = await sendBroadcast({ name, subject, html, text, audienceId });
-	console.log(`Sent broadcast ${result?.id ?? ""}`.trim());
+	const { id } = await sendBroadcast({ name, subject, html, text, audienceId });
+	console.log(`Sent broadcast ${id}`);
 
 	const updated = updateFrontmatter(contents, {
-		broadcast_id: result?.id ?? null,
+		broadcast_id: id,
 		sent: true,
 		sentAt: new Date().toISOString(),
 	});
 	await writeFile(filePath, updated, "utf8");
 	console.log("Frontmatter updated with sent status.");
 
-	if (confirm && result?.id) {
-		await confirmBroadcastStatus(result.id);
-	} else if (confirm) {
-		console.log("Broadcast id missing; skipping confirm check.");
+	if (confirm) {
+		await confirmBroadcastStatus(id);
 	}
 };
 

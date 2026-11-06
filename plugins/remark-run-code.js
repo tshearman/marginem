@@ -38,28 +38,19 @@ function registerSnippetDependency(snippetPath, consumerPath) {
 }
 
 function resetConsumerDependencies(consumerPath) {
-	if (!consumerPath) return;
-	const normalizedConsumer = normalizePath(consumerPath);
-	const snippets = consumerToSnippets.get(normalizedConsumer);
+	const snippets = consumerToSnippets.get(consumerPath);
 	if (!snippets) return;
 	for (const snippetPath of snippets) {
-		const normalizedSnippet = normalizePath(snippetPath);
-		const consumers = snippetToConsumers.get(normalizedSnippet);
-		if (consumers) {
-			consumers.delete(normalizedConsumer);
-			if (!consumers.size) {
-				snippetToConsumers.delete(normalizedSnippet);
-			}
-		}
+		const consumers = snippetToConsumers.get(snippetPath);
+		consumers?.delete(consumerPath);
+		if (consumers && !consumers.size) snippetToConsumers.delete(snippetPath);
 	}
-	consumerToSnippets.delete(normalizedConsumer);
+	consumerToSnippets.delete(consumerPath);
 }
 
+/** Files whose runnable blocks load `snippetPath` via `src=` (for dev HMR). */
 export function getSnippetDependents(snippetPath) {
-	if (!snippetPath) return new Set();
-	const normalizedSnippet = normalizePath(snippetPath);
-	const dependents = snippetToConsumers.get(normalizedSnippet);
-	return new Set(dependents ?? []);
+	return new Set(snippetToConsumers.get(normalizePath(snippetPath)) ?? []);
 }
 
 function executeJavascriptSnippet(code, filePath) {
@@ -167,7 +158,7 @@ function executePythonSnippet(code) {
 	}
 }
 
-function executeHaskellSnippet(code, sourcePath, contextPath) {
+function executeHaskellSnippet(code, contextPath, sourcePath) {
 	return runWithTempFile({
 		code,
 		sourcePath,
@@ -180,7 +171,7 @@ function executeHaskellSnippet(code, sourcePath, contextPath) {
 	});
 }
 
-function executeLispSnippet(code, sourcePath, contextPath) {
+function executeLispSnippet(code, contextPath, sourcePath) {
 	return runWithTempFile({
 		code,
 		sourcePath,
@@ -193,7 +184,7 @@ function executeLispSnippet(code, sourcePath, contextPath) {
 	});
 }
 
-function executeTypescriptSnippet(code, sourcePath, contextPath, language) {
+function executeTypescriptSnippet(code, contextPath, sourcePath, language) {
 	return runWithTempFile({
 		code,
 		sourcePath,
@@ -236,67 +227,53 @@ function loadSourceFromMeta(options, filePath) {
 	}
 }
 
-function executeSnippet(code, filePath, language, sourcePath) {
-	if (language === "python" || language === "py") {
-		return executePythonSnippet(code);
-	}
-	if (language === "typescript" || language === "ts" || language === "tsx") {
-		return executeTypescriptSnippet(code, sourcePath, filePath, language);
-	}
-	if (language === "haskell" || language === "hs") {
-		return executeHaskellSnippet(code, sourcePath, filePath);
-	}
-	if (language === "lisp" || language === "commonlisp" || language === "cl") {
-		return executeLispSnippet(code, sourcePath, filePath);
-	}
-	return executeJavascriptSnippet(code, filePath);
-}
+// Fence language → runner(code, contextPath, sourcePath, language).
+const RUNNERS = {
+	js: executeJavascriptSnippet,
+	javascript: executeJavascriptSnippet,
+	python: executePythonSnippet,
+	py: executePythonSnippet,
+	typescript: executeTypescriptSnippet,
+	ts: executeTypescriptSnippet,
+	tsx: executeTypescriptSnippet,
+	haskell: executeHaskellSnippet,
+	hs: executeHaskellSnippet,
+	lisp: executeLispSnippet,
+	commonlisp: executeLispSnippet,
+	cl: executeLispSnippet,
+};
 
+/**
+ * Execute fenced blocks whose meta includes `run` (e.g. ```python run) at
+ * build time and append their output to the block. `src=path` loads the code
+ * from a file relative to the document.
+ */
 export default function remarkRunCode(options = {}) {
 	const { continueOnError = false, onResult } = options ?? {};
 	return function transformer(tree, file) {
-		const consumerPath = file?.path ? normalizePath(file.path) : undefined;
-		if (consumerPath) {
-			resetConsumerDependencies(consumerPath);
-		}
-		visit(tree, "code", (node, index, parent) => {
-			if (!parent || typeof index !== "number") return;
+		if (file?.path) resetConsumerDependencies(normalizePath(file.path));
+		visit(tree, "code", (node) => {
 			const meta = node.meta ?? "";
-			if (!meta.includes("run")) return;
-			const options = parseMetaOptions(meta);
+			if (!/(?:^|\s)run\b/.test(meta)) return;
 			const language = node.lang ?? "js";
-			if (
-				![
-					"js",
-					"javascript",
-					"ts",
-					"tsx",
-					"typescript",
-					"python",
-					"py",
-					"haskell",
-					"hs",
-					"lisp",
-					"commonlisp",
-					"cl",
-				].includes(language)
-			)
-				return;
+			const run = RUNNERS[language];
+			if (!run) return;
 
 			let snippetValue = node.value;
-			const sourceResult = loadSourceFromMeta(options, file?.path);
+			const sourceResult = loadSourceFromMeta(
+				parseMetaOptions(meta),
+				file?.path,
+			);
 			if (sourceResult) {
 				snippetValue = sourceResult.contents;
 				node.value = sourceResult.contents.replace(/\s+$/, "");
 			}
 
-			const contextPath = sourceResult?.resolvedPath ?? file?.path;
-			const resolvedSourcePath = sourceResult?.resolvedPath;
-			const { output, success } = executeSnippet(
+			const { output, success } = run(
 				snippetValue,
-				contextPath,
+				sourceResult?.resolvedPath ?? file?.path,
+				sourceResult?.resolvedPath,
 				language,
-				resolvedSourcePath,
 			);
 			if (typeof onResult === "function") {
 				onResult({

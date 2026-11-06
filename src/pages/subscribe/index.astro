@@ -1,52 +1,20 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import Banner from "../../components/Banner.astro";
 import SubscribeForm from "../../components/SubscribeForm.astro";
 import { SITE_NAME } from "../../lib/site";
-
-export const prerender = true;
 ---
 
 <BaseLayout
   title={`Subscribe | ${SITE_NAME}`}
   description="Email updates when new posts land."
   hero="Subscribe"
-  showHero={false}
-  bodyClass="brutalist form-page subscribe-page"
+  heroNarrow={"SUBSC\nRIBE"}
+  heroHeight={140}
+  eyebrow="Newsletter"
+  bodyClass="full-height"
 >
-  <div class="page-hero">
-    <div class="page-hero__banner">
-      <Banner
-        text="SUBSCRIBE"
-        textNarrow={"SUBSC\nRIBE"}
-        height={140}
-        srLabel="Subscribe"
-      />
-      <span class="page-hero__eyebrow">Newsletter</span>
-    </div>
-  </div>
-
   <div class="page-shell">
-    <h2 class="subscribe-page__heading">Subscribe for notifications on new posts!</h2>
+    <h2 class="page-statement">Subscribe for notifications on new posts!</h2>
     <SubscribeForm />
   </div>
 </BaseLayout>
-
-<style is:global>
-  body.subscribe-page .subscribe-page__heading {
-    margin: clamp(48px, 8vh, 96px) auto 24px;
-    font-family: var(--display);
-    font-size: clamp(1.25rem, 3vw, 2rem);
-    font-weight: 900;
-    line-height: 1.1;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    text-align: center;
-    color: var(--ink);
-  }
-
-  /* The form ships its own heading; the page-level one above replaces it. */
-  body.subscribe-page .subscribe-form__heading {
-    display: none;
-  }
-</style>

@@ -1,169 +1,58 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import Banner from "../../components/Banner.astro";
+import ArchiveList from "../../components/ArchiveList.astro";
 import FilterableCount from "../../components/FilterableCount.astro";
-import ArchiveEntry from "../../components/ArchiveEntry.astro";
 import TagFilterPanel from "../../components/TagFilterPanel.astro";
 import { MAIN_PAGES } from "../../lib/site";
-import {
-	groupByYear,
-	loadArchiveItems,
-	sortArchiveItems,
-} from "../../lib/archive";
+import { loadArchiveItems, sortArchiveItems } from "../../lib/archive";
 
-export const prerender = true;
-
-const sortedItems = sortArchiveItems(await loadArchiveItems());
-const groupedYears = groupByYear(sortedItems);
-
-const allTags = [...new Set(sortedItems.flatMap((item) => item.tags))].sort(
-	(a, b) => a.localeCompare(b),
+const items = sortArchiveItems(await loadArchiveItems());
+const allTags = [...new Set(items.flatMap((item) => item.tags))].sort((a, b) =>
+	a.localeCompare(b),
 );
-
-const categoryOptions = [
-	{ label: MAIN_PAGES.writing.label, value: MAIN_PAGES.writing.label },
-	{ label: MAIN_PAGES.commonplace.label, value: MAIN_PAGES.commonplace.label },
-	{ label: MAIN_PAGES.garden.label, value: MAIN_PAGES.garden.label },
-	{ label: MAIN_PAGES.newsletter.label, value: MAIN_PAGES.newsletter.label },
-];
-
-const archiveFilterConfig = JSON.stringify({
-	filterSelector: ".tag-filter-container .tag--filter",
-	categoryFilterSelector: ".category-filter-container [data-category]",
-	countId: "entriesCount",
-	hintId: "entriesClearHint",
-	itemSelector: ".archive-item",
-	itemTagSelector: ".archive-item .tag--filter",
-	groupSelector: ".archive-year",
-	groupItemSelector: ".archive-item",
-	stateKey: "archive-all",
-	countLabel: "entries",
-});
+const categories = [
+	MAIN_PAGES.writing,
+	MAIN_PAGES.commonplace,
+	MAIN_PAGES.garden,
+	MAIN_PAGES.newsletter,
+].map((page) => page.label);
 ---
+
 <BaseLayout
   title={MAIN_PAGES.archive.pageTitle}
   description={MAIN_PAGES.archive.description}
   hero={MAIN_PAGES.archive.label}
-  showHero={false}
+  heroHeight={140}
+  eyebrow={MAIN_PAGES.archive.eyebrow}
+  subtitle={MAIN_PAGES.archive.description}
   activePage={MAIN_PAGES.archive.label}
-  bodyClass="brutalist archive-page"
 >
-  <div class="page-hero">
-    <div class="page-hero__banner">
-      <Banner
-        text="ARCHIVE"
-        height={140}
-        srLabel={MAIN_PAGES.archive.label}
-      />
-      <span class="page-hero__eyebrow">{MAIN_PAGES.archive.eyebrow}</span>
-    </div>
-    <p class="page-hero__subtitle">{MAIN_PAGES.archive.description}</p>
-  </div>
-
   <div class="page-shell">
-  {
-    !sortedItems.length ? (
-      <p>No entries yet. Check back soon.</p>
-    ) : (
-      <section class="archive-page" data-filter-config={archiveFilterConfig}>
-        <TagFilterPanel tags={allTags} categories={categoryOptions} />
-        <FilterableCount contentType="entries" totalCount={sortedItems.length} />
-        <div class="archive-years">
-          {groupedYears.map(([year, yearEntries]) => (
-            <section class="archive-year">
-              <h2>{year}</h2>
-              <div class="archive-year__entries">
-                {yearEntries.map((entry) => (
-                  <div
-                    class="archive-item"
-                    data-tags={JSON.stringify(entry.tags)}
-                    data-categories={JSON.stringify([entry.category])}
-                  >
-                    <ArchiveEntry
-                      title={entry.title}
-                      url={entry.url}
-                      date={entry.displayDate ?? entry.sortDate ?? new Date(0)}
-                      description={entry.description}
-                      tags={entry.tags}
-                      showYear={entry.kind === "commonplace"}
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      </section>
-    )
-  }
+    {
+      items.length ? (
+        <ArchiveList
+          items={items}
+          filterConfig={{
+            filterSelector: ".tag-filter-container .tag--filter",
+            categoryFilterSelector: ".category-filter-container [data-category]",
+            itemSelector: ".archive-item",
+            itemTagSelector: ".archive-item .tag--filter",
+            groupSelector: ".archive-year",
+            countId: "entriesCount",
+            hintId: "entriesClearHint",
+            countLabel: "entries",
+          }}
+        >
+          <TagFilterPanel tags={allTags} categories={categories} />
+          <FilterableCount contentType="entries" totalCount={items.length} />
+        </ArchiveList>
+      ) : (
+        <p>No entries yet. Check back soon.</p>
+      )
+    }
   </div>
 </BaseLayout>
 
 <script>
   import "../../scripts/filterable-content.js";
 </script>
-
-<style is:global>
-  /*
-   * Archive-specific styles. The brutalist frame, hero, shell, tag panel, and
-   * count strip come from brutalist-page.css (body.brutalist); this block only
-   * adds the inner layout and year-group styling unique to the archive index.
-   */
-
-  body.archive-page .archive-page {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
-
-  /* ---- YEAR GROUPS ---- */
-  body.archive-page .archive-years {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    margin-top: 0.5rem;
-  }
-
-  body.archive-page .archive-year {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  body.archive-page .archive-year[hidden] {
-    display: none;
-  }
-
-  body.archive-page .archive-year h2 {
-    display: inline-block;
-    align-self: flex-start;
-    margin: 0;
-    padding: 2px 10px;
-    font-family: var(--display);
-    font-size: var(--fs-md);
-    font-weight: 900;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--paper);
-    background: var(--ink);
-  }
-
-  body.archive-page .archive-year__entries {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  body.archive-page .archive-item.hidden {
-    display: none;
-  }
-
-  body.archive-page .archive-item__tags {
-    margin: 0 8px 12px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-</style>

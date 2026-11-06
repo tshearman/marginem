@@ -1,9 +1,9 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
-import Banner from "../components/Banner.astro";
 import FilterableCount from "../components/FilterableCount.astro";
 import ForceGraph from "../components/ForceGraph.astro";
 import GardenNotePreview from "../components/GardenNotePreview.astro";
+import { MAIN_PAGES } from "../lib/site";
 import "../styles/garden.css";
 
 type GardenCard = {
@@ -33,11 +33,9 @@ interface GardenLayoutProps {
 	heading: string;
 	intro: string;
 	notes: GardenCard[];
-	vaultRoot?: string;
 	breadcrumbs?: Breadcrumb[];
 	graph?: GraphData;
 	emptyMessage?: string;
-	activePage?: string;
 }
 
 const {
@@ -47,47 +45,26 @@ const {
 	heading,
 	intro,
 	notes,
-	vaultRoot,
 	breadcrumbs = [],
 	graph,
 	emptyMessage,
-	activePage,
 } = Astro.props as GardenLayoutProps;
 
 const showEmpty = notes.length === 0;
 const showGraph = graph?.nodes.length;
-const gardenTooltips = notes.map((note) => ({
-	id: note.slug,
-	slug: note.slug,
-	title: note.title,
-	excerpt: note.excerpt,
-	updatedAt: note.updatedAt,
-	relativePath: note.relativePath,
-	vaultRoot,
-}));
-
-const bannerText = heading.toUpperCase();
+const gardenTooltips = notes.map((note) => ({ ...note, id: note.slug }));
 ---
 
 <BaseLayout
   title={pageTitle}
   description={description}
   hero={heading}
-  showHero={false}
-  activePage={activePage}
-  bodyClass="brutalist garden-page"
+  heroHeight={140}
+  eyebrow={eyebrow}
+  subtitle={intro}
+  activePage={MAIN_PAGES.garden.label}
+  bodyClass="garden-page"
 >
-  <div class="page-hero">
-    <div class="page-hero__banner">
-      <Banner
-        text={bannerText}
-        height={140}
-        srLabel={heading}
-      />
-      <span class="page-hero__eyebrow">{eyebrow}</span>
-    </div>
-    <p class="page-hero__subtitle">{intro}</p>
-  </div>
 
   <div class="page-shell">
     {
@@ -128,7 +105,7 @@ const bannerText = heading.toUpperCase();
           <FilterableCount contentType="notes" totalCount={notes.length} />
           <div class="garden-grid">
             {notes.map((note) => (
-              <GardenNotePreview note={note} vaultRoot={vaultRoot} />
+              <GardenNotePreview note={note} />
             ))}
           </div>
         </section>

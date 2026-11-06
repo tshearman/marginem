@@ -1,48 +1,83 @@
 /**
- * Client-side wiring for subscribe forms. Finds every
- * `form[data-subscribe-form]` on the page and:
- *
- *   1. Lazy-loads Cloudflare Turnstile on first focus of an input.
- *   2. Renders the widget into the form's `.cf-turnstile-mount` element.
- *   3. On submit, waits up to ~8s for a token if one isn't ready yet.
- *
- * The form already includes a hidden honeypot field server-side, so this
- * file is purely about producing a valid Turnstile token for real users.
+ * Client-side wiring for every `form[data-subscribe-form]`. Cloudflare
+ * Turnstile (~30KB) is only loaded on first focus of an input, then rendered
+ * into the form's `.cf-turnstile-mount`. On submit, waits up to ~8s for a
+ * token before posting. (The honeypot field needs no client code.)
  */
-import { renderTurnstile } from "./turnstile-loader";
+
+type Turnstile = {
+	render: (container: HTMLElement, options: object) => string;
+};
+
+declare global {
+	interface Window {
+		turnstile?: Turnstile;
+	}
+}
+
+let scriptLoad: Promise<Turnstile> | null = null;
+
+const loadTurnstile = () => {
+	scriptLoad ??= new Promise<Turnstile>((resolve, reject) => {
+		const script = document.createElement("script");
+		script.src =
+			"https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+		script.async = true;
+		script.onload = () =>
+			window.turnstile
+				? resolve(window.turnstile)
+				: reject(new Error("Turnstile failed to initialise."));
+		script.onerror = () => reject(new Error("Failed to load Turnstile."));
+		document.head.append(script);
+	}).catch((error) => {
+		scriptLoad = null; // let the next focus/submit retry
+		throw error;
+	});
+	return scriptLoad;
+};
 
 const wireForm = (form: HTMLFormElement) => {
-	const sitekey = form.dataset.turnstileSitekey ?? "";
+	const sitekey = form.dataset.turnstileSitekey;
 	const mount = form.querySelector<HTMLElement>(".cf-turnstile-mount");
 	if (!sitekey || !mount) return;
 
 	let token = "";
-	let loading: Promise<void> | null = null;
-
-	const ensureWidget = () => {
-		if (loading) return loading;
-		loading = renderTurnstile({
-			container: mount,
-			sitekey,
-			onToken: (t) => {
-				token = t;
-			},
-			onError: () => {
-				token = "";
-			},
-		})
-			.then(() => undefined)
-			.catch(() => {
-				loading = null;
-			});
-		return loading;
+	let widget: Promise<void> | null = null;
+	const clearToken = () => {
+		token = "";
 	};
 
-	const inputs = form.querySelectorAll<HTMLInputElement>(
-		'input[name="email"], input[name="name"]',
-	);
-	for (const el of inputs) {
-		el.addEventListener("focus", ensureWidget, { once: true });
+	const ensureWidget = () => {
+		widget ??= loadTurnstile().then(
+			(turnstile) => {
+				turnstile.render(mount, {
+					sitekey,
+					appearance: "interaction-only",
+					size: "flexible",
+					// The iframe can't see our CSS, so match the site toggle rather
+					// than the OS ("auto"), which shows a white box in dark mode.
+					theme:
+						document.documentElement.dataset.theme === "dark"
+							? "dark"
+							: "light",
+					callback: (t: string) => {
+						token = t;
+					},
+					"error-callback": clearToken,
+					"expired-callback": clearToken,
+				});
+			},
+			() => {
+				widget = null;
+			},
+		);
+		return widget;
+	};
+
+	for (const input of form.querySelectorAll(
+		"input[name=email], input[name=name]",
+	)) {
+		input.addEventListener("focus", ensureWidget, { once: true });
 	}
 
 	form.addEventListener("submit", async (event) => {
@@ -61,9 +96,10 @@ const wireForm = (form: HTMLFormElement) => {
 	});
 };
 
-const forms = document.querySelectorAll<HTMLFormElement>(
+for (const form of document.querySelectorAll<HTMLFormElement>(
 	"form[data-subscribe-form]",
-);
-for (const form of forms) {
+)) {
 	wireForm(form);
 }
+
+export type {};

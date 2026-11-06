@@ -1,3 +1,6 @@
+// Hydrates each `[data-force-graph]` stage rendered by ForceGraph.astro.
+// Colours are CSS variables, so the graph follows theme changes on its own.
+
 import {
 	drag,
 	forceCenter,
@@ -8,37 +11,34 @@ import {
 	forceY,
 	select,
 } from "d3";
-import type { D3DragEvent, SimulationNodeDatum } from "d3";
+import type { SimulationNodeDatum } from "d3";
 
 type GraphNode = SimulationNodeDatum & {
 	id: string;
-	group?: number;
 	url?: string;
 	tooltipId?: string;
+	[key: string]: unknown;
 };
 
 type GraphLink = {
 	source: string | GraphNode;
 	target: string | GraphNode;
-	value?: number;
 };
 
 type GraphPayload = {
-	nodes: GraphNode[];
-	links: GraphLink[];
-	width?: number;
+	nodes?: GraphNode[];
+	links?: GraphLink[];
 	height?: number;
 	labelKey?: string;
 };
 
-const DEFAULT_WIDTH = 640;
-const DEFAULT_HEIGHT = 420;
 const BOUNDS_PADDING = 18;
 
 function clamp(value: number, min: number, max: number) {
 	return Math.min(Math.max(value, min), max);
 }
 
+// Keep nodes inside the stage, bouncing them (at half speed) off the edges.
 function keepNodesInBounds(nodes: GraphNode[], width: number, height: number) {
 	const minX = BOUNDS_PADDING;
 	const maxX = Math.max(BOUNDS_PADDING, width - BOUNDS_PADDING);
@@ -50,7 +50,7 @@ function keepNodesInBounds(nodes: GraphNode[], width: number, height: number) {
 			const clampedX = clamp(node.x, minX, maxX);
 			if (clampedX !== node.x) {
 				node.x = clampedX;
-				const vx = typeof node.vx === "number" ? node.vx : 0;
+				const vx = node.vx ?? 0;
 				node.vx = clampedX <= minX ? Math.abs(vx) * 0.5 : -Math.abs(vx) * 0.5;
 			}
 		}
@@ -58,273 +58,176 @@ function keepNodesInBounds(nodes: GraphNode[], width: number, height: number) {
 			const clampedY = clamp(node.y, minY, maxY);
 			if (clampedY !== node.y) {
 				node.y = clampedY;
-				const vy = typeof node.vy === "number" ? node.vy : 0;
+				const vy = node.vy ?? 0;
 				node.vy = clampedY <= minY ? Math.abs(vy) * 0.5 : -Math.abs(vy) * 0.5;
 			}
 		}
 	}
 }
 
-function labelFor(node: GraphNode, labelKey?: string) {
-	if (!labelKey) return node.id;
-	const value = (node as unknown as Record<string, unknown>)[labelKey];
-	return typeof value === "string" || typeof value === "number"
-		? String(value)
-		: node.id;
-}
-
-function navigateTo(node: GraphNode) {
-	if (!node.url) return;
-	window.location.assign(node.url);
-}
-
-function positionTooltip(tooltip: HTMLElement, event: PointerEvent) {
-	const x = event.clientX;
-	const y = event.clientY;
-	tooltip.style.transform = `translate(${x + 16}px, ${y + 16}px)`;
-}
-
 function hydrateGraph(el: HTMLElement) {
-	const raw = el.getAttribute("data-force-graph");
-	if (!raw) return;
+	const payload = JSON.parse(el.dataset.forceGraph ?? "{}") as GraphPayload;
+	const nodes = payload.nodes ?? [];
+	const links = payload.links ?? [];
+	const labelKey = payload.labelKey ?? "id";
+	let width = el.clientWidth || 640;
+	let height = el.clientHeight || payload.height || 420;
 
-	try {
-		const payload = JSON.parse(raw) as GraphPayload;
-		const nodes = payload.nodes ?? [];
-		const links = payload.links ?? [];
-		const fallbackWidth = payload.width ?? DEFAULT_WIDTH;
-		const fallbackHeight = payload.height ?? DEFAULT_HEIGHT;
-		let width = el.clientWidth || fallbackWidth;
-		let height = el.clientHeight || fallbackHeight;
-		const labelKey = payload.labelKey ?? "id";
-
-		el.removeAttribute("data-force-graph");
-		el.innerHTML = "";
-
-		const graphId = el.id;
-		const tooltipLayer = document.querySelector<HTMLElement>(
-			`[data-force-tooltip-owner="${graphId}"]`,
-		);
-		if (tooltipLayer && !tooltipLayer.dataset.portalized) {
-			tooltipLayer.dataset.portalized = "true";
-			document.body.appendChild(tooltipLayer);
+	// Move the tooltip layer to <body> so its fixed positioning is always
+	// relative to the viewport, whatever the graph's ancestors do.
+	const tooltips = new Map<string, HTMLElement>();
+	const tooltipLayer = document.querySelector<HTMLElement>(
+		`[data-force-tooltip-owner="${el.id}"]`,
+	);
+	if (tooltipLayer) {
+		document.body.appendChild(tooltipLayer);
+		for (const tip of tooltipLayer.querySelectorAll<HTMLElement>(
+			"[data-force-tooltip-id]",
+		)) {
+			tooltips.set(tip.dataset.forceTooltipId ?? "", tip);
 		}
+	}
 
-		const tooltipNodes = document.querySelectorAll<HTMLElement>(
-			`[data-force-tooltip-owner="${graphId}"] [data-force-tooltip-id]`,
+	let tooltip: HTMLElement | undefined;
+	const setTooltipVisible = (visible: boolean) => {
+		if (!tooltip) return;
+		tooltip.style.opacity = visible ? "1" : "0";
+		tooltip.style.visibility = visible ? "visible" : "hidden";
+	};
+	const moveTooltip = (event: PointerEvent) => {
+		if (!tooltip) return;
+		tooltip.style.transform = `translate(${event.clientX + 16}px, ${
+			event.clientY + 16
+		}px)`;
+	};
+
+	const svg = select(el)
+		.append("svg")
+		.attr("viewBox", `0 0 ${width} ${height}`)
+		.attr("width", "100%")
+		.attr("height", "100%")
+		.attr("role", "img")
+		.attr("aria-label", "Force-directed graph");
+
+	const link = svg
+		.append("g")
+		.attr("stroke", "var(--ink)")
+		.attr("stroke-opacity", 0.45)
+		.attr("stroke-width", 1.5)
+		.selectAll("line")
+		.data(links)
+		.join("line");
+
+	const simulation = forceSimulation(nodes)
+		.force(
+			"link",
+			forceLink<GraphNode, GraphLink>(links)
+				.id((d) => d.id)
+				.strength(0.25),
+		)
+		.force("charge", forceManyBody().strength(-500));
+	const centerForces = () => {
+		simulation
+			.force("center", forceCenter(width / 2, height / 2))
+			.force("x", forceX(width / 2).strength(0.05))
+			.force("y", forceY(height / 2).strength(0.05));
+	};
+	centerForces();
+
+	// One <g> per node holds its circle and label, so hover, click and drag
+	// cover both.
+	const node = svg
+		.append("g")
+		.selectAll<SVGGElement, GraphNode>("g")
+		.data(nodes)
+		.join("g")
+		.style("cursor", (d) => (d.url ? "pointer" : "default"))
+		.on("click", (_event, d) => {
+			if (d.url) window.location.assign(d.url);
+		})
+		.on("pointerenter", (event: PointerEvent, d) => {
+			tooltip = d.tooltipId ? tooltips.get(d.tooltipId) : undefined;
+			moveTooltip(event);
+			setTooltipVisible(true);
+		})
+		.on("pointermove", moveTooltip)
+		.on("pointerleave", () => {
+			setTooltipVisible(false);
+			tooltip = undefined;
+		})
+		.call(
+			drag<SVGGElement, GraphNode>()
+				.on("start", (event, d) => {
+					if (!event.active) simulation.alphaTarget(0.3).restart();
+					d.fx = d.x;
+					d.fy = d.y;
+				})
+				.on("drag", (event, d) => {
+					d.fx = event.x;
+					d.fy = event.y;
+				})
+				.on("end", (event, d) => {
+					if (!event.active) simulation.alphaTarget(0);
+					d.fx = null;
+					d.fy = null;
+				}),
 		);
-		const tooltipMap = new Map<string, HTMLElement>();
-		for (const tooltipEl of tooltipNodes) {
-			const id = tooltipEl.dataset.forceTooltipId;
-			if (id) tooltipMap.set(id, tooltipEl);
-		}
 
-		const svg = select(el)
-			.append("svg")
-			.attr("viewBox", `0 0 ${width} ${height}`)
-			.attr("width", "100%")
-			.attr("height", "100%")
-			.attr("role", "img")
-			.attr("aria-label", "Force-directed graph");
+	node
+		.append("circle")
+		.attr("r", 9)
+		.attr("fill", (d) =>
+			d.id.startsWith("folder:") ? "var(--highlight)" : "var(--paper)",
+		)
+		.attr("stroke", "var(--ink)")
+		.attr("stroke-width", 2.5);
 
-		const link = svg
-			.append("g")
-			.attr("stroke", "var(--ink)")
-			.attr("stroke-opacity", 0.45)
-			.attr("stroke-width", 1.5)
-			.selectAll("line")
-			.data(links)
-			.join("line");
-
-		const simulation = forceSimulation(nodes);
-
-		let activeTooltip: HTMLElement | null = null;
-
-		const showTooltip = (event: PointerEvent, nodeData: GraphNode) => {
-			if (!nodeData.tooltipId) return;
-			const tooltip = tooltipMap.get(nodeData.tooltipId);
-			if (!tooltip) return;
-			if (activeTooltip && activeTooltip !== tooltip) {
-				activeTooltip.style.opacity = "0";
-				activeTooltip.style.visibility = "hidden";
-			}
-			activeTooltip = tooltip;
-			tooltip.style.opacity = "1";
-			tooltip.style.visibility = "visible";
-			positionTooltip(tooltip, event);
-		};
-
-		const moveTooltip = (event: PointerEvent, nodeData: GraphNode) => {
-			if (!nodeData.tooltipId || !activeTooltip) return;
-			if (activeTooltip.dataset.forceTooltipId !== nodeData.tooltipId) return;
-			positionTooltip(activeTooltip, event);
-		};
-
-		const hideTooltip = (nodeData: GraphNode) => {
-			if (!nodeData.tooltipId || !activeTooltip) return;
-			if (activeTooltip.dataset.forceTooltipId !== nodeData.tooltipId) return;
-			activeTooltip.style.opacity = "0";
-			activeTooltip.style.visibility = "hidden";
-			activeTooltip = null;
-		};
-
-		const node = svg
-			.append("g")
-			.selectAll<SVGGElement, GraphNode>("g")
-			.data(nodes)
-			.join("g")
-			.style("cursor", (d: GraphNode) => (d.url ? "pointer" : "default"))
-			.on("click", (_event: MouseEvent, d: GraphNode) => {
-				navigateTo(d);
-			})
-			.on("pointerenter", (event: PointerEvent, d: GraphNode) => {
-				showTooltip(event, d);
-			})
-			.on("pointermove", (event: PointerEvent, d: GraphNode) => {
-				moveTooltip(event, d);
-			})
-			.on("pointerleave", (_event: PointerEvent, d: GraphNode) => {
-				hideTooltip(d);
-			})
-			.call(
-				drag<SVGGElement, GraphNode>()
-					.on(
-						"start",
-						(
-							event: D3DragEvent<SVGGElement, GraphNode, GraphNode>,
-							d: GraphNode,
-						) => {
-							if (!event.active) simulation.alphaTarget(0.3).restart();
-							d.fx = d.x;
-							d.fy = d.y;
-						},
-					)
-					.on(
-						"drag",
-						(
-							event: D3DragEvent<SVGGElement, GraphNode, GraphNode>,
-							d: GraphNode,
-						) => {
-							d.fx = event.x;
-							d.fy = event.y;
-						},
-					)
-					.on(
-						"end",
-						(
-							event: D3DragEvent<SVGGElement, GraphNode, GraphNode>,
-							d: GraphNode,
-						) => {
-							if (!event.active) simulation.alphaTarget(0);
-							d.fx = null;
-							d.fy = null;
-						},
-					),
-			);
-
+	if (nodes.length <= 25) {
 		node
-			.append("circle")
-			.attr("r", 9)
-			.attr("fill", (d: GraphNode) =>
-				d.id.startsWith("folder:") ? "var(--highlight)" : "var(--paper)",
-			)
-			.attr("stroke", "var(--ink)")
-			.attr("stroke-width", 2.5);
-
-		const showLabels = nodes.length <= 25;
-		const labels = showLabels
-			? svg
-					.append("g")
-					.attr("font-size", "12px")
-					.attr("fill", "var(--ink)")
-					.attr("paint-order", "stroke")
-					.attr("stroke", "var(--paper)")
-					.attr("stroke-width", 3)
-					.selectAll("text")
-					.data(nodes)
-					.join("text")
-					.style("cursor", (d: GraphNode) => (d.url ? "pointer" : "default"))
-					.on("click", (_event: MouseEvent, d: GraphNode) => {
-						navigateTo(d);
-					})
-					.on("pointerenter", (event: PointerEvent, d: GraphNode) => {
-						showTooltip(event, d);
-					})
-					.on("pointermove", (event: PointerEvent, d: GraphNode) => {
-						moveTooltip(event, d);
-					})
-					.on("pointerleave", (_event: MouseEvent, d: GraphNode) => {
-						hideTooltip(d);
-					})
-					.text((d: GraphNode) => labelFor(d, labelKey))
-			: null;
-
-		const updateForces = () => {
-			simulation
-				.force(
-					"link",
-					forceLink<GraphNode, GraphLink>(links)
-						.id((d: GraphNode) => d.id)
-						.strength(0.25),
-				)
-				.force("charge", forceManyBody().strength(-500))
-				.force("center", forceCenter(width / 2, height / 2))
-				.force("x", forceX(width / 2).strength(0.05))
-				.force("y", forceY(height / 2).strength(0.05));
-		};
-
-		updateForces();
-
-		simulation.on("tick", () => {
-			keepNodesInBounds(nodes, width, height);
-
-			link
-				.attr("x1", (d: GraphLink) => (d.source as GraphNode).x ?? 0)
-				.attr("y1", (d: GraphLink) => (d.source as GraphNode).y ?? 0)
-				.attr("x2", (d: GraphLink) => (d.target as GraphNode).x ?? 0)
-				.attr("y2", (d: GraphLink) => (d.target as GraphNode).y ?? 0);
-
-			node.attr(
-				"transform",
-				(d: GraphNode) => `translate(${d.x ?? 0}, ${d.y ?? 0})`,
-			);
-
-			if (labels) {
-				labels
-					.attr("x", (d: GraphNode) => (d.x ?? 0) + 12)
-					.attr("y", (d: GraphNode) => (d.y ?? 0) + 4);
-			}
-		});
-
-		if ("ResizeObserver" in window) {
-			const observer = new ResizeObserver((entries) => {
-				for (const entry of entries) {
-					const nextWidth = Math.round(entry.contentRect.width);
-					const nextHeight = Math.round(entry.contentRect.height);
-					if (!nextWidth || !nextHeight) continue;
-					width = nextWidth;
-					height = nextHeight;
-					svg.attr("viewBox", `0 0 ${width} ${height}`);
-					updateForces();
-					simulation.alpha(0.6).restart();
-				}
+			.append("text")
+			.attr("x", 12)
+			.attr("y", 4)
+			.attr("font-size", "12px")
+			.attr("fill", "var(--ink)")
+			.attr("paint-order", "stroke")
+			.attr("stroke", "var(--paper)")
+			.attr("stroke-width", 3)
+			.text((d) => {
+				const label = d[labelKey];
+				return typeof label === "string" || typeof label === "number"
+					? String(label)
+					: d.id;
 			});
-			observer.observe(el);
-		}
+	}
+
+	simulation.on("tick", () => {
+		keepNodesInBounds(nodes, width, height);
+		link
+			.attr("x1", (d) => (d.source as GraphNode).x ?? 0)
+			.attr("y1", (d) => (d.source as GraphNode).y ?? 0)
+			.attr("x2", (d) => (d.target as GraphNode).x ?? 0)
+			.attr("y2", (d) => (d.target as GraphNode).y ?? 0);
+		node.attr("transform", (d) => `translate(${d.x ?? 0}, ${d.y ?? 0})`);
+	});
+
+	new ResizeObserver(([entry]) => {
+		const nextWidth = Math.round(entry.contentRect.width);
+		const nextHeight = Math.round(entry.contentRect.height);
+		if (!nextWidth || !nextHeight) return;
+		if (nextWidth === width && nextHeight === height) return;
+		width = nextWidth;
+		height = nextHeight;
+		svg.attr("viewBox", `0 0 ${width} ${height}`);
+		centerForces();
+		simulation.alpha(0.6).restart();
+	}).observe(el);
+}
+
+// Module scripts run after the document is parsed, so the DOM is ready.
+for (const el of document.querySelectorAll<HTMLElement>("[data-force-graph]")) {
+	try {
+		hydrateGraph(el);
 	} catch (error) {
 		console.error("Failed to initialize force graph", error);
 	}
-}
-
-function init() {
-	const nodes = document.querySelectorAll<HTMLElement>("[data-force-graph]");
-	for (const el of nodes) {
-		hydrateGraph(el);
-	}
-}
-
-if (document.readyState === "loading") {
-	document.addEventListener("DOMContentLoaded", init, { once: true });
-} else {
-	init();
 }

@@ -12,7 +12,7 @@ fi
 case "$BRANCH" in
 	main|dev)
 		echo "Deploying branch: $BRANCH"
-		PAGES_FUNCTIONS=true npx wrangler pages deploy ../dist --project-name marginem --branch "$BRANCH" --cwd src
+		npx wrangler pages deploy ../dist --project-name marginem --branch "$BRANCH" --cwd src
 		;;
 	*)
 		echo "Skipping deploy for branch '$BRANCH' (only main/dev deploy)."

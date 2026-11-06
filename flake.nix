@@ -35,7 +35,9 @@
             python312
             pkgsUnstable.uv
             ghc
-            sbcl
+            # SBCL < 2.6.6 can't start on macOS 27 (it maps memory at a
+            # fixed address the OS no longer allows).
+            pkgsUnstable.sbcl
             ormolu
             biome
             hlint

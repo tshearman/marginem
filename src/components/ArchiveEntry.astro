@@ -9,9 +9,7 @@ interface Props {
 	url: string;
 	date: Date;
 	description?: string;
-	abstract?: string;
 	tags?: string[];
-	class?: string;
 	// When set, renders the year below the month/day. Used for archive items
 	// whose own date can disagree with the year they're grouped under (e.g.
 	// commonplace notes grouped by date-added but displaying the source date).
@@ -23,23 +21,18 @@ const {
 	url,
 	date,
 	description = "",
-	abstract = "",
 	tags = [],
-	class: className = "",
 	showYear = false,
 } = Astro.props as Props;
 
 const dateLabel = formatDate(date, { month: "long", day: "numeric" });
-const yearLabel = showYear
-	? date.toLocaleDateString("en-US", { year: "numeric" })
-	: "";
-const preview = ellipsizeText(abstract || description || "", 220);
+const preview = ellipsizeText(description, 220);
 ---
 
-<article class={`archive-entry ${className}`} data-tags={JSON.stringify(tags)}>
+<article class="archive-entry">
   <div class="archive-entry__meta">
     <DateStamp datetime={date} label={dateLabel} />
-    {yearLabel ? <span class="archive-entry__year">{yearLabel}</span> : null}
+    {showYear ? <span class="archive-entry__year">{date.getUTCFullYear()}</span> : null}
   </div>
   <div class="archive-entry__body">
     <h3 class="archive-entry__title">
@@ -90,10 +83,6 @@ const preview = ellipsizeText(abstract || description || "", 220);
   .archive-entry:hover .archive-entry__meta,
   .archive-entry:hover .archive-entry__year {
     color: var(--highlight-fg);
-  }
-
-  .archive-entry.hidden {
-    display: none;
   }
 
   .archive-entry__meta {

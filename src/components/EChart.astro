@@ -12,48 +12,35 @@ interface Props {
 	option: Option;
 	/** Chart height in px. Defaults to the option's `height`, else 320. */
 	height?: number;
-	/** Visual theme. Known: "default" | "newsprint" | "highlight" | "blueprint"
-	 *  | "carbon". See src/scripts/chart-themes.ts. Unknown names fall back to
-	 *  the default (base axis/font theme only). */
+	/** Visual theme: "default" | "newsprint" (see src/scripts/chart-themes.ts).
+	 *  Unknown names fall back to "default". */
 	theme?: string;
 }
 
 const { option, height, theme = "default" } = Astro.props as Props;
 const layoutHeight =
-	typeof option.height === "number" && Number.isFinite(option.height)
-		? (option.height as number)
-		: height ?? 320;
-
-const chartStyle = `width: 100%; height: ${layoutHeight}px;`;
-const chartId = `echart-${
-	globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
-}`;
-const payloadAttr = JSON.stringify(option).replace(/</g, "\\u003c");
+	height ?? (typeof option.height === "number" ? option.height : 320);
 ---
 <div class="echart-shell">
   <div
-    id={chartId}
     class="echart-chart"
-    style={chartStyle}
-    data-echart={payloadAttr}
+    style={`height: ${layoutHeight}px;`}
+    data-echart={JSON.stringify(option)}
     data-echart-theme={theme}
   ></div>
 </div>
 <script>
-  import("../scripts/echarts-client.ts");
+  import "../scripts/echarts-client.ts";
 </script>
 
 <style>
   .echart-shell {
-    width: 100%;
     margin: 1.5rem 0 1.75rem;
     padding: 0.75rem;
     background: var(--paper);
   }
 
   .echart-chart {
-    display: block;
-    max-width: 100%;
     background: var(--paper);
   }
 </style>

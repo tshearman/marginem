@@ -1,182 +1,74 @@
-@import "./primitives.css";
-@import "./prism-vs.css";
+@import "./page-texture.css";
 @import "./typography.css";
+@import "./buttons.css";
 @import "./cards.css";
+@import "./brutalist-page.css";
 
+/* Same-origin navigations keep showing the old page until the new one has
+   rendered, so there is never a blank frame between pages. No animation:
+   pages still swap instantly. */
+@view-transition {
+  /* biome-ignore lint/correctness/noUnknownProperty: valid descriptor, unknown to Biome 1.9 */
+  navigation: auto;
+}
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation: none;
+}
+
+/* ---- PALETTE ------------------------------------------------------------
+ * The canvas colour (html background) and color-scheme are NOT here: they
+ * live in the inline <style> in HtmlHead.astro so they apply on the very
+ * first frame, before this stylesheet has loaded.
+ *
+ * --highlight / --highlight-fg are picked at runtime from
+ * src/lib/highlight-pool.ts (inline bootstrap in HtmlHead pins one per page
+ * load on :root; highlight-hover.ts re-rolls per hovered element). The
+ * values below are only the no-JS fallbacks.
+ * ----------------------------------------------------------------------- */
 :root {
-  color-scheme: light;
-
-  /* Brutalist palette tokens shared with the homepage. */
   --display: "Arial Black", Helvetica, sans-serif;
-  /* iA Writer Duo + Courier New fallback chain — registered by the
-     experimental.fonts entry in astro.config.mjs and emitted by <Font />
-     in HtmlHead. */
+  /* iA Writer Duo + metric-matched fallback, from the experimental.fonts
+     entry in astro.config.mjs (emitted by <Font /> in HtmlHead). */
   --mono: var(--font-ia-writer);
+
   --paper: #ffffff;
-  --page-bg: #e8e8e8;
-  --highlight: #ffe600;
-  --highlight-fg: var(--ink);
-  --paper-shadow: var(--highlight);
-  --paper-accent: var(--highlight);
-
-  --bg: #ffffff;
-  --bg-subtle: #f8fafc;
-  --surface: #ffffff;
-
-  /* True black — matches the homepage and the Banner. The previous value
-     (#0f172a) was a dark slate-blue and tinted every page that loaded
-     global.css, clashing visibly against the pure-black banner. */
   --ink: #000;
   --ink-rgb: 0 0 0;
+  --highlight: #ffe600;
+  --highlight-fg: #0a0a0a;
+
+  /* Aliases kept for older components; prefer --paper / --ink. Declared on
+     :root, so they resolve against the theme's --paper / --ink. */
+  --bg: var(--paper);
   --fg: var(--ink);
   --muted: rgb(var(--ink-rgb) / 0.7);
-  --muted-soft: rgb(var(--ink-rgb) / 0.6);
-  --muted-strong: rgb(var(--ink-rgb) / 0.85);
+  --thin-border-color: rgb(var(--ink-rgb) / 0.3);
+  --thin-border: 1px solid var(--thin-border-color);
 
-  /* Syntax-highlighting accents (Prism + decorative use only — links,
-     buttons, and hover states should use --ink / --highlight). */
+  /* Syntax highlighting + chart accents only. Links, buttons and hover
+     states use --ink / --highlight. */
   --accent: #0ea5e9;
   --accent-2: #10b981;
   --accent-3: #84cc16;
   --accent-soft: color-mix(in srgb, var(--accent) 18%, transparent);
-
-  --fg-inverse: #ffffff;
-  --fg-inverse-soft: rgb(255 255 255 / 0.95);
-
-  --white-rgb: 255 255 255;
-  --black-rgb: 0 0 0;
-  --thin-border-color: rgb(var(--ink-rgb) / 0.3);
-  --thin-border: 1px solid var(--thin-border-color);
-  --border: var(--thin-border);
+  --code-bg: var(--paper);
+  --code-fg: #1b1b1b;
 
   --shadow-rgb: 0 0 0;
   --shadow-soft: 0 15px 35px rgb(var(--shadow-rgb) / 0.08);
-  --shadow-strong: 0 0 80px rgb(var(--shadow-rgb) / 0.1);
-  --overlay: rgb(var(--shadow-rgb) / 0.45);
-  --overlay-strong: rgb(var(--shadow-rgb) / 0.65);
 
-  --code-bg: var(--bg);
-  --code-fg: #1b1b1b;
-
-  --success: #0f5132;
   --danger: #b91c1c;
 
   --site-max-width: 860px;
 }
 
-/* ---- DARK MODE ---------------------------------------------------------
- * One palette (a near-black brutalist base). --highlight + --highlight-fg
- * are picked at runtime from src/lib/highlight-pool.ts in both themes:
- *   - The inline bootstrap in HtmlHead picks one entry per page load and
- *     pins it on :root via inline style. The banner reads this once.
- *   - highlight-hover.ts re-rolls per hover/focus by writing inline style
- *     onto the hovered element, which scopes the override to that subtree
- *     (the banner keeps its load-time pick).
- *
- * The --highlight values below are JS-disabled fallbacks; the bootstrap's
- * inline-style write overrides them whenever scripting is available.
- * ----------------------------------------------------------------------- */
 :root[data-theme="dark"] {
-  color-scheme: dark;
-  --fg-inverse: #000000;
-  --fg-inverse-soft: rgb(0 0 0 / 0.95);
-
   --paper: #0a0a0a;
-  --page-bg: #000000;
   --ink: #f0f0f0;
   --ink-rgb: 240 240 240;
-  --bg: #0a0a0a;
-  --bg-subtle: #161616;
-  --surface: #0a0a0a;
   --highlight: #ff2d8a;
-  --highlight-fg: #0a0a0a;
-  --paper-shadow: var(--highlight);
-  --paper-accent: var(--highlight);
   --code-bg: #050505;
   --code-fg: #d4d4d4;
-}
-
-.footnotes {
-  font-size: var(--fs-sm);
-  border-top: var(--thin-border);
-  margin-top: 3rem;
-  padding-top: 1rem;
-}
-
-.footnote-panel {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  background: color-mix(in srgb, var(--bg) 96%, transparent);
-  color: var(--fg);
-  border-radius: 0;
-  box-shadow: 0 -6px 30px rgb(var(--ink-rgb) / 0.18);
-  padding: 1.35rem 3.25rem 1.35rem 1.5rem;
-  transform: translateY(100%);
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
-  z-index: 50;
-  font-size: var(--fs-sm);
-}
-
-.footnote-panel--visible {
-  transform: translateY(0);
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.footnote-panel__inner {
-  margin: 1rem auto 1rem;
-  width: min(72ch, 100%);
-}
-
-.footnote-panel__content {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-}
-
-.footnote-panel__number {
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.footnote-panel__text {
-  margin: 0;
-  flex: 1;
-  max-height: 50vh;
-  overflow-y: auto;
-}
-
-.footnote-panel__text > p {
-  margin-top: 0;
-}
-
-.footnote-panel__text img {
-  max-height: 50vh;
-  width: auto;
-  display: block;
-  margin: 0 auto;
-}
-
-.footnote-panel__close {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  border: none;
-  background: transparent;
-  font-size: var(--fs-2xl);
-  color: var(--muted);
-  cursor: pointer;
-  line-height: 1;
-  padding: 0.25rem;
-}
-
-.footnote-panel__close:hover {
-  color: var(--fg);
 }

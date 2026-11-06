@@ -53,40 +53,16 @@ const { activePage } = Astro.props as MastheadProps;
   </div>
 </header>
 
-<script is:inline>
-  (function () {
-    var btn = document.querySelector("[data-theme-toggle]");
-    if (!btn) return;
-    btn.addEventListener("click", function () {
-      var root = document.documentElement;
-      var next = root.dataset.theme === "dark" ? "light" : "dark";
-      root.dataset.theme = next;
-      try {
-        localStorage.setItem("theme", next);
-      } catch (e) {}
-      // Banner highlight is fixed per page load (see HtmlHead.astro);
-      // toggling theme keeps the same highlight color in both themes.
-      document.dispatchEvent(
-        new CustomEvent("themechange", { detail: { theme: next } }),
-      );
-    });
-  })();
-</script>
+{/* The toggle is handled by the theme bootstrap in HtmlHead.astro. */}
 <script>
-  // Per-hover highlight randomizer. Module script — runs after parse.
   import "../scripts/highlight-hover.ts";
 </script>
 
 <style>
   .masthead {
-    --masthead-ink: var(--ink);
-    --masthead-paper: var(--paper);
-    --masthead-accent: var(--highlight);
-    width: min(860px, 100%);
-    margin: 0 auto;
-    background: var(--masthead-paper);
-    color: var(--masthead-ink);
-    border-bottom: 1px solid var(--masthead-ink);
+    background: var(--paper);
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink);
   }
 
   .meta {
@@ -95,8 +71,7 @@ const { activePage } = Astro.props as MastheadProps;
     align-items: center;
     gap: 12px;
     padding: 6px 12px;
-    font-family:
-      "iA Writer Duo", "Courier New", Courier, monospace;
+    font-family: var(--mono);
     font-size: var(--fs-2xs);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -104,13 +79,13 @@ const { activePage } = Astro.props as MastheadProps;
 
   .meta__brand {
     font-weight: 700;
-    color: var(--masthead-ink);
+    color: var(--ink);
     text-decoration: none;
   }
 
   .meta__brand:hover,
   .meta__brand:focus-visible {
-    background: var(--masthead-accent);
+    background: var(--highlight);
     color: var(--highlight-fg);
   }
 
@@ -122,20 +97,20 @@ const { activePage } = Astro.props as MastheadProps;
   }
 
   .meta__nav a {
-    color: var(--masthead-ink);
+    color: var(--ink);
     text-decoration: none;
     padding: 2px 4px;
   }
 
   .meta__nav a:hover,
   .meta__nav a:focus-visible {
-    background: var(--masthead-accent);
+    background: var(--highlight);
     color: var(--highlight-fg);
   }
 
   .meta__nav a.is-active {
-    background: var(--masthead-ink);
-    color: var(--masthead-paper);
+    background: var(--ink);
+    color: var(--paper);
   }
 
   .meta__abbr {
@@ -158,16 +133,16 @@ const { activePage } = Astro.props as MastheadProps;
     font-family: inherit;
     font-size: var(--fs-xs);
     line-height: 1;
-    color: var(--masthead-ink);
-    background: var(--masthead-paper);
-    border: 2px solid var(--masthead-ink);
+    color: var(--ink);
+    background: var(--paper);
+    border: 2px solid var(--ink);
     border-radius: 0;
     cursor: pointer;
   }
 
   .theme-toggle:hover,
   .theme-toggle:focus-visible {
-    background: var(--masthead-accent);
+    background: var(--highlight);
     color: var(--highlight-fg);
     outline: none;
   }

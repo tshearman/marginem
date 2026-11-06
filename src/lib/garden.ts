@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypePrism from "rehype-prism-plus";
@@ -27,68 +26,50 @@ import {
 } from "./obsidianConfig";
 import { normalizeTags, parseDate } from "./frontmatter";
 
-export { resolveGardenRoot as resolveVaultRoot };
-
-const prismPlugin: [RehypePlugin, { showLineNumbers: true }] = [
-	rehypePrism as unknown as RehypePlugin,
-	{ showLineNumbers: true },
-];
-
 export interface GardenNote {
 	slug: string;
 	title: string;
 	content: string;
 	updatedAt: Date;
-	sourcePath: string;
 	relativePath: string;
 	published: boolean;
 	tags: string[];
 	date?: Date;
 }
 
-const isMarkdownFile = (fileName: string) => /\.md$/i.test(fileName);
-
-const extractTitle = (_content: string, fallback: string) =>
-	fallback.replace(/\.md$/i, "");
-
-const normalizePath = (value: string) => value.split(path.sep).join("/");
-
+/** Read every note in the garden root, sorted by title (published only by default). */
 export const loadGardenNotes = async (
 	options: { includeUnpublished?: boolean } = {},
 ) => {
 	const vaultRoot = resolveGardenRoot();
 	if (!vaultRoot) return [] as GardenNote[];
-	const config = loadObsidianConfig();
-	const ignoredRoots = [config.commonplacePath]
-		.filter(Boolean)
-		.map((entry) => normalizeVaultPath(entry));
-	const isIgnoredPath = (relativePath: string) =>
-		ignoredRoots.some(
-			(root) => relativePath === root || relativePath.startsWith(`${root}/`),
-		);
+	// Commonplace notes live in the same vault but are not garden notes.
+	const commonplaceRoot = normalizeVaultPath(
+		loadObsidianConfig().commonplacePath,
+	);
+	const isCommonplace = (relativePath: string) =>
+		relativePath === commonplaceRoot ||
+		relativePath.startsWith(`${commonplaceRoot}/`);
 
 	const notes: GardenNote[] = [];
 	const visitDir = (dir: string) => {
-		const entries = fs.readdirSync(dir, { withFileTypes: true });
-		for (const entry of entries) {
+		for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
 			const fullPath = path.join(dir, entry.name);
 			if (entry.isDirectory()) {
-				if (!isIgnoredDirName(entry.name)) {
-					visitDir(fullPath);
-				}
+				if (!isIgnoredDirName(entry.name)) visitDir(fullPath);
 				continue;
 			}
-			if (!entry.isFile() || !isMarkdownFile(entry.name)) continue;
-			if (isIgnoredFileName(entry.name)) {
-				continue;
-			}
-			const rawContent = fs.readFileSync(fullPath, "utf8");
-			let frontmatter: Record<string, unknown> = {};
-			let content = rawContent;
+			if (!entry.isFile() || !/\.md$/i.test(entry.name)) continue;
+			if (isIgnoredFileName(entry.name)) continue;
+			const relativePath = normalizeVaultPath(
+				path.relative(vaultRoot, fullPath),
+			);
+			if (isCommonplace(relativePath)) continue;
+			let parsed: ReturnType<typeof parseFrontmatter>;
 			try {
-				const parsed = parseFrontmatter(rawContent, { frontmatter: "remove" });
-				frontmatter = (parsed.frontmatter ?? {}) as Record<string, unknown>;
-				content = parsed.content ?? rawContent;
+				parsed = parseFrontmatter(fs.readFileSync(fullPath, "utf8"), {
+					frontmatter: "remove",
+				});
 			} catch (error) {
 				console.warn(
 					`[obsidian] Skipping note with invalid frontmatter at ${fullPath}: ${
@@ -97,119 +78,96 @@ export const loadGardenNotes = async (
 				);
 				continue;
 			}
-			const relativePath = normalizePath(path.relative(vaultRoot, fullPath));
-			if (isIgnoredPath(relativePath)) continue;
-			const slug = slugifyObsidianTarget(relativePath);
-			const stats = fs.statSync(fullPath);
-			const published = isGardenPublished(frontmatter);
-			const tags = normalizeTags(frontmatter?.tags);
-			const date = parseDate(frontmatter?.date);
+			const frontmatter = parsed.frontmatter as Record<string, unknown>;
 			notes.push({
-				slug,
+				slug: slugifyObsidianTarget(relativePath),
 				title:
-					(typeof frontmatter?.title === "string" && frontmatter.title) ||
-					extractTitle(content, entry.name),
-				content,
-				updatedAt: stats.mtime,
-				sourcePath: fullPath,
+					(typeof frontmatter.title === "string" && frontmatter.title) ||
+					entry.name.replace(/\.md$/i, ""),
+				content: parsed.content,
+				updatedAt: fs.statSync(fullPath).mtime,
 				relativePath,
-				published,
-				tags,
-				date,
+				published: isGardenPublished(frontmatter),
+				tags: normalizeTags(frontmatter.tags),
+				date: parseDate(frontmatter.date),
 			});
 		}
 	};
 
 	visitDir(vaultRoot);
-	const sorted = notes.sort((a, b) => a.title.localeCompare(b.title));
-	if (options.includeUnpublished) return sorted;
-	return sorted.filter((note) => note.published);
+	notes.sort((a, b) => a.title.localeCompare(b.title));
+	return options.includeUnpublished
+		? notes
+		: notes.filter((note) => note.published);
 };
 
 const normalizeTarget = (value: string) =>
 	slugifyObsidianTarget(value).toLowerCase();
 
+/**
+ * Resolve a wikilink/markdown-link target to a note by relative path, file
+ * name, or title. Unknown and unpublished targets render as plain text.
+ */
 export const createGardenLinkResolver = (notes: GardenNote[]) => {
 	const targetToNote = new Map<string, GardenNote>();
-
 	for (const note of notes) {
 		targetToNote.set(normalizeTarget(note.relativePath), note);
 		targetToNote.set(normalizeTarget(path.basename(note.relativePath)), note);
 		targetToNote.set(normalizeTarget(note.title), note);
 	}
 
-	return (link: { target: string; alias?: string }) => {
+	return (link: {
+		target: string;
+		alias?: string;
+	}): { text: string; isLink: boolean; slug?: string } => {
 		const match = targetToNote.get(normalizeTarget(link.target));
-		const displayText = link.alias || match?.title || link.target;
-
-		if (!match) {
-			return { text: displayText, isLink: false };
-		}
-
-		if (!match.published) {
-			return { text: displayText, isLink: false };
-		}
-
-		return { slug: match.slug, text: displayText, isLink: true };
+		const text = link.alias || match?.title || link.target;
+		if (!match?.published) return { text, isLink: false };
+		return { slug: match.slug, text, isLink: true };
 	};
 };
 
 type HeadingNode = Node & {
 	value?: unknown;
 	children?: HeadingNode[];
-	data?: {
-		hProperties?: Record<string, unknown>;
-	};
+	data?: { hProperties?: Record<string, unknown> };
 };
 
-const headingIdPlugin = () => (tree: unknown) => {
-	visit(tree as Node, "heading", (node: Node) => {
-		const collectText = (child: HeadingNode): string => {
-			if (!child) return "";
-			if (typeof child.value === "string") return child.value;
-			if (Array.isArray(child.children)) {
-				return child.children.map(collectText).join(" ");
-			}
-			return "";
-		};
+const collectText = (node: HeadingNode): string => {
+	if (typeof node.value === "string") return node.value;
+	return (node.children ?? []).map(collectText).join(" ");
+};
 
-		const text = collectText(node as HeadingNode).trim();
-		const id = slugifyHeading(text);
+// Give headings the same ids that `[[Note#Heading]]` links point at.
+const headingIdPlugin = () => (tree: unknown) => {
+	visit(tree as Node, "heading", (node: HeadingNode) => {
+		const id = slugifyHeading(collectText(node).trim());
 		if (!id) return;
-		const typedNode = node as HeadingNode;
-		typedNode.data = typedNode.data || {};
-		typedNode.data.hProperties = {
-			...(typedNode.data.hProperties || {}),
-			id,
-		};
+		node.data = node.data || {};
+		node.data.hProperties = { ...node.data.hProperties, id };
 	});
 };
 
+// Same pipeline as astro.config.mjs `markdown`, plus wikilink resolution.
+// Astro's built-in Prism is off: rehype-prism-plus highlights and numbers lines.
 export const renderGardenMarkdown = async (
 	content: string,
-	resolveLink: (link: {
-		target: string;
-		alias?: string;
-		heading?: string;
-		isEmbed?: boolean;
-	}) =>
-		| string
-		| {
-				text: string;
-				isLink: boolean;
-				slug?: string;
-				url?: string;
-		  },
+	resolveLink: ReturnType<typeof createGardenLinkResolver>,
 ) => {
 	const processor = await createMarkdownProcessor({
-		syntaxHighlight: "prism",
+		syntaxHighlight: false,
 		remarkPlugins: [
 			remarkMath,
-			remarkGfm,
-			[remarkObsidianLinks, { resolveLink, linkPrefix: "/garden" }],
+			[remarkObsidianLinks, { resolveLink }],
 			headingIdPlugin,
 		],
-		rehypePlugins: [rehypeKatex, prismPlugin],
+		rehypePlugins: [
+			rehypeKatex,
+			[
+				rehypePrism as unknown as RehypePlugin,
+				{ showLineNumbers: true, defaultLanguage: "plaintext" },
+			],
+		],
 	});
 
 	const { code, metadata } = await processor.render(content);

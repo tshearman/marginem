@@ -1,107 +1,17 @@
 ---
 import GardenLayout from "../../layouts/GardenLayout.astro";
-import {
-	createGardenLinkResolver,
-	loadGardenNotes,
-	resolveVaultRoot,
-} from "../../lib/garden";
-import { slugifyObsidianTarget } from "../../../plugins/remark-obsidian-links.js";
-import { extractTargets, plainExcerpt } from "../../lib/gardenPageUtils";
+import { createGardenLinkResolver, loadGardenNotes } from "../../lib/garden";
+import { buildFolderGraphData, plainExcerpt } from "../../lib/gardenPageUtils";
 import { MAIN_PAGES } from "../../lib/site";
 
-export const prerender = true;
-
-const notes = await loadGardenNotes();
-const vaultRoot = resolveVaultRoot();
-
-const gardenNotes = notes.map((note) => ({
+const notes = (await loadGardenNotes()).map((note) => ({
 	...note,
 	excerpt: plainExcerpt(note.content),
 }));
-
-const linkResolver = createGardenLinkResolver(gardenNotes);
-
-const groupByFolder = new Map<string, number>();
-let groupIndex = 1;
-const groupFor = (relativePath: string) => {
-	const folder = relativePath.split("/").slice(0, -1).join("/") || "root";
-	const existing = groupByFolder.get(folder);
-	if (existing) return existing;
-	const next = groupIndex++;
-	groupByFolder.set(folder, next);
-	return next;
-};
-
-const folderPaths = new Set<string>();
-for (const note of gardenNotes) {
-	const parts = note.relativePath.split("/");
-	parts.pop();
-	for (let index = 0; index < parts.length; index += 1) {
-		const folderPath = parts.slice(0, index + 1).join("/");
-		if (folderPath) folderPaths.add(folderPath);
-	}
-}
-
-const folderNodes = Array.from(folderPaths).map((folderPath) => {
-	const slug = slugifyObsidianTarget(folderPath);
-	const folderId = `folder:${slug}`;
-	const title = folderPath.split("/").slice(-1)[0] || folderPath;
-	return {
-		id: folderId,
-		title,
-		url: `/garden/${slug}/`,
-		group: groupFor(`${folderPath}/_folder`),
-	};
+const graph = buildFolderGraphData({
+	folderNotes: notes,
+	resolveLink: createGardenLinkResolver(notes),
 });
-
-const graphNodes = gardenNotes.map((note) => ({
-	id: note.slug,
-	title: note.title,
-	url: `/garden/${note.slug}/`,
-	group: groupFor(note.relativePath),
-	tooltipId: note.slug,
-}));
-const graphNodeList = [...folderNodes, ...graphNodes];
-
-const linkKeys = new Set<string>();
-const noteLinks = gardenNotes.flatMap((note) => {
-	const targets = extractTargets(note.content);
-	return targets.flatMap((target) => {
-		const resolved = linkResolver({ target });
-		if (!resolved.isLink || !resolved.slug) return [];
-		const key = `${note.slug}->${resolved.slug}`;
-		if (linkKeys.has(key)) return [];
-		linkKeys.add(key);
-		return [{ source: note.slug, target: resolved.slug }];
-	});
-});
-
-const folderLinks = Array.from(folderPaths).flatMap((folderPath) => {
-	const parts = folderPath.split("/");
-	if (parts.length < 2) return [];
-	const parentPath = parts.slice(0, -1).join("/");
-	const source = `folder:${slugifyObsidianTarget(folderPath)}`;
-	const target = `folder:${slugifyObsidianTarget(parentPath)}`;
-	const key = `${source}->${target}`;
-	if (linkKeys.has(key)) return [];
-	linkKeys.add(key);
-	return [{ source, target }];
-});
-
-const noteFolderLinks = gardenNotes.flatMap((note) => {
-	const parts = note.relativePath.split("/");
-	parts.pop();
-	if (!parts.length) return [];
-	const folderPath = parts.join("/");
-	const source = note.slug;
-	const target = `folder:${slugifyObsidianTarget(folderPath)}`;
-	const key = `${source}->${target}`;
-	if (linkKeys.has(key)) return [];
-	linkKeys.add(key);
-	return [{ source, target }];
-});
-
-const graphLinks = [...noteLinks, ...folderLinks, ...noteFolderLinks];
 ---
 
 <GardenLayout
@@ -110,9 +20,7 @@ const graphLinks = [...noteLinks, ...folderLinks, ...noteFolderLinks];
   eyebrow={MAIN_PAGES.garden.eyebrow}
   heading={MAIN_PAGES.garden.label}
   intro={MAIN_PAGES.garden.description}
-  notes={gardenNotes}
-  vaultRoot={vaultRoot ?? undefined}
-  graph={{ nodes: graphNodeList, links: graphLinks, labelKey: "title" }}
-  emptyMessage={`Set <code>OBSIDIAN_VAULT</code> to the root of an Obsidian vault (in your .env files or shell) and rebuild to generate Garden pages. Synced notes live at <code>./content/garden</code>; a sample vault lives at <code>./data/obsidian-vault-sample</code>.`}
-  activePage={MAIN_PAGES.garden.label}
+  notes={notes}
+  graph={{ ...graph, labelKey: "title" }}
+  emptyMessage="Set <code>OBSIDIAN_VAULT</code> to the root of an Obsidian vault (in .env or your shell) and run <code>npm run sync:obsidian</code> to publish Garden notes into <code>content/garden</code>."
 />

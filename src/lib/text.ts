@@ -40,7 +40,7 @@ export const oneLineSnippet = (text: string, max = 160): string => {
  * punctuation to yield plain prose. Does not truncate — compose with
  * {@link ellipsizeText} when a length limit is needed.
  */
-export const plainExcerpt = (content: string): string =>
+export const toPlainText = (content: string): string =>
 	content
 		.replace(/!?\[\[[^\]]+\]\]/g, " ")
 		.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")

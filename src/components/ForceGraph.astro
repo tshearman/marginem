@@ -1,69 +1,35 @@
 ---
 import GardenNotePreview from "./GardenNotePreview.astro";
-import NoteCard from "./NoteCard.astro";
-import PostPreview from "./PostPreview.astro";
 
 type GraphNode = {
 	id: string;
 	title?: string;
-	group?: number;
 	url?: string;
 	tooltipId?: string;
 };
 
-type GraphLink = {
-	source: string;
-	target: string;
-	value?: number;
-};
-
-type ForceGraphProps = {
+interface Props {
 	nodes: GraphNode[];
-	links: GraphLink[];
-	width?: number;
+	links: Array<{ source: string; target: string }>;
 	height?: number;
 	labelKey?: string;
-	className?: string;
-	noteTooltips?: Array<{
-		id: string;
-		content: string;
-		source?: string;
-		author?: string;
-		tags?: string[];
-		date?: Date;
-	}>;
-	postTooltips?: Array<{
-		id: string;
-		title: string;
-		url: string;
-		pubDate?: string;
-		displayDate?: string;
-		description?: string;
-		abstract?: string;
-		tags?: string[];
-	}>;
+	/** Rich hover cards, keyed by node id; other nodes show their title. */
 	gardenTooltips?: Array<{
 		id: string;
 		slug: string;
 		title: string;
 		excerpt: string;
 		updatedAt: Date;
-		relativePath: string;
-		vaultRoot?: string;
 	}>;
-};
+}
 
 const {
 	nodes,
 	links,
-	width = 640,
 	height = 240,
 	labelKey = "id",
-	className = "",
-	noteTooltips = [],
-	postTooltips = [],
 	gardenTooltips = [],
-} = Astro.props as ForceGraphProps;
+} = Astro.props;
 
 const labelForNode = (node: GraphNode) => {
 	const value = (node as Record<string, unknown>)[labelKey];
@@ -73,21 +39,16 @@ const labelForNode = (node: GraphNode) => {
 	return node.title || node.id;
 };
 
-const previewTooltipIds = new Set([
-	...gardenTooltips.map((note) => note.id),
-	...noteTooltips.map((note) => note.id),
-	...postTooltips.map((post) => post.id),
-]);
-
 const nodesWithTooltips = nodes.map((node) => ({
 	...node,
 	tooltipId: node.tooltipId ?? node.id,
 }));
 
+const previewTooltipIds = new Set(gardenTooltips.map((note) => note.id));
 const fallbackTooltips = nodesWithTooltips
-	.filter((node) => !previewTooltipIds.has(node.tooltipId ?? node.id))
+	.filter((node) => !previewTooltipIds.has(node.tooltipId))
 	.map((node) => ({
-		id: node.tooltipId ?? node.id,
+		id: node.tooltipId,
 		title: node.title || labelForNode(node),
 	}));
 
@@ -99,70 +60,30 @@ const graphId = `force-graph-${
 const payloadAttr = JSON.stringify({
 	nodes: nodesWithTooltips,
 	links,
-	width,
 	height: clampedHeight,
 	labelKey,
-}).replace(/</g, "\\u003c");
+});
 ---
 
-<div
-  class={`force-graph ${className}`.trim()}
-  style={`--force-graph-height-desktop: ${clampedHeight}px;`}
-  data-force-graph-id={graphId}
->
+<div class="force-graph" style={`--force-graph-height: ${clampedHeight}px;`}>
   <div id={graphId} class="force-graph__stage" data-force-graph={payloadAttr}>
   </div>
-  {
-    noteTooltips.length ||
-    postTooltips.length ||
-    gardenTooltips.length ||
-    fallbackTooltips.length ? (
-      <div
-        class="force-graph__tooltip-layer"
-        data-force-tooltip-owner={graphId}
-        aria-hidden="true"
-      >
-        {gardenTooltips.map((note) => (
-          <div class="force-graph__tooltip" data-force-tooltip-id={note.id}>
-            <GardenNotePreview note={note} />
-          </div>
-        ))}
-        {noteTooltips.map((note) => (
-          <div class="force-graph__tooltip" data-force-tooltip-id={note.id}>
-            <NoteCard
-              content={note.content}
-              source={note.source}
-              author={note.author}
-              tags={note.tags}
-              date={note.date}
-              class="force-graph__tooltip-card"
-              idOverride={`tooltip-${note.id}`}
-            />
-          </div>
-        ))}
-        {postTooltips.map((post) => (
-          <div class="force-graph__tooltip" data-force-tooltip-id={post.id}>
-            <PostPreview
-              title={post.title}
-              url={post.url}
-              pubDate={post.pubDate}
-              displayDate={post.displayDate}
-              description={post.description}
-              abstract={post.abstract}
-              tags={post.tags}
-            />
-          </div>
-        ))}
-        {fallbackTooltips.map((node) => (
-          <div class="force-graph__tooltip" data-force-tooltip-id={node.id}>
-            <div class="force-graph__title-card">
-              <h3 class="force-graph__title-card-heading">{node.title}</h3>
-            </div>
-          </div>
-        ))}
+  <div
+    class="force-graph__tooltip-layer"
+    data-force-tooltip-owner={graphId}
+    aria-hidden="true"
+  >
+    {gardenTooltips.map((note) => (
+      <div class="force-graph__tooltip" data-force-tooltip-id={note.id}>
+        <GardenNotePreview note={note} />
       </div>
-    ) : null
-  }
+    ))}
+    {fallbackTooltips.map((node) => (
+      <div class="force-graph__tooltip" data-force-tooltip-id={node.id}>
+        <h3 class="force-graph__title-card-heading">{node.title}</h3>
+      </div>
+    ))}
+  </div>
 </div>
 <script>
   import "../scripts/force-graph.ts";
@@ -170,11 +91,7 @@ const payloadAttr = JSON.stringify({
 
 <style>
   .force-graph {
-    width: 100%;
     height: var(--force-graph-height, 420px);
-    position: relative;
-    overflow: visible;
-    --force-graph-height: var(--force-graph-height-desktop, 420px);
   }
 
   .force-graph__stage {
@@ -205,31 +122,9 @@ const payloadAttr = JSON.stringify({
     padding: 1rem;
   }
 
-  .force-graph__tooltip :global(.note-card) {
-    margin: 0;
-    border-radius: 6px;
-  }
-
   .force-graph__tooltip :global(.garden-card) {
     margin: 0;
     border-radius: 6px;
-  }
-
-  .force-graph__tooltip :global(.post-preview) {
-    margin: 0;
-    border-radius: 6px;
-  }
-
-  .force-graph__tooltip :global(.note-card__anchor-link) {
-    display: none;
-  }
-
-  .force-graph__tooltip :global(.note-like) {
-    display: none;
-  }
-
-  .force-graph__title-card {
-    /* min-width: min(260px, 75vw); */
   }
 
   .force-graph__title-card-heading {
@@ -241,7 +136,7 @@ const payloadAttr = JSON.stringify({
 
   @media (max-width: 720px) {
     .force-graph {
-      --force-graph-height: 180px;
+      height: 180px;
     }
   }
 </style>

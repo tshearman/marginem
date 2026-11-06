@@ -1,6 +1,9 @@
 import { defineCollection, z } from "astro:content";
 import { glob } from "astro/loaders";
 
+// Garden and commonplace notes are raw Obsidian markdown read straight from
+// disk by src/lib/garden.ts and src/lib/commonplace.ts, not collections.
+
 const blog = defineCollection({
 	loader: glob({ base: "content/blog", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
@@ -13,45 +16,6 @@ const blog = defineCollection({
 		tags: z.array(z.string()).default([]),
 		draft: z.boolean().default(false),
 		featured: z.boolean().optional(),
-	}),
-});
-
-const commonplace = defineCollection({
-	loader: glob({ base: "content/commonplace", pattern: "**/*.{md,mdx}" }),
-	schema: z.object({
-		author: z.string().optional(),
-		source: z.string().optional(),
-		tags: z.array(z.string()).default([]),
-		date: z.coerce.date().optional(),
-		draft: z.boolean().optional(),
-		title: z.string().optional(),
-	}),
-});
-
-const garden = defineCollection({
-	loader: glob({ base: "content/garden", pattern: "**/*.{md,mdx}" }),
-	schema: z.object({
-		published: z.boolean().optional(),
-		tags: z.array(z.string()).default([]),
-		date: z.coerce.date().optional(),
-		draft: z.boolean().optional(),
-		title: z.string().optional(),
-	}),
-});
-
-const imgs = defineCollection({
-	loader: glob({ base: "content/imgs", pattern: "**/*.{md,mdx}" }),
-	schema: z.object({
-		draft: z.boolean().optional(),
-		title: z.string().optional(),
-	}),
-});
-
-const snippets = defineCollection({
-	loader: glob({ base: "content/snippets", pattern: "**/*.{md,mdx}" }),
-	schema: z.object({
-		draft: z.boolean().optional(),
-		title: z.string().optional(),
 	}),
 });
 
@@ -70,11 +34,4 @@ const newsletter = defineCollection({
 	}),
 });
 
-export const collections = {
-	blog,
-	commonplace,
-	garden,
-	imgs,
-	snippets,
-	newsletter,
-};
+export const collections = { blog, newsletter };

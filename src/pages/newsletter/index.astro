@@ -1,14 +1,12 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import Banner from "../../components/Banner.astro";
 import ArchiveEntry from "../../components/ArchiveEntry.astro";
 import SubscribeForm from "../../components/SubscribeForm.astro";
 import { getCollection } from "astro:content";
-import { withSlugs } from "../../lib/content";
 import { MAIN_PAGES } from "../../lib/site";
 
-const newsletters = withSlugs(
-	await getCollection("newsletter", ({ data }) => !data.draft),
+const newsletters = (
+	await getCollection("newsletter", ({ data }) => !data.draft)
 ).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
@@ -16,22 +14,12 @@ const newsletters = withSlugs(
   title={MAIN_PAGES.newsletter.pageTitle}
   description={MAIN_PAGES.newsletter.description}
   hero={MAIN_PAGES.newsletter.label}
-  showHero={false}
+  heroNarrow={"NEWSL\nETTER"}
+  heroHeight={140}
+  eyebrow={MAIN_PAGES.newsletter.eyebrow}
   activePage={MAIN_PAGES.newsletter.label}
-  bodyClass="brutalist newsletter-page"
+  bodyClass="full-height newsletter-page"
 >
-  <div class="page-hero">
-    <div class="page-hero__banner">
-      <Banner
-        text="NEWSLETTER"
-        textNarrow={"NEWSL\nETTER"}
-        height={140}
-        srLabel={MAIN_PAGES.newsletter.label}
-      />
-      <span class="page-hero__eyebrow">{MAIN_PAGES.newsletter.eyebrow}</span>
-    </div>
-  </div>
-
   <div class="newsletter-grid">
     <section class="newsletter-grid__issues" aria-labelledby="newsletter-archive-label">
       <h2 id="newsletter-archive-label" class="newsletter-section__label">Back Issues</h2>
@@ -42,7 +30,7 @@ const newsletters = withSlugs(
             newsletters.map((entry) => (
               <ArchiveEntry
                 title={`Issue ${entry.data.issueNumber}: ${entry.data.title}`}
-                url={`/newsletter/${entry.slug}/`}
+                url={`/newsletter/${entry.id}/`}
                 date={entry.data.pubDate}
                 description={entry.data.description}
                 tags={entry.data.tags}
@@ -63,31 +51,14 @@ const newsletters = withSlugs(
         Occasional dispatches from the margins &mdash; new essays, notes, and
         whatever else is drying on the page.
       </p>
-      <SubscribeForm variant="compact" redirectUrl="/subscribe/confirmed" invert />
+      <SubscribeForm invert />
     </aside>
   </div>
 </BaseLayout>
 
 <style is:global>
-  /*
-   * Newsletter-specific styles. The brutalist frame, hero, and footer chrome
-   * come from brutalist-page.css (body.brutalist); this block adds the
-   * vertical flex layout and the two-cell issues/subscribe grid.
-   */
-
-  /* Vertical flex column so the grid fills the viewport and the footer pins to
-     the bottom; the rest of the frame comes from brutalist-page.css. */
-  body.newsletter-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  body.newsletter-page .site-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
+  /* The two-cell issues/subscribe grid. `full-height` (brutalist-page.css)
+     makes .site-main a flex column so the grid can fill down to the footer. */
 
   /* ---- INTRO INSIDE ISSUES CELL ---- */
   body.newsletter-page .newsletter-issues__intro {
@@ -168,10 +139,6 @@ const newsletters = withSlugs(
   /* Archive-entry brutalist styles live in ArchiveEntry.astro (is:global). */
 
   /* ---- DARK SUBSCRIBE CELL (mirrors home.css .tall) ---- */
-  body.newsletter-page .newsletter-grid__subscribe a {
-    color: var(--paper);
-  }
-
   body.newsletter-page .newsletter-subscribe__intro {
     margin: 0 0 16px;
     font-family: var(--mono);
@@ -180,72 +147,19 @@ const newsletters = withSlugs(
     color: var(--paper);
   }
 
+  /* SubscribeForm's inverted styles come from brutalist-page.css; here it
+     just drops its box to sit flush in the cell. */
   body.newsletter-page .newsletter-grid__subscribe .subscribe-form {
-    display: block;
     padding: 0;
     border: 0;
-    border-radius: 0;
-    background: transparent;
-    color: var(--paper);
-  }
-
-  /* Hide the form's own h2 — section label already announces the cell. */
-  body.newsletter-page .newsletter-grid__subscribe .subscribe-form h2 {
-    display: none;
   }
 
   body.newsletter-page .newsletter-grid__subscribe .subscribe-form__field {
-    display: block;
     margin: 0 0 12px;
   }
 
-  body.newsletter-page .newsletter-grid__subscribe .subscribe-form label {
-    display: block;
-    margin: 0 0 4px;
-    font-family: var(--mono);
-    font-size: var(--fs-2xs);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--paper);
-  }
-
-  body.newsletter-page
-    .newsletter-grid__subscribe
-    .subscribe-form
-    input[type="email"],
-  body.newsletter-page
-    .newsletter-grid__subscribe
-    .subscribe-form
-    input[type="text"] {
-    width: 100%;
-    padding: 8px;
-    font-family: var(--mono);
-    font-size: var(--fs-base);
-    background: var(--paper);
-    color: var(--ink);
-    border: 3px solid var(--paper);
-    border-radius: 0;
-    box-shadow: none;
-  }
-
-  body.newsletter-page .newsletter-grid__subscribe .subscribe-form input:focus {
-    outline: 3px solid var(--paper-accent);
-    outline-offset: 0;
-    border-color: var(--paper);
-    box-shadow: none;
-  }
-
-  /* Subscribe button uses the shared .btn / .btn--invert from buttons.css —
-     no per-page overrides. */
-
   body.newsletter-page .newsletter-grid__subscribe .subscribe-form__note {
     margin: 12px 0 0;
-    font-family: var(--mono);
-    font-size: var(--fs-3xs);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: rgb(var(--white-rgb) / 0.75);
   }
 
   /* ---- MOBILE ---- */

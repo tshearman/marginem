@@ -1,196 +1,158 @@
-import type { GardenNote } from "./garden";
-import { slugifyObsidianTarget } from "../../plugins/remark-obsidian-links.js";
-import { plainExcerpt as toPlainText } from "./text";
+import type { createGardenLinkResolver, GardenNote } from "./garden";
+import {
+	isExternalOrAbsolute,
+	OBSIDIAN_LINK_PATTERN,
+	parseObsidianLink,
+	slugifyObsidianTarget,
+} from "../../plugins/remark-obsidian-links.js";
+import { toPlainText } from "./text";
 
-type GraphNode = {
-	id: string;
-	title: string;
-	url: string;
-	group?: number;
-	tooltipId?: string;
-};
-
-type GraphLink = {
-	source: string;
-	target: string;
-};
+type LinkResolver = ReturnType<typeof createGardenLinkResolver>;
 
 export const plainExcerpt = (content: string) => {
 	const condensed = toPlainText(content);
 	return condensed.length > 160 ? `${condensed.slice(0, 160)}…` : condensed;
 };
 
+/** Targets of the wikilinks and relative markdown links in raw markdown. */
 export const extractTargets = (content: string) => {
-	const targets: string[] = [];
+	const wikiTargets = Array.from(
+		content.matchAll(OBSIDIAN_LINK_PATTERN),
+		(match) => parseObsidianLink(match).target,
+	);
+	const markdownTargets = Array.from(
+		content.matchAll(/\[[^\]]+\]\(([^)]+)\)/g),
+		(match) => match[1].trim(),
+	)
+		.filter((url) => !isExternalOrAbsolute(url))
+		.map((url) => url.split("#")[0].replace(/\.mdx?$/i, ""));
+	return [...wikiTargets, ...markdownTargets].filter(Boolean);
+};
 
-	const obsidianPattern = /\[\[([^\]]+)\]\]/g;
-	let match = obsidianPattern.exec(content);
-	while (match) {
-		const raw = match[1]?.trim();
-		if (raw) {
-			targets.push(raw.split("|")[0]?.trim() ?? raw);
-		}
-		match = obsidianPattern.exec(content);
+const folderOf = (relativePath: string) =>
+	relativePath.split("/").slice(0, -1).join("/");
+
+const folderId = (folderPath: string) =>
+	`folder:${slugifyObsidianTarget(folderPath)}`;
+
+const folderUrl = (folderPath: string) =>
+	`/garden/${slugifyObsidianTarget(folderPath)}/`;
+
+/** Every folder, including ancestors, that contains at least one note. */
+export const collectFolderPaths = (
+	notes: Pick<GardenNote, "relativePath">[],
+) => {
+	const folders = new Set<string>();
+	for (const note of notes) {
+		const parts = note.relativePath.split("/").slice(0, -1);
+		parts.forEach((_, index) => {
+			folders.add(parts.slice(0, index + 1).join("/"));
+		});
 	}
-
-	const markdownPattern = /\[([^\]]+)\]\(([^)]+)\)/g;
-	let mdMatch = markdownPattern.exec(content);
-	while (mdMatch) {
-		const rawTarget = mdMatch[2]?.trim();
-		if (rawTarget) {
-			if (
-				rawTarget.startsWith("#") ||
-				rawTarget.startsWith("/") ||
-				rawTarget.startsWith("http://") ||
-				rawTarget.startsWith("https://") ||
-				rawTarget.startsWith("mailto:") ||
-				rawTarget.startsWith("tel:")
-			) {
-				mdMatch = markdownPattern.exec(content);
-				continue;
-			}
-			const normalized = rawTarget.replace(/\.md$/i, "");
-			targets.push(normalized || rawTarget);
-		}
-		mdMatch = markdownPattern.exec(content);
-	}
-
-	return targets;
+	return Array.from(folders);
 };
 
 export const buildBreadcrumbs = (segments: string[]) =>
-	segments.map((segment, index) => {
-		const href =
+	segments.map((segment, index) => ({
+		label: segment,
+		href:
 			index === segments.length - 1
 				? undefined
-				: `/garden/${slugifyObsidianTarget(
-						segments.slice(0, index + 1).join("/"),
-					)}/`;
-		return { label: segment, href };
-	});
+				: folderUrl(segments.slice(0, index + 1).join("/")),
+	}));
 
+/** Unique slugs of the published notes that `note` links to. */
+export const getOutgoingNeighborSlugs = (
+	note: GardenNote,
+	resolveLink: LinkResolver,
+) =>
+	Array.from(
+		new Set(
+			extractTargets(note.content).flatMap(
+				(target) => resolveLink({ target }).slug || [],
+			),
+		),
+	);
+
+/** Slugs of the other notes that link to `currentSlug`. */
 export const getIncomingNeighborSlugs = (
 	notes: GardenNote[],
 	currentSlug: string,
-	resolveLink: (link: { target: string }) => { slug?: string; isLink: boolean },
+	resolveLink: LinkResolver,
 ) =>
 	notes
-		.filter((item) => item.slug !== currentSlug)
-		.filter((item) =>
-			extractTargets(item.content).some(
-				(target) => resolveLink({ target }).slug === currentSlug,
-			),
+		.filter(
+			(item) =>
+				item.slug !== currentSlug &&
+				getOutgoingNeighborSlugs(item, resolveLink).includes(currentSlug),
 		)
 		.map((item) => item.slug);
 
-export const getOutgoingNeighborSlugs = (
-	note: GardenNote,
-	resolveLink: (link: { target: string }) => { slug?: string; isLink: boolean },
-) =>
-	extractTargets(note.content)
-		.map((target) => resolveLink({ target }).slug)
-		.filter((slug): slug is string => Boolean(slug));
-
+/**
+ * Force-graph data for a set of notes plus their folders: note→note links,
+ * folder→parent links, and note→folder links. Pass `folderPath` to scope the
+ * graph to that folder's subfolders; omit it for the whole garden.
+ */
 export const buildFolderGraphData = ({
 	folderNotes,
 	folderPath,
 	resolveLink,
 }: {
 	folderNotes: GardenNote[];
-	folderPath: string;
-	resolveLink: (link: { target: string }) => { slug?: string; isLink: boolean };
+	folderPath?: string;
+	resolveLink: LinkResolver;
 }) => {
-	const groupByFolder = new Map<string, number>();
-	let groupIndex = 1;
-	const groupFor = (relativePath: string) => {
-		const folder = relativePath.split("/").slice(0, -1).join("/") || "root";
-		const existing = groupByFolder.get(folder);
-		if (existing) return existing;
-		const next = groupIndex++;
-		groupByFolder.set(folder, next);
-		return next;
+	// Each folder gets a colour group shared with the notes directly inside it.
+	const groups = new Map<string, number>();
+	const groupFor = (folder: string) => {
+		if (!groups.has(folder)) groups.set(folder, groups.size + 1);
+		return groups.get(folder) as number;
 	};
 
-	const folderNodeSlugs = new Set(folderNotes.map((item) => item.slug));
+	const folderPaths = collectFolderPaths(folderNotes).filter(
+		(path) => !folderPath || path.startsWith(`${folderPath}/`),
+	);
+	const folderIds = new Set(folderPaths.map(folderId));
+	const noteSlugs = new Set(folderNotes.map((note) => note.slug));
 
-	const folderPaths = new Set<string>();
-	for (const note of folderNotes) {
-		const parts = note.relativePath.split("/");
-		parts.pop();
-		for (let index = 0; index < parts.length; index += 1) {
-			const pathValue = parts.slice(0, index + 1).join("/");
-			if (pathValue.startsWith(`${folderPath}/`)) {
-				folderPaths.add(pathValue);
-			}
-		}
-	}
+	const nodes = [
+		...folderPaths.map((path) => ({
+			id: folderId(path),
+			title: path.split("/").pop() || path,
+			url: folderUrl(path),
+			group: groupFor(path),
+		})),
+		...folderNotes.map((note) => ({
+			id: note.slug,
+			title: note.title,
+			url: `/garden/${note.slug}/`,
+			tooltipId: note.slug,
+			group: groupFor(folderOf(note.relativePath) || "root"),
+		})),
+	];
 
-	const folderNodes = Array.from(folderPaths).map((pathValue) => {
-		const slug = slugifyObsidianTarget(pathValue);
-		return {
-			id: `folder:${slug}`,
-			title: pathValue.split("/").slice(-1)[0] || pathValue,
-			url: `/garden/${slug}/`,
-			group: groupFor(`${pathValue}/_folder`),
-		} satisfies GraphNode;
-	});
+	const noteLinks = folderNotes.flatMap((note) =>
+		getOutgoingNeighborSlugs(note, resolveLink)
+			.filter((slug) => noteSlugs.has(slug))
+			.map((target) => ({ source: note.slug, target })),
+	);
+	const folderLinks = folderPaths
+		.map((path) => ({
+			source: folderId(path),
+			target: folderId(folderOf(path)),
+		}))
+		.filter((link) => folderIds.has(link.target));
+	const noteFolderLinks = folderNotes
+		.map((note) => ({
+			source: note.slug,
+			target: folderId(folderOf(note.relativePath)),
+		}))
+		.filter((link) => folderIds.has(link.target));
 
-	const folderGraphNodes = folderNotes.map((item) => ({
-		id: item.slug,
-		title: item.title,
-		url: `/garden/${item.slug}/`,
-		tooltipId: item.slug,
-		group: groupFor(item.relativePath),
-	})) satisfies GraphNode[];
-
-	const folderLinkKeys = new Set<string>();
-	const noteLinks = folderNotes.flatMap((item) => {
-		const targets = extractTargets(item.content);
-		return targets.flatMap((target) => {
-			const resolved = resolveLink({ target });
-			if (!resolved.isLink || !resolved.slug) return [];
-			if (!folderNodeSlugs.has(resolved.slug)) return [];
-			const key = `${item.slug}->${resolved.slug}`;
-			if (folderLinkKeys.has(key)) return [];
-			folderLinkKeys.add(key);
-			return [{ source: item.slug, target: resolved.slug }];
-		});
-	});
-
-	const folderIds = new Set(folderNodes.map((node) => node.id));
-	const folderLinks = Array.from(folderPaths).flatMap((pathValue) => {
-		const parts = pathValue.split("/");
-		if (parts.length < 2) return [];
-		const parentPath = parts.slice(0, -1).join("/");
-		const source = `folder:${slugifyObsidianTarget(pathValue)}`;
-		const target = `folder:${slugifyObsidianTarget(parentPath)}`;
-		if (!folderIds.has(source) || !folderIds.has(target)) return [];
-		const key = `${source}->${target}`;
-		if (folderLinkKeys.has(key)) return [];
-		folderLinkKeys.add(key);
-		return [{ source, target }];
-	});
-
-	const noteFolderLinks = folderNotes.flatMap((item) => {
-		const parts = item.relativePath.split("/");
-		parts.pop();
-		if (!parts.length) return [];
-		const pathValue = parts.join("/");
-		const source = item.slug;
-		const target = `folder:${slugifyObsidianTarget(pathValue)}`;
-		if (!folderIds.has(target)) return [];
-		const key = `${source}->${target}`;
-		if (folderLinkKeys.has(key)) return [];
-		folderLinkKeys.add(key);
-		return [{ source, target }];
-	});
-
-	return {
-		nodes: [...folderNodes, ...folderGraphNodes],
-		links: [...noteLinks, ...folderLinks, ...noteFolderLinks],
-	} satisfies { nodes: GraphNode[]; links: GraphLink[] };
+	return { nodes, links: [...noteLinks, ...folderLinks, ...noteFolderLinks] };
 };
 
+/** Graph of a note, the notes it links to or from, and its parent folder. */
 export const buildNeighborGraphData = ({
 	note,
 	notes,
@@ -200,69 +162,45 @@ export const buildNeighborGraphData = ({
 }: {
 	note: GardenNote;
 	notes: GardenNote[];
-	resolveLink: (link: { target: string }) => { slug?: string; isLink: boolean };
-	incomingNeighborSlugs?: string[];
-	outgoingNeighborSlugs?: string[];
+	resolveLink: LinkResolver;
+	incomingNeighborSlugs: string[];
+	outgoingNeighborSlugs: string[];
 }) => {
 	const noteBySlug = new Map(notes.map((item) => [item.slug, item]));
-	const currentSlug = note.slug;
-	const outgoing =
-		outgoingNeighborSlugs ?? getOutgoingNeighborSlugs(note, resolveLink);
-	const incoming =
-		incomingNeighborSlugs ??
-		getIncomingNeighborSlugs(notes, currentSlug, resolveLink);
+	const neighborSlugs = new Set([
+		note.slug,
+		...outgoingNeighborSlugs,
+		...incomingNeighborSlugs,
+	]);
+	const neighbors = Array.from(neighborSlugs).flatMap(
+		(slug) => noteBySlug.get(slug) ?? [],
+	);
 
-	const neighborNoteSlugs = new Set([currentSlug, ...outgoing, ...incoming]);
+	const folder = folderOf(note.relativePath);
+	const folderNode = folder
+		? {
+				id: folderId(folder),
+				title: folder.split("/").pop() || "Folder",
+				url: folderUrl(folder),
+			}
+		: { id: "folder:root", title: "Garden", url: "/garden/" };
 
-	const neighborNotes = Array.from(neighborNoteSlugs)
-		.map((slug) => noteBySlug.get(slug))
-		.filter((item): item is GardenNote => Boolean(item))
-		.map((item) => ({
-			id: item.slug,
-			title: item.title,
-			url: `/garden/${item.slug}/`,
-		}));
-
-	const currentFolderPath =
-		note.relativePath.split("/").slice(0, -1).join("/") ?? "";
-	const folderNode = {
-		id: currentFolderPath
-			? `folder:${slugifyObsidianTarget(currentFolderPath)}`
-			: "folder:root",
-		title: currentFolderPath
-			? currentFolderPath.split("/").slice(-1)[0] || "Folder"
-			: "Garden",
-		url: currentFolderPath
-			? `/garden/${slugifyObsidianTarget(currentFolderPath)}/`
-			: "/garden/",
-	};
-
-	const neighborNodes = [...neighborNotes, folderNode];
-
-	const neighborLinks = new Set<string>();
-	const neighborEdges = neighborNotes.flatMap((node) => {
-		const sourceNote = noteBySlug.get(node.id);
-		if (!sourceNote) return [];
-		const targets = extractTargets(sourceNote.content)
-			.map((target) => resolveLink({ target }).slug)
-			.filter((slug): slug is string => Boolean(slug))
-			.filter((slug) => neighborNoteSlugs.has(slug));
-		return targets.flatMap((target) => {
-			const key = `${node.id}->${target}`;
-			if (neighborLinks.has(key)) return [];
-			neighborLinks.add(key);
-			return [{ source: node.id, target }];
-		});
-	});
-
-	const key = `${currentSlug}->${folderNode.id}`;
-	if (!neighborLinks.has(key)) {
-		neighborLinks.add(key);
-		neighborEdges.push({ source: currentSlug, target: folderNode.id });
-	}
+	const links = neighbors.flatMap((item) =>
+		getOutgoingNeighborSlugs(item, resolveLink)
+			.filter((slug) => neighborSlugs.has(slug))
+			.map((target) => ({ source: item.slug, target })),
+	);
+	links.push({ source: note.slug, target: folderNode.id });
 
 	return {
-		nodes: neighborNodes,
-		links: neighborEdges,
-	} satisfies { nodes: GraphNode[]; links: GraphLink[] };
+		nodes: [
+			...neighbors.map((item) => ({
+				id: item.slug,
+				title: item.title,
+				url: `/garden/${item.slug}/`,
+			})),
+			folderNode,
+		],
+		links,
+	};
 };

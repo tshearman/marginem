@@ -1,19 +1,18 @@
-export interface NoteMeta {
-	content: string;
-	source?: string;
-	author?: string;
-	date?: Date;
-}
-
+/**
+ * Stable anchor id for a commonplace note: content and author slugs plus a
+ * short hash. Used for permalinks, so the output must not change.
+ */
 export const generateNoteId = ({
 	content = "",
-	author = "",
+	author,
 	date,
-}: NoteMeta) => {
-	const baseContent = content || "";
+}: {
+	content?: string;
+	author?: string;
+	date?: Date;
+}) => {
 	const baseAuthor = author || "unknown";
-	const isoDate = date ? new Date(date).toISOString() : "";
-	const slugify = (value: string, max = 30) =>
+	const slugify = (value: string, max: number) =>
 		value
 			.toLowerCase()
 			.replace(/[^a-z0-9\s]/g, "")
@@ -21,15 +20,14 @@ export const generateNoteId = ({
 			.replace(/\s+/g, "-")
 			.slice(0, max);
 
-	const contentSlug = slugify(baseContent, 30);
-	const authorSlug = slugify(baseAuthor, 20);
-	const hashSource = `${baseContent}|${baseAuthor}|${isoDate}`;
+	const hashSource = `${content}|${baseAuthor}|${
+		date ? date.toISOString() : ""
+	}`;
 	let hash = 0;
 	for (let i = 0; i < hashSource.length; i++) {
-		const charCode = hashSource.charCodeAt(i);
-		hash = (hash << 5) - hash + charCode;
+		hash = (hash << 5) - hash + hashSource.charCodeAt(i);
 		hash |= 0;
 	}
 	const hashHex = Math.abs(hash).toString(16).padStart(8, "0").slice(0, 8);
-	return `${contentSlug}-${authorSlug}-${hashHex}`;
+	return `${slugify(content, 30)}-${slugify(baseAuthor, 20)}-${hashHex}`;
 };

@@ -5,7 +5,7 @@
  * glyph EDGES stay crisp (per-pixel alpha), but the black/white "ink" inside
  * each letter is decided once per PIXEL-sized block from the image's luminance
  * — white over dark regions, black over light — so the colour quantizes into
- * chunks. A hot-yellow offset copy sits behind the text for depth.
+ * chunks. A highlight-coloured offset copy sits behind the text for depth.
  *
  * The composite is GPU-driven: a tiny W/block × H/block luminance image is
  * thresholded to black/white, nearest-neighbor upscaled to W×H to produce the
@@ -42,7 +42,7 @@ export interface BannerConfig {
 	invert: boolean;
 	/** Image pixels below this alpha count as transparent (→ black ink). */
 	alphaCutoff: number;
-	/** Draw the hot-yellow offset copy behind the text. */
+	/** Draw the highlight-coloured offset copy behind the text. */
 	shadow: boolean;
 	/** Shadow colour. Defaults to the `--shadow` CSS variable on the canvas. */
 	shadowColor: string;
@@ -350,7 +350,7 @@ export function renderBanner(
 			lineGaps[li],
 		);
 
-	// 5. Hot-yellow offset copy on the main canvas, behind the final text.
+	// 5. Highlight-coloured offset copy on the main canvas, behind the text.
 	if (cfg.shadow) {
 		ctx.save();
 		ctx.fillStyle = cfg.shadowColor;
@@ -433,12 +433,19 @@ export function initBanner(canvas: HTMLCanvasElement): void {
 	}
 
 	const start = () => {
-		// Re-read config each frame so theme-derived CSS vars (e.g. --shadow,
-		// which tracks --highlight) update when the theme toggle fires.
-		const render = () => renderBanner(canvas, readConfig(canvas), img);
+		// The banner looks the same in both themes (the --shadow highlight is
+		// pinned per page load), so only a width or DPR change needs a
+		// repaint. Skipping height-only resizes avoids redrawing on every
+		// mobile toolbar show/hide while scrolling.
+		let lastKey = "";
+		const render = () => {
+			const key = `${canvas.parentElement?.clientWidth}@${window.devicePixelRatio}`;
+			if (key === lastKey) return;
+			lastKey = key;
+			renderBanner(canvas, cfg, img);
+		};
 		render();
 		window.addEventListener("resize", render);
-		document.addEventListener("themechange", render);
 	};
 
 	const ready = () => {

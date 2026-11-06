@@ -1,18 +1,9 @@
 /*
- * Brutalist post page styles. Loaded by two consumers — PostLayout (the
- * blog/newsletter article layout) and pages/garden/[...slug].astro (the
- * note view, which uses BaseLayout directly + pulls in this file plus
- * garden.css for the article body styling) — so these rules live in a
- * shared file rather than a single layout's <style is:global>.
- *
- * Selectors are global; they override BaseLayout's neutral chrome so
- * post pages adopt the same brutalist frame as the homepage. Where
- * possible we reuse rules from home.css verbatim.
+ * Article styles: the title block, long-form body, footnotes and the
+ * footnote panel. Imported by PostLayout (essays, newsletter issues) and by
+ * pages/garden/[...slug].astro (garden notes reuse `.paper-body`).
  */
-
-/* The brutalist page frame (max-width, border, mono type) comes from
-   brutalist-page.css (body.brutalist); post pages set both `brutalist` and
-   `post-page`. This file adds the article-specific chrome below. */
+@import "./prism-vs.css";
 
 /* ---- ARTICLE FRAME ---- */
 .post-shell {
@@ -109,7 +100,6 @@
   margin: 18px 0 0;
   padding: 14px 16px 16px;
   text-align: left;
-  border: 0px solid var(--ink);
   background: var(--paper);
 }
 
@@ -202,7 +192,7 @@
 }
 
 .paper-body a:hover {
-  background-color: var(--paper-accent);
+  background-color: var(--highlight);
   color: var(--highlight-fg);
   text-decoration: none;
 }
@@ -210,7 +200,7 @@
 /* ---- INLINE CODE / CODE BLOCKS ---- */
 .paper-body code:not(pre code) {
   font-family: var(--mono);
-  background: var(--paper-shadow);
+  background: var(--highlight);
   border: 1.5px solid var(--ink);
   border-radius: 0;
   padding: 0 4px;
@@ -404,19 +394,82 @@
   display: none;
 }
 
+/* Bottom sheet that init-footnotes.js opens when a footnote ref is clicked. */
 .footnote-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  padding: 1.35rem 3.25rem 1.35rem 1.5rem;
+  font-family: var(--mono);
+  font-size: var(--fs-sm);
+  color: var(--ink);
   background: var(--paper);
   border-top: 6px solid var(--ink);
-  border-radius: 0;
-  box-shadow: 0 -8px 0 var(--paper-shadow);
-  font-family: var(--mono);
-  color: var(--ink);
-  font-size: var(--fs-sm);
+  box-shadow: 0 -8px 0 var(--highlight);
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.footnote-panel--visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.footnote-panel__inner {
+  margin: 1rem auto;
+  width: min(72ch, 100%);
+}
+
+.footnote-panel__content {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
 }
 
 .footnote-panel__number {
-  color: var(--ink);
   font-weight: 900;
+}
+
+.footnote-panel__text {
+  margin: 0;
+  flex: 1;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.footnote-panel__text > p {
+  margin-top: 0;
+}
+
+.footnote-panel__text img {
+  max-height: 50vh;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.footnote-panel__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  font-size: var(--fs-2xl);
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.footnote-panel__close:hover {
+  color: var(--ink);
 }
 
 /* ---- MARGIN NOTES (re-emphasise inside post body) ---- */
@@ -425,8 +478,6 @@
   border-left: 4px solid var(--ink);
   font-size: var(--fs-xs);
 }
-
-/* Tag chips use the shared brutalist definition in cards.css. */
 
 /* ---- MOBILE ---- */
 @media (max-width: 720px) {

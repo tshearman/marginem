@@ -1,103 +1,50 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import Banner from "../../components/Banner.astro";
+import ArchiveList from "../../components/ArchiveList.astro";
 import FilterableCount from "../../components/FilterableCount.astro";
-import ArchiveEntry from "../../components/ArchiveEntry.astro";
 import TagFilterPanel from "../../components/TagFilterPanel.astro";
-import { getCollection } from "astro:content";
 import { MAIN_PAGES } from "../../lib/site";
-import { withSlugs } from "../../lib/content";
+import { loadArchiveItems, sortArchiveItems } from "../../lib/archive";
 
-export const prerender = true;
-
-const posts = withSlugs(await getCollection("blog", ({ data }) => !data.draft));
-
-const sortedPosts = posts.sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+const posts = sortArchiveItems(
+	(await loadArchiveItems()).filter((item) => item.kind === "blog"),
 );
-
-type PostsByYear = Record<string, typeof sortedPosts>;
-const postsByYear = sortedPosts.reduce<PostsByYear>((acc, post) => {
-	const year = post.data.pubDate.getFullYear().toString();
-	if (!acc[year]) acc[year] = [];
-	acc[year].push(post);
-	return acc;
-}, {});
-
-const groupedYears = Object.entries(postsByYear).sort(
-	(a, b) => Number(b[0]) - Number(a[0]),
+const allTags = [...new Set(posts.flatMap((post) => post.tags))].sort((a, b) =>
+	a.localeCompare(b),
 );
-
-const allTags = [
-	...new Set(sortedPosts.flatMap((post) => post.data.tags ?? [])),
-].sort((a, b) => a.localeCompare(b));
-
-const writingFilterConfig = JSON.stringify({
-	filterSelector: ".tag-filter-container .tag--filter",
-	countId: "postsCount",
-	hintId: "postsClearHint",
-	itemSelector: ".archive-item",
-	itemTagSelector: ".archive-item .tag--filter",
-	groupSelector: ".archive-year",
-	groupItemSelector: ".archive-item",
-	stateKey: "writing-all",
-	countLabel: "posts",
-});
 ---
+
 <BaseLayout
   title={MAIN_PAGES.writing.pageTitle}
   description={MAIN_PAGES.writing.description}
   hero={MAIN_PAGES.writing.label}
-  showHero={false}
+  heroHeight={140}
+  eyebrow={MAIN_PAGES.writing.eyebrow}
+  subtitle={MAIN_PAGES.writing.description}
   activePage={MAIN_PAGES.writing.label}
-  bodyClass="brutalist archive-page"
 >
-  <div class="page-hero">
-    <div class="page-hero__banner">
-      <Banner
-        text="WRITING"
-        height={140}
-        srLabel={MAIN_PAGES.writing.label}
-      />
-      <span class="page-hero__eyebrow">{MAIN_PAGES.writing.eyebrow}</span>
-    </div>
-    <p class="page-hero__subtitle">{MAIN_PAGES.writing.description}</p>
-  </div>
-
   <div class="page-shell">
-  {
-    !sortedPosts.length ? (
-      <p>No posts yet. Check back soon.</p>
-    ) : (
-      <section class="archive-page" data-filter-config={writingFilterConfig}>
-        <TagFilterPanel tags={allTags} />
-        <FilterableCount contentType="posts" totalCount={sortedPosts.length} />
-        <div class="archive-years">
-          {groupedYears.map(([year, yearPosts]) => (
-            <section class="archive-year">
-              <h2>{year}</h2>
-              <div class="archive-year__entries">
-                {yearPosts.map((post) => (
-                  <div
-                    class="archive-item"
-                    data-tags={JSON.stringify(post.data.tags ?? [])}
-                  >
-                    <ArchiveEntry
-                      title={post.data.title}
-                      url={`/writing/${post.slug}/`}
-                      date={post.data.pubDate}
-                      description={post.data.abstract ?? post.data.description ?? ""}
-                      tags={post.data.tags ?? []}
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      </section>
-    )
-  }
+    {
+      posts.length ? (
+        <ArchiveList
+          items={posts}
+          filterConfig={{
+            filterSelector: ".tag-filter-container .tag--filter",
+            itemSelector: ".archive-item",
+            itemTagSelector: ".archive-item .tag--filter",
+            groupSelector: ".archive-year",
+            countId: "postsCount",
+            hintId: "postsClearHint",
+            countLabel: "posts",
+          }}
+        >
+          <TagFilterPanel tags={allTags} />
+          <FilterableCount contentType="posts" totalCount={posts.length} />
+        </ArchiveList>
+      ) : (
+        <p>No posts yet. Check back soon.</p>
+      )
+    }
   </div>
 </BaseLayout>
 

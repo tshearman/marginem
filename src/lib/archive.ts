@@ -5,7 +5,6 @@ import { loadGardenNotes } from "./garden";
 import { plainExcerpt } from "./gardenPageUtils";
 import { oneLineSnippet } from "./text";
 import { generateNoteId } from "./noteUtils";
-import { withSlugs } from "./content";
 
 /**
  * Normalised archive entry. Every kind funnels through ArchiveEntry, so the
@@ -20,8 +19,8 @@ export type ArchiveItem = {
 	title: string;
 	url: string;
 	description: string;
-	sortDate?: Date;
-	displayDate?: Date;
+	sortDate: Date;
+	displayDate: Date;
 };
 
 /** Load every published item across all four collections as a flat ArchiveItem[]. */
@@ -35,29 +34,26 @@ export async function loadArchiveItems(): Promise<ArchiveItem[]> {
 		],
 	);
 
-	const postsWithSlugs = withSlugs(posts);
-	const newslettersWithSlugs = withSlugs(newsletters);
-
 	return [
-		...postsWithSlugs.map(
+		...posts.map(
 			(post): ArchiveItem => ({
 				kind: "blog",
 				category: MAIN_PAGES.writing.label,
-				tags: post.data.tags ?? [],
+				tags: post.data.tags,
 				title: post.data.title,
-				url: `/writing/${post.slug}/`,
-				description: post.data.abstract ?? post.data.description ?? "",
+				url: `/writing/${post.id}/`,
+				description: post.data.abstract ?? post.data.description,
 				sortDate: post.data.pubDate,
 				displayDate: post.data.pubDate,
 			}),
 		),
-		...newslettersWithSlugs.map(
+		...newsletters.map(
 			(entry): ArchiveItem => ({
 				kind: "newsletter",
 				category: MAIN_PAGES.newsletter.label,
-				tags: entry.data.tags ?? [],
+				tags: entry.data.tags,
 				title: `Issue ${entry.data.issueNumber}: ${entry.data.title}`,
-				url: `/newsletter/${entry.slug}/`,
+				url: `/newsletter/${entry.id}/`,
 				description: entry.data.description ?? "",
 				sortDate: entry.data.pubDate,
 				displayDate: entry.data.pubDate,
@@ -72,7 +68,7 @@ export async function loadArchiveItems(): Promise<ArchiveItem[]> {
 			return {
 				kind: "commonplace",
 				category: MAIN_PAGES.commonplace.label,
-				tags: note.tags ?? [],
+				tags: note.tags,
 				title: `"${oneLineSnippet(note.content, 140)}"`,
 				url: `${MAIN_PAGES.commonplace.href}#${noteId}`,
 				description: formatAttribution(note),
@@ -84,7 +80,7 @@ export async function loadArchiveItems(): Promise<ArchiveItem[]> {
 			(note): ArchiveItem => ({
 				kind: "garden",
 				category: MAIN_PAGES.garden.label,
-				tags: note.tags ?? [],
+				tags: note.tags,
 				title: note.title,
 				url: `/garden/${note.slug}/`,
 				description: plainExcerpt(note.content),
@@ -95,34 +91,22 @@ export async function loadArchiveItems(): Promise<ArchiveItem[]> {
 	];
 }
 
-/** Sort newest-first, falling back to title for undated items. */
+/** Sort newest-first. */
 export function sortArchiveItems(items: ArchiveItem[]): ArchiveItem[] {
-	return [...items].sort((a, b) => {
-		const aTime = a.sortDate?.getTime();
-		const bTime = b.sortDate?.getTime();
-		if (aTime != null && bTime != null) return bTime - aTime;
-		if (aTime != null) return -1;
-		if (bTime != null) return 1;
-		return a.title.localeCompare(b.title);
-	});
+	return [...items].sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
 }
 
 /** Group a sorted item list into [year, items[]] tuples, newest year first.
- *  Items without a sortDate land in an "Undated" bucket pinned to the end. */
+ *  Years are UTC, matching the dates formatted by lib/date.ts. */
 export function groupByYear(
 	items: ArchiveItem[],
 ): Array<[string, ArchiveItem[]]> {
-	const byYear: Record<string, ArchiveItem[]> = {};
+	const byYear = new Map<string, ArchiveItem[]>();
 	for (const item of items) {
-		const year = item.sortDate
-			? item.sortDate.getFullYear().toString()
-			: "Undated";
-		if (!byYear[year]) byYear[year] = [];
-		byYear[year].push(item);
+		const year = String(item.sortDate.getUTCFullYear());
+		const bucket = byYear.get(year);
+		if (bucket) bucket.push(item);
+		else byYear.set(year, [item]);
 	}
-	return Object.entries(byYear).sort((a, b) => {
-		if (a[0] === "Undated") return 1;
-		if (b[0] === "Undated") return -1;
-		return Number(b[0]) - Number(a[0]);
-	});
+	return [...byYear].sort((a, b) => Number(b[0]) - Number(a[0]));
 }

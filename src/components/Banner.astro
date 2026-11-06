@@ -1,8 +1,10 @@
 ---
-import { DEFAULT_CONFIG } from "../scripts/banner";
 import bannerSrcUrl from "../assets/banners/_optimized/notebook_banner_c.webp?url";
 
-interface BannerProps {
+// Canvas tunables (pixel block size, ink inversion, shadow offset, narrow
+// breakpoint) use DEFAULT_CONFIG in scripts/banner.ts; add a data-* attribute
+// below to override one.
+interface Props {
 	text: string;
 	textNarrow?: string;
 	src?: string;
@@ -11,11 +13,6 @@ interface BannerProps {
 	 *  which covers up to 400 CSS px at 2× DPR. Beyond that the canvas
 	 *  letterboxes with the background fill. */
 	height?: number;
-	pixel?: number;
-	invert?: boolean;
-	shadowDx?: number;
-	shadowDy?: number;
-	narrowMax?: number;
 	srLabel?: string;
 }
 
@@ -24,30 +21,17 @@ const {
 	textNarrow,
 	src = bannerSrcUrl,
 	height = 300,
-	pixel = DEFAULT_CONFIG.pixel,
-	invert = true,
-	shadowDx = 5,
-	shadowDy = 5,
-	narrowMax = 720,
 	srLabel,
-} = Astro.props as BannerProps;
-
-const bannerStyle = `--banner-h:${height}px;background-image:url(${src});`;
+} = Astro.props;
 ---
 
-<div class="banner" style={bannerStyle}>
+<div class="banner" style={`--banner-h:${height}px;background-image:url(${src});`}>
   <canvas
     data-banner
     data-src={src}
     data-text={text}
-    data-text-narrow={textNarrow ?? ""}
-    data-narrow-max={String(narrowMax)}
-    data-height={String(height)}
-    data-pixel={String(pixel)}
-    data-invert={String(invert)}
-    data-shadow-dx={String(shadowDx)}
-    data-shadow-dy={String(shadowDy)}
-    style={`height:${height}px;`}></canvas>
+    data-text-narrow={textNarrow}
+    data-height={height}></canvas>
   <h1 class="sr-only">{srLabel ?? text}</h1>
 </div>
 
@@ -74,8 +58,6 @@ const bannerStyle = `--banner-h:${height}px;background-image:url(${src});`;
 <style>
   .banner {
     --shadow: var(--highlight);
-    width: min(860px, 100%);
-    margin: 0 auto;
     /* Stays raw black — matches the dark notebook scan painted into the canvas
        so there's no light strip during image load, regardless of theme. */
     background-color: #000;

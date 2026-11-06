@@ -7,12 +7,14 @@ import {
 	isIgnoredFileName,
 } from "../src/lib/obsidian-utils.js";
 
+// Copy published garden notes and commonplace notes from an Obsidian vault
+// into content/garden and content/commonplace, using the same publish rules as
+// src/lib/garden.ts and src/lib/commonplace.ts.
+//
+// Usage: npm run sync:obsidian -- [--vault <path>] [--no-clean]
+
 const REPO_ROOT = process.cwd();
 const CONTENT_DIR = "content";
-
-const DEFAULT_CONFIG = {
-	commonplacePath: "commonplace",
-};
 
 const parseEnvFile = (filePath) => {
 	if (!fs.existsSync(filePath)) return;
@@ -34,17 +36,6 @@ const loadEnv = () => {
 	parseEnvFile(path.join(REPO_ROOT, ".dev.vars"));
 	parseEnvFile(path.join(REPO_ROOT, ".env"));
 };
-
-const readConfig = () => {
-	loadEnv();
-	return {
-		commonplacePath:
-			process.env.OBSIDIAN_COMMONPLACE_PATH ?? DEFAULT_CONFIG.commonplacePath,
-	};
-};
-
-const resolveCandidatePath = (value) =>
-	path.isAbsolute(value) ? value : path.resolve(REPO_ROOT, value);
 
 const parseArgs = (argv) => {
 	const args = new Map();
@@ -68,27 +59,22 @@ const parseArgs = (argv) => {
 };
 
 const args = parseArgs(process.argv.slice(2));
-const config = readConfig();
-const vaultOverride = args.get("--vault");
-const vaultEnv = process.env.OBSIDIAN_VAULT;
-const sampleVaultRoot = path.join(REPO_ROOT, "data/obsidian-vault-sample");
-const vaultPath = vaultOverride || vaultEnv || sampleVaultRoot;
+loadEnv();
+const commonplacePath = process.env.OBSIDIAN_COMMONPLACE_PATH ?? "commonplace";
+const vaultPath = args.get("--vault") || process.env.OBSIDIAN_VAULT;
 
-if (!vaultPath) {
+if (!vaultPath || vaultPath === true) {
 	throw new Error(
-		"Missing vault path. Set OBSIDIAN_VAULT in your .env file or shell.",
+		"Missing vault path. Set OBSIDIAN_VAULT in your .env file or shell, or pass --vault <path>.",
 	);
 }
 
-const vaultRoot = resolveCandidatePath(vaultPath);
+const vaultRoot = path.resolve(REPO_ROOT, vaultPath);
 if (!fs.existsSync(vaultRoot) || !fs.statSync(vaultRoot).isDirectory()) {
 	throw new Error(`Vault path not found: ${vaultRoot}`);
 }
-if (!vaultOverride && !vaultEnv) {
-	console.log(`[obsidian] Using sample vault at ${vaultRoot}`);
-}
 
-const commonplaceRoot = path.join(vaultRoot, config.commonplacePath);
+const commonplaceRoot = path.join(vaultRoot, commonplacePath);
 const targetGardenRoot = path.join(REPO_ROOT, CONTENT_DIR, "garden");
 const targetCommonplaceRoot = path.join(REPO_ROOT, CONTENT_DIR, "commonplace");
 
@@ -114,7 +100,9 @@ const readFrontmatter = (filePath) => {
 		return frontmatter ?? {};
 	} catch (error) {
 		console.warn(
-			`[obsidian] Skipping frontmatter parse for ${filePath}: ${error?.message ?? error}`,
+			`[obsidian] Skipping frontmatter parse for ${filePath}: ${
+				error?.message ?? error
+			}`,
 		);
 		return {};
 	}
@@ -135,7 +123,7 @@ const walk = (dir, onFile, shouldSkipPath) => {
 		const fullPath = path.join(dir, entry.name);
 		if (entry.isDirectory()) {
 			if (isIgnoredDirName(entry.name)) continue;
-			if (shouldSkipPath && shouldSkipPath(fullPath)) continue;
+			if (shouldSkipPath?.(fullPath)) continue;
 			walk(fullPath, onFile, shouldSkipPath);
 			continue;
 		}
@@ -174,15 +162,14 @@ walk(
 	(filePath) => {
 		if (!isMarkdownFile(filePath)) return;
 		const relativePath = path.relative(vaultRoot, filePath);
-		if (isWithinSubpath(filePath, config.commonplacePath)) return;
+		if (isWithinSubpath(filePath, commonplacePath)) return;
 		const frontmatter = readFrontmatter(filePath);
 		if (!isGardenPublished(frontmatter)) return;
 		const targetPath = path.join(targetGardenRoot, relativePath);
 		copyFile(filePath, targetPath);
 		gardenCopied += 1;
 	},
-	(fullPath) =>
-		isWithinSubpath(fullPath, config.commonplacePath),
+	(fullPath) => isWithinSubpath(fullPath, commonplacePath),
 );
 
 console.log(

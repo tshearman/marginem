@@ -1,28 +1,24 @@
 ---
-import GardenNoteCard from "./GardenNoteCard.astro";
-
-interface GardenNotePreviewData {
-	slug: string;
-	title: string;
-	excerpt: string;
-	updatedAt: Date;
-	relativePath: string;
-	vaultRoot?: string;
-}
+import { renderGardenNoteCard } from "../lib/card-html";
+import { formatDate } from "../lib/date";
 
 interface Props {
-	note: GardenNotePreviewData;
-	vaultRoot?: string;
+	note: {
+		slug: string;
+		title: string;
+		excerpt: string;
+		updatedAt: Date;
+	};
 }
 
-const { note, vaultRoot } = Astro.props as Props;
+const { note } = Astro.props as Props;
+const html = renderGardenNoteCard({
+	href: `/garden/${note.slug}/`,
+	title: note.title,
+	excerpt: note.excerpt,
+	updatedAt: note.updatedAt,
+	dateLabel: formatDate(note.updatedAt),
+});
 ---
 
-<GardenNoteCard
-  slug={note.slug}
-  title={note.title}
-  excerpt={note.excerpt}
-  updatedAt={note.updatedAt}
-  relativePath={note.relativePath}
-  vaultRoot={note.vaultRoot ?? vaultRoot}
-/>
+<Fragment set:html={html} />

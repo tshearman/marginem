@@ -4,8 +4,7 @@ export const CONTENT_DIR = "content";
 export const MAIN_PAGES = {
 	writing: {
 		label: "Writing",
-		href: "/writing",
-		isCompact: false,
+		href: "/writing/",
 		pageTitle: `Writing | ${SITE_NAME}`,
 		eyebrow: "Essays, Experiments, and Explorations",
 		description:
@@ -14,7 +13,6 @@ export const MAIN_PAGES = {
 	commonplace: {
 		label: "Commonplace",
 		href: "/commonplace/",
-		isCompact: false,
 		pageTitle: `Commonplace | ${SITE_NAME}`,
 		eyebrow: "Adversaria",
 		description: "Collected passages, quotations, and fragments.",
@@ -22,7 +20,6 @@ export const MAIN_PAGES = {
 	garden: {
 		label: "Garden",
 		href: "/garden/",
-		isCompact: true,
 		pageTitle: `Garden | ${SITE_NAME}`,
 		eyebrow: "Personal Wikipedia",
 		description:
@@ -31,7 +28,6 @@ export const MAIN_PAGES = {
 	archive: {
 		label: "Archive",
 		href: "/archive/",
-		isCompact: true,
 		pageTitle: `Archive | ${SITE_NAME}`,
 		eyebrow: "Full site index",
 		description: "Browse every note, quote, and essay, organized by year.",
@@ -39,7 +35,6 @@ export const MAIN_PAGES = {
 	newsletter: {
 		label: "Newsletter",
 		href: "/newsletter/",
-		isCompact: true,
 		pageTitle: `Newsletters | ${SITE_NAME}`,
 		eyebrow: "Back Catalog",
 		description: "Previous issues available to browse at any time.",

@@ -2,61 +2,71 @@
 import Tag from "./Tag.astro";
 
 interface Props {
-	title?: string;
 	tags?: string[];
-	categoryTitle?: string;
-	categories?: Array<string | { label: string; value: string }>;
+	/** Optional second row of category buttons (label doubles as value). */
+	categories?: string[];
 }
 
-const {
-	title = "Filter by tags:",
-	tags = [],
-	categoryTitle = "Filter by category:",
-	categories = [],
-} = Astro.props as Props;
-
-const normalizedCategories = categories
-	.map((category) =>
-		typeof category === "string"
-			? { label: category, value: category }
-			: category,
-	)
-	.filter(
-		(category) =>
-			typeof category?.label === "string" &&
-			typeof category?.value === "string",
-	);
+const { tags = [], categories = [] } = Astro.props;
 ---
 
 <div class="tag-filter-container">
   <div class="tag-filter-section">
-    <h3>{title}</h3>
+    <h3>Filter by tags:</h3>
     <div class="tag-list">
       {tags.map((tag) => <Tag tag={tag} variant="filter" size="medium" />)}
     </div>
   </div>
 </div>
 {
-  normalizedCategories.length ? (
+  categories.length > 0 && (
     <div class="category-filter-container">
       <div class="tag-filter-section">
-        <h3>{categoryTitle}</h3>
+        <h3>Filter by category:</h3>
         <div class="tag-list">
-          {normalizedCategories.map((category) => (
+          {categories.map((category) => (
             <button
               class="tag tag--filter"
               type="button"
-              data-category={category.value}
+              data-category={category}
               data-selected="false"
               aria-pressed="false"
             >
-              {category.label}
+              {category}
             </button>
           ))}
         </div>
       </div>
     </div>
-  ) : null
+  )
 }
 
+<style>
+  .tag-filter-container {
+    margin-top: 1.25rem;
+  }
 
+  .category-filter-container {
+    margin-top: 1rem;
+  }
+
+  h3 {
+    display: inline-block;
+    margin: 0 0 12px;
+    padding: 2px 8px;
+    font-family: var(--display);
+    font-size: var(--fs-sm);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--ink);
+  }
+
+  .tag-list {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+</style>

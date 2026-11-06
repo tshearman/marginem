@@ -2,68 +2,31 @@ import fs from "node:fs";
 import path from "node:path";
 import { CONTENT_DIR } from "./site";
 
-export type ObsidianConfig = {
-	vaultPath?: string | null;
-	commonplacePath: string;
-};
-
-const DEFAULT_CONFIG: ObsidianConfig = {
-	vaultPath: null,
-	commonplacePath: "commonplace",
-};
-
-export const loadObsidianConfig = (): ObsidianConfig => ({
-	vaultPath: process.env.OBSIDIAN_VAULT ?? DEFAULT_CONFIG.vaultPath,
-	commonplacePath:
-		process.env.OBSIDIAN_COMMONPLACE_PATH ?? DEFAULT_CONFIG.commonplacePath,
+export const loadObsidianConfig = () => ({
+	vaultPath: process.env.OBSIDIAN_VAULT,
+	commonplacePath: process.env.OBSIDIAN_COMMONPLACE_PATH ?? "commonplace",
 });
 
-const resolveCandidatePath = (value: string) =>
-	path.isAbsolute(value) ? value : path.resolve(process.cwd(), value);
+const isDirectory = (value: string) =>
+	fs.existsSync(value) && fs.statSync(value).isDirectory();
 
+/** The live vault named by OBSIDIAN_VAULT, or null when unset/missing. */
 export const resolveLocalVaultRoot = () => {
-	const config = loadObsidianConfig();
-	const candidates = [];
-	if (config.vaultPath) {
-		candidates.push(resolveCandidatePath(config.vaultPath));
-	}
-
-	for (const candidate of candidates) {
-		if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
-			return candidate;
-		}
-	}
-
-	if (config.vaultPath) {
-		console.warn(
-			`[obsidian] Vault path "${resolveCandidatePath(
-				config.vaultPath,
-			)}" does not exist or is not a directory.`,
-		);
-	}
+	const { vaultPath } = loadObsidianConfig();
+	if (!vaultPath) return null;
+	const resolved = path.resolve(vaultPath);
+	if (isDirectory(resolved)) return resolved;
+	console.warn(
+		`[obsidian] Vault path "${resolved}" does not exist or is not a directory.`,
+	);
 	return null;
 };
 
+/** The live vault if configured, else the notes synced into content/garden. */
 export const resolveGardenRoot = () => {
-	const localVault = resolveLocalVaultRoot();
-	if (localVault) return localVault;
-
-	const candidates = [
-		path.resolve(process.cwd(), CONTENT_DIR, "garden"),
-		path.resolve(process.cwd(), "data/obsidian-vault-sample"),
-	];
-
-	for (const candidate of candidates) {
-		if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
-			return candidate;
-		}
-	}
-
-	return null;
+	const synced = path.resolve(CONTENT_DIR, "garden");
+	return resolveLocalVaultRoot() ?? (isDirectory(synced) ? synced : null);
 };
-
-export const resolveVaultSubpath = (vaultRoot: string, subpath: string) =>
-	path.resolve(vaultRoot, subpath);
 
 export const normalizeVaultPath = (value: string) =>
 	value.split(path.sep).join("/");

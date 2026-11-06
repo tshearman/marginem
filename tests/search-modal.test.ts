@@ -8,12 +8,10 @@ import {
 	renderPostPreview,
 } from "../src/lib/card-html";
 
-type SearchState = { cleanup?: () => void };
-
 const setupDom = () => {
 	document.body.innerHTML = `
     <button id="search-trigger" type="button">Search</button>
-    <div id="search-modal" class="search-modal" hidden aria-hidden="true">
+    <div id="search-modal" class="search-modal" hidden>
       <div id="search-overlay"></div>
       <div class="search-modal__panel">
         <div class="search-modal__header">
@@ -39,7 +37,6 @@ const flushSearchWork = async () => {
 const importSearchScript = async () => {
 	vi.resetModules();
 	await import("../src/scripts/search-modal");
-	document.dispatchEvent(new Event("DOMContentLoaded"));
 };
 
 const mockFetchIndex = (items: SearchItem[] | Error) => {
@@ -52,19 +49,8 @@ const mockFetchIndex = (items: SearchItem[] | Error) => {
 };
 
 beforeEach(() => {
-	const globalState = (window as typeof window & { __siteSearchState?: SearchState })
-		.__siteSearchState;
-	globalState?.cleanup?.();
-	delete (window as typeof window & { __siteSearchState?: SearchState })
-		.__siteSearchState;
-	(window as typeof window & { __searchDebug?: boolean }).__searchDebug = false;
 	document.body.innerHTML = "";
 	vi.useFakeTimers();
-	vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
-		cb(performance.now());
-		return 1;
-	});
-	vi.spyOn(console, "info").mockImplementation(() => {});
 	vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
@@ -72,7 +58,6 @@ afterEach(() => {
 	document.body.innerHTML = "";
 	vi.useRealTimers();
 	vi.restoreAllMocks();
-	vi.unstubAllGlobals();
 });
 
 describe("search modal script", () => {
@@ -89,9 +74,7 @@ describe("search modal script", () => {
 
 		trigger.click();
 
-		expect(modal.classList.contains("is-visible")).toBe(true);
-		expect(modal.hasAttribute("hidden")).toBe(false);
-		expect(modal.getAttribute("aria-hidden")).toBe("false");
+		expect(modal.hidden).toBe(false);
 		expect(document.body.classList.contains("search-locked")).toBe(true);
 		expect(document.activeElement).toBe(input);
 
@@ -100,27 +83,18 @@ describe("search modal script", () => {
 
 		overlay.dispatchEvent(new Event("click", { bubbles: true }));
 
-		expect(modal.classList.contains("is-visible")).toBe(false);
-		expect(modal.getAttribute("hidden")).toBe("true");
-		expect(modal.getAttribute("aria-hidden")).toBe("true");
+		expect(modal.hidden).toBe(true);
 		expect(document.body.classList.contains("search-locked")).toBe(false);
 		expect(input.value).toBe("");
-		expect(results.textContent?.trim()).toBe("Type to search the entire archive.");
+		expect(results.textContent?.trim()).toBe(
+			"Type to search the entire archive.",
+		);
 	});
 
 	it("renders matches for each content type and reuses the cached index", async () => {
 		setupDom();
 		const searchData: SearchItem[] = [
 			{
-				id: "note-1",
-				title: "Note Match",
-				snippet: "A quick note.",
-				tags: ["notes"],
-				pubDate: "2024-03-11",
-				displayDate: "March 11th, 2024",
-				url: "/notes/1",
-				kind: "note",
-				author: "Author",
 				searchText: "note match alpha",
 				timestamp: 200,
 				html: renderNoteCard({
@@ -134,12 +108,6 @@ describe("search modal script", () => {
 				}),
 			},
 			{
-				id: "garden-1",
-				title: "Garden Entry",
-				snippet: "From the garden.",
-				displayDate: "Updated today",
-				url: "/garden/entry",
-				kind: "garden",
 				searchText: "note garden",
 				timestamp: 150,
 				html: renderGardenNoteCard({
@@ -151,13 +119,6 @@ describe("search modal script", () => {
 				}),
 			},
 			{
-				id: "post-1",
-				title: "Post Match",
-				snippet: "Post content.",
-				tags: [],
-				pubDate: "2023-12-20",
-				url: "/posts/post-match",
-				kind: "post",
 				searchText: "note post",
 				timestamp: 100,
 				html: renderPostPreview({
@@ -199,9 +160,9 @@ describe("search modal script", () => {
 		expect(results.querySelector(".garden-search__date")?.textContent).toBe(
 			"Updated today",
 		);
-		expect(results.querySelector(".post-preview__authors")?.textContent).toContain(
-			"December 20th, 2023",
-		);
+		expect(
+			results.querySelector(".post-preview__authors")?.textContent,
+		).toContain("December 20th, 2023");
 
 		input.value = "missing";
 		input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -209,6 +170,27 @@ describe("search modal script", () => {
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 		expect(results.textContent?.includes("No matches found.")).toBe(true);
+	});
+
+	it("drops a pending search when the modal closes", async () => {
+		setupDom();
+		mockFetchIndex([]);
+		await importSearchScript();
+
+		const trigger = document.getElementById("search-trigger") as HTMLElement;
+		const input = document.getElementById("search-input") as HTMLInputElement;
+		const results = document.getElementById("search-results") as HTMLElement;
+
+		trigger.click();
+		input.value = "note";
+		input.dispatchEvent(new Event("input", { bubbles: true }));
+		vi.advanceTimersByTime(220); // search starts, awaiting the index
+		document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+		await flushSearchWork();
+
+		expect(results.textContent?.trim()).toBe(
+			"Type to search the entire archive.",
+		);
 	});
 
 	it("shows an error placeholder when the index fails to load", async () => {

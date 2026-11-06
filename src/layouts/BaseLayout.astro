@@ -1,56 +1,71 @@
 ---
 import "../styles/global.css";
-import "../styles/brutalist-page.css";
 import Masthead from "../components/Masthead.astro";
 import Banner from "../components/Banner.astro";
 import HtmlHead from "../components/HtmlHead.astro";
 import { SITE_NAME } from "../lib/site";
 
-interface BaseLayoutProps {
+interface Props {
 	title?: string;
 	description?: string;
+	/** Banner title (painted uppercase). Also the default screen-reader label. */
 	hero?: string;
-	/** Optional per-page banner image src. Defaults to Banner's own default
-	 *  (the site-wide notebook banner) when omitted. PostLayout uses this
-	 *  to forward a heroImage-derived dithered banner. */
+	/** Optional narrow-viewport banner title; "\n" forces a line break. */
+	heroNarrow?: string;
+	/** Small stamp overlaid on the banner. */
+	eyebrow?: string;
+	/** Strip under the banner. */
+	subtitle?: string;
+	/** Banner height in CSS px. */
+	heroHeight?: number;
+	/** Banner image; defaults to the site-wide notebook banner. */
 	bannerSrc?: string;
-	/** Screen-reader label for the banner. Defaults to `hero` when omitted —
-	 *  the homepage uses this to expose the full tagline to assistive tech
-	 *  while keeping the painted title short. */
+	/** Screen-reader label for the banner; defaults to `hero`. */
 	bannerSrLabel?: string;
 	showHero?: boolean;
-	includeFootnotes?: boolean;
+	/** Matched case-insensitively against MAIN_NAV labels. */
 	activePage?: string;
 	bodyClass?: string;
 }
 
 const {
 	title = SITE_NAME,
-	description = "Explorations in math, code, and visualization",
+	description,
 	hero = SITE_NAME,
+	heroNarrow,
+	eyebrow,
+	subtitle,
+	heroHeight = 300,
 	bannerSrc,
 	bannerSrLabel,
 	showHero = true,
-	includeFootnotes = false,
 	activePage,
 	bodyClass,
-} = Astro.props as BaseLayoutProps;
+} = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <HtmlHead title={title} description={description} />
+    <HtmlHead title={title} description={description} bannerSrc={bannerSrc} />
   </head>
   <body class={bodyClass}>
     <Masthead activePage={activePage} />
     {
       showHero && (
-        <Banner
-          text={hero.toUpperCase()}
-          src={bannerSrc}
-          srLabel={bannerSrLabel ?? hero}
-        />
+        <div class="page-hero">
+          <div class="page-hero__banner">
+            <Banner
+              text={hero.toUpperCase()}
+              textNarrow={heroNarrow}
+              src={bannerSrc}
+              height={heroHeight}
+              srLabel={bannerSrLabel ?? hero}
+            />
+            {eyebrow && <span class="page-hero__eyebrow">{eyebrow}</span>}
+          </div>
+          {subtitle && <p class="page-hero__subtitle">{subtitle}</p>}
+        </div>
       )
     }
     <main class="site-main">
@@ -61,61 +76,5 @@ const {
         <span>&copy; 2026</span>
       </footer>
     </main>
-    {
-      includeFootnotes ? (
-        <script>import "../scripts/init-footnotes.js";</script>
-      ) : null
-    }
   </body>
 </html>
-
-<style>
-  .site-main {
-    width: min(var(--site-max-width), 100%);
-    margin: 0 auto;
-    padding: 2.25rem 1.5rem 3rem;
-    background: var(--bg);
-    border: 0;
-  }
-
-  .site-header h1 {
-    margin: 0.25rem 0 1.5rem;
-    font-size: var(--fs-display-md);
-    font-weight: 500;
-    color: var(--fg);
-  }
-
-  .site-footer {
-    margin-top: 4rem;
-    padding-top: 1.5rem;
-    border: 0;
-  }
-</style>
-
-<style is:global>
-  body.brutalist .site-main {
-    width: 100%;
-    max-width: none;
-    padding: 0;
-    background: var(--paper);
-  }
-
-  body.brutalist .site-footer {
-    margin-top: 4rem;
-    padding: 12px;
-    border-top: 6px solid var(--ink);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    font-family: var(--mono);
-    font-size: var(--fs-2xs);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  /* Newsletter sits flush against its hero banner. */
-  body.newsletter-page .site-footer {
-    margin-top: 0;
-  }
-</style>

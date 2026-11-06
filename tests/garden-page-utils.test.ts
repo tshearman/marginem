@@ -3,6 +3,8 @@ import { createGardenLinkResolver, type GardenNote } from "../src/lib/garden";
 import {
 	buildFolderGraphData,
 	buildNeighborGraphData,
+	collectFolderPaths,
+	extractTargets,
 	getIncomingNeighborSlugs,
 	getOutgoingNeighborSlugs,
 } from "../src/lib/gardenPageUtils";
@@ -13,11 +15,33 @@ const buildNote = (
 ): GardenNote => ({
 	content: "",
 	relativePath: "Example.md",
-	sourcePath: "/vault/Example.md",
 	updatedAt: new Date("2024-01-01T00:00:00Z"),
 	published: true,
 	tags: [],
 	...overrides,
+});
+
+describe("extractTargets", () => {
+	it("returns wikilink and relative markdown-link targets without headings", () => {
+		expect(
+			extractTargets(
+				"[[Alpha#Intro|a]] [b](Notes/Beta.md#part) [c](https://x.y) [d](#top)",
+			),
+		).toEqual(["Alpha", "Notes/Beta"]);
+	});
+});
+
+describe("collectFolderPaths", () => {
+	it("lists every folder and ancestor folder once", () => {
+		expect(
+			collectFolderPaths([
+				{ relativePath: "Root.md" },
+				{ relativePath: "A/B/One.md" },
+				{ relativePath: "A/Two.md" },
+				{ relativePath: "C/Three.md" },
+			]),
+		).toEqual(["A", "A/B", "C"]);
+	});
 });
 
 describe("buildFolderGraphData", () => {
@@ -61,7 +85,9 @@ describe("buildFolderGraphData", () => {
 			]),
 		);
 
-		const linkSet = new Set(links.map((link) => `${link.source}->${link.target}`));
+		const linkSet = new Set(
+			links.map((link) => `${link.source}->${link.target}`),
+		);
 		expect(linkSet).toEqual(
 			new Set([
 				"ideas-alpha->ideas-beta",
@@ -120,7 +146,9 @@ describe("buildNeighborGraphData", () => {
 			]),
 		);
 
-		const linkSet = new Set(links.map((link) => `${link.source}->${link.target}`));
+		const linkSet = new Set(
+			links.map((link) => `${link.source}->${link.target}`),
+		);
 		expect(linkSet).toEqual(
 			new Set([
 				"ideas-alpha->ideas-beta",
@@ -128,5 +156,37 @@ describe("buildNeighborGraphData", () => {
 				`ideas-alpha->folder:${slugifyObsidianTarget("Ideas")}`,
 			]),
 		);
+	});
+});
+
+describe("buildFolderGraphData without folderPath", () => {
+	it("graphs the whole garden, including top-level folders", () => {
+		const notes = [
+			buildNote({
+				slug: "root",
+				title: "Root",
+				relativePath: "Root.md",
+				content: "[[Alpha]]",
+			}),
+			buildNote({
+				slug: "ideas/alpha",
+				title: "Alpha",
+				relativePath: "Ideas/Alpha.md",
+			}),
+		];
+		const { nodes, links } = buildFolderGraphData({
+			folderNotes: notes,
+			resolveLink: createGardenLinkResolver(notes),
+		});
+
+		expect(nodes.map((node) => [node.id, node.group])).toEqual([
+			["folder:ideas", 1],
+			["root", 2],
+			["ideas/alpha", 1],
+		]);
+		expect(links).toEqual([
+			{ source: "root", target: "ideas/alpha" },
+			{ source: "ideas/alpha", target: "folder:ideas" },
+		]);
 	});
 });
