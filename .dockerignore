@@ -1,0 +1,4 @@
+# deploy/Dockerfile copies only these two; keep the build context to them.
+*
+!deploy/nginx.conf
+!dist/
