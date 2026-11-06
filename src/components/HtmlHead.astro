@@ -37,8 +37,11 @@ const {
     changes so canvases (banner, charts) can repaint.
 
     Also pins one random highlight on :root for the page load. The banner
-    reads it; highlight-hover.ts re-rolls per hovered element. */}
-<script is:inline define:vars={{ POOL: HIGHLIGHT_POOL }}>
+    reads it; highlight-hover.ts re-rolls per hovered element.
+
+    data-cfasync="false" exempts it from Cloudflare Rocket Loader, which
+    would otherwise defer it past first paint and flash the light theme. */}
+<script is:inline data-cfasync="false" define:vars={{ POOL: HIGHLIGHT_POOL }}>
   (function () {
     var root = document.documentElement;
     var darkQuery = matchMedia("(prefers-color-scheme: dark)");
